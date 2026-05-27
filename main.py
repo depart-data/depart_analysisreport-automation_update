@@ -88,7 +88,7 @@ def _materialize_content_thumbnails(items: list[dict[str, Any]], output_dir: str
     if not items:
         return
 
-    _load_env_file(Path("db_update/.env"))
+    _load_env_file(Path("scripts/.env"))
 
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
