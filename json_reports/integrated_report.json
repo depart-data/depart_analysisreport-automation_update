@@ -1,0 +1,3546 @@
+{
+    "meta": {
+        "account_name": "당당플로우",
+        "period": "2026-01-05 ~ 2026-03-30",
+        "period_ads": "2026-01-12 09:00:00+00:00 ~ 2026-03-30",
+        "period_contents": "2026-01-08 ~ 2026-03-27",
+        "generated_at": "2026-06-09 09:49:20"
+    },
+    "currency": "",
+    "currency_symbol": "원",
+    "summary": {
+        "total_ads": 63,
+        "total_contents": 63,
+        "total_keywords": 1144
+    },
+    "datasets": {
+        "insta_followers": {
+            "kind": "line",
+            "title": "팔로워 추이",
+            "unit": "명",
+            "labels": [
+                "2026-01-05",
+                "2026-01-12",
+                "2026-01-19",
+                "2026-01-26",
+                "2026-02-02",
+                "2026-02-09",
+                "2026-02-16",
+                "2026-02-23",
+                "2026-03-02",
+                "2026-03-09",
+                "2026-03-16",
+                "2026-03-23"
+            ],
+            "series": [
+                {
+                    "name": "follower_count",
+                    "data": [
+                        1357,
+                        1469,
+                        1588,
+                        1689,
+                        1721,
+                        1765,
+                        1803,
+                        1838,
+                        1960,
+                        1967,
+                        2101,
+                        2126
+                    ]
+                }
+            ]
+        },
+        "insta_profile_visits": {
+            "kind": "line",
+            "title": "프로필 방문 수(주별)",
+            "unit": "회",
+            "labels": [
+                "2026-01-05",
+                "2026-01-12",
+                "2026-01-19",
+                "2026-01-26",
+                "2026-02-02",
+                "2026-02-09",
+                "2026-02-16",
+                "2026-02-23",
+                "2026-03-02",
+                "2026-03-09",
+                "2026-03-16",
+                "2026-03-23"
+            ],
+            "series": [
+                {
+                    "name": "profile_views",
+                    "data": [
+                        1058,
+                        2171,
+                        3084,
+                        2720,
+                        2250,
+                        1323,
+                        1168,
+                        1140,
+                        3466,
+                        443,
+                        5138,
+                        1586
+                    ]
+                }
+            ]
+        },
+        "insta_profile_visits_monthly": {
+            "kind": "line",
+            "title": "인스타그램 프로필 방문수 (월별)",
+            "unit": "회",
+            "labels": [
+                "2026-01-05",
+                "2026-02-02",
+                "2026-03-02"
+            ],
+            "series": [
+                {
+                    "name": "profile_views",
+                    "data": [
+                        9033,
+                        5881,
+                        10633
+                    ]
+                }
+            ]
+        },
+        "organic_trend": {
+            "kind": "line",
+            "title": "오가닉 조회수 추이 (주별)",
+            "unit": "회",
+            "labels": [
+                "2026-01-05",
+                "2026-01-12",
+                "2026-01-19",
+                "2026-01-26",
+                "2026-02-02",
+                "2026-02-09",
+                "2026-02-16",
+                "2026-02-23",
+                "2026-03-02",
+                "2026-03-09",
+                "2026-03-16",
+                "2026-03-23"
+            ],
+            "series": [
+                {
+                    "name": "organic_impressions",
+                    "data": [
+                        115762,
+                        236693,
+                        101370,
+                        41623,
+                        17831,
+                        22981,
+                        22057,
+                        38240,
+                        12191,
+                        24967,
+                        23410,
+                        24070
+                    ]
+                }
+            ]
+        },
+        "organic_trend_monthly": {
+            "kind": "line",
+            "title": "오가닉 조회수 추이 (월별)",
+            "unit": "회",
+            "labels": [
+                "2026-01-05",
+                "2026-02-02",
+                "2026-03-02"
+            ],
+            "series": [
+                {
+                    "name": "organic_impressions",
+                    "data": [
+                        495448,
+                        101109,
+                        84638
+                    ]
+                }
+            ]
+        },
+        "gender_clean": {
+            "chart_type": "doughnut",
+            "title": "팔로워 성별·연령 구성",
+            "labels": [
+                "남성",
+                "여성"
+            ],
+            "series": [
+                {
+                    "name": "비율",
+                    "data": [
+                        80.8,
+                        19.2
+                    ]
+                }
+            ],
+            "unit": "%",
+            "center_text": "2,126",
+            "center_subtext": "팔로워"
+        },
+        "age_gender_clean": {
+            "chart_type": "stacked_barh",
+            "title": "연령대별 성별 분포 (알 수 없음 제외)",
+            "labels": [
+                "13-17",
+                "18-24",
+                "25-34",
+                "35-44",
+                "45-54",
+                "55-64",
+                "65+"
+            ],
+            "series": [
+                {
+                    "name": "male",
+                    "data": [
+                        2.0,
+                        19.0,
+                        199.0,
+                        569.0,
+                        408.0,
+                        85.0,
+                        18.0
+                    ]
+                },
+                {
+                    "name": "female",
+                    "data": [
+                        4.0,
+                        38.0,
+                        102.0,
+                        105.0,
+                        42.0,
+                        15.0,
+                        3.0
+                    ]
+                }
+            ],
+            "unit": "명"
+        },
+        "age_gender_distribution": {
+            "chart_type": "stacked_barh",
+            "title": "연령대별 팔로워 분포(성별 구성)",
+            "labels": [
+                "13-17",
+                "18-24",
+                "25-34",
+                "35-44",
+                "45-54",
+                "55-64",
+                "65+"
+            ],
+            "series": [
+                {
+                    "name": "male",
+                    "data": [
+                        2.0,
+                        19.0,
+                        199.0,
+                        569.0,
+                        408.0,
+                        85.0,
+                        18.0
+                    ]
+                },
+                {
+                    "name": "female",
+                    "data": [
+                        4.0,
+                        38.0,
+                        102.0,
+                        105.0,
+                        42.0,
+                        15.0,
+                        3.0
+                    ]
+                }
+            ],
+            "unit": "명"
+        },
+        "gender_unknown": {
+            "chart_type": "doughnut",
+            "title": "성별 데이터 식별 여부",
+            "labels": [
+                "남/여 전체",
+                "알 수 없음"
+            ],
+            "series": [
+                {
+                    "name": "비율",
+                    "data": [
+                        76.2,
+                        23.8
+                    ]
+                }
+            ],
+            "unit": "%",
+            "center_text": "23.8%",
+            "center_subtext": "알 수 없음 비율"
+        },
+        "age_known_unknown": {
+            "chart_type": "stacked_barh",
+            "title": "연령대별 성별 데이터 식별 여부 분포",
+            "labels": [
+                "13-17",
+                "18-24",
+                "25-34",
+                "35-44",
+                "45-54",
+                "55-64",
+                "65+"
+            ],
+            "series": [
+                {
+                    "name": "known",
+                    "data": [
+                        6.0,
+                        57.0,
+                        301.0,
+                        674.0,
+                        450.0,
+                        100.0,
+                        21.0
+                    ]
+                },
+                {
+                    "name": "unknown",
+                    "data": [
+                        2.0,
+                        23.0,
+                        105.0,
+                        212.0,
+                        122.0,
+                        30.0,
+                        9.0
+                    ]
+                }
+            ],
+            "unit": "명"
+        },
+        "ctr_trend_weekly": {
+            "kind": "line",
+            "title": "주별 CTR 추이",
+            "unit": "%",
+            "labels": [
+                "2026-01-12",
+                "2026-01-19",
+                "2026-01-26",
+                "2026-02-02",
+                "2026-02-09",
+                "2026-02-16",
+                "2026-02-23",
+                "2026-03-02",
+                "2026-03-09",
+                "2026-03-16",
+                "2026-03-23",
+                "2026-03-30"
+            ],
+            "series": [
+                {
+                    "name": "ctr",
+                    "data": [
+                        6.66,
+                        6.24,
+                        5.9,
+                        5.96,
+                        5.3,
+                        4.87,
+                        4.41,
+                        5.35,
+                        5.74,
+                        5.77,
+                        5.71,
+                        5.63
+                    ]
+                }
+            ]
+        },
+        "ctr_trend_monthly": {
+            "kind": "line",
+            "title": "월별 CTR 추이",
+            "unit": "%",
+            "labels": [
+                "2026-01-01",
+                "2026-02-01",
+                "2026-03-01"
+            ],
+            "series": [
+                {
+                    "name": "ctr",
+                    "data": [
+                        6.04,
+                        5.28,
+                        5.67
+                    ]
+                }
+            ]
+        },
+        "target_heatmap": {
+            "kind": "table",
+            "title": "타겟별 노출 및 CTR 성과",
+            "unit": "",
+            "rows": [
+                {
+                    "age": "18-24",
+                    "gender": "female",
+                    "impressions": 66490,
+                    "clicks": 2938,
+                    "ctr": 4.42
+                },
+                {
+                    "age": "18-24",
+                    "gender": "male",
+                    "impressions": 617749,
+                    "clicks": 19583,
+                    "ctr": 3.17
+                },
+                {
+                    "age": "25-34",
+                    "gender": "female",
+                    "impressions": 138987,
+                    "clicks": 6888,
+                    "ctr": 4.96
+                },
+                {
+                    "age": "25-34",
+                    "gender": "male",
+                    "impressions": 1213778,
+                    "clicks": 54146,
+                    "ctr": 4.46
+                },
+                {
+                    "age": "35-44",
+                    "gender": "female",
+                    "impressions": 138456,
+                    "clicks": 8144,
+                    "ctr": 5.88
+                },
+                {
+                    "age": "35-44",
+                    "gender": "male",
+                    "impressions": 1641088,
+                    "clicks": 96935,
+                    "ctr": 5.91
+                },
+                {
+                    "age": "45-54",
+                    "gender": "female",
+                    "impressions": 73957,
+                    "clicks": 4668,
+                    "ctr": 6.31
+                },
+                {
+                    "age": "45-54",
+                    "gender": "male",
+                    "impressions": 856532,
+                    "clicks": 57104,
+                    "ctr": 6.67
+                },
+                {
+                    "age": "55-64",
+                    "gender": "female",
+                    "impressions": 31229,
+                    "clicks": 2798,
+                    "ctr": 8.96
+                },
+                {
+                    "age": "55-64",
+                    "gender": "male",
+                    "impressions": 357404,
+                    "clicks": 27526,
+                    "ctr": 7.7
+                },
+                {
+                    "age": "65+",
+                    "gender": "female",
+                    "impressions": 14056,
+                    "clicks": 865,
+                    "ctr": 6.15
+                },
+                {
+                    "age": "65+",
+                    "gender": "male",
+                    "impressions": 176369,
+                    "clicks": 15159,
+                    "ctr": 8.6
+                }
+            ]
+        },
+        "overall_top_noun": {
+            "kind": "bar_h",
+            "title": "전체 TOP 10 (명사)",
+            "unit": "%",
+            "labels": [
+                "확장",
+                "제동",
+                "회전",
+                "편의",
+                "타이어",
+                "차이",
+                "바이크",
+                "클래식",
+                "멀리",
+                "시티"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        8.6,
+                        8.5,
+                        8.39,
+                        8.3,
+                        8.29,
+                        8.19,
+                        8.18,
+                        7.59,
+                        7.52,
+                        7.45
+                    ]
+                }
+            ]
+        },
+        "overall_top_va": {
+            "kind": "bar_h",
+            "title": "전체 TOP 10 (형용사)",
+            "unit": "%",
+            "labels": [
+                "만들",
+                "들어가",
+                "돌아오",
+                "대하",
+                "줄이",
+                "위하",
+                "원하",
+                "늘어나",
+                "가지",
+                "다르"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        7.09,
+                        6.88,
+                        6.49,
+                        6.44,
+                        6.39,
+                        6.31,
+                        6.25,
+                        5.96,
+                        5.94,
+                        5.93
+                    ]
+                }
+            ]
+        },
+        "overall_bottom_noun": {
+            "kind": "bar_h",
+            "title": "전체 BOTTOM 10 (명사)",
+            "unit": "%",
+            "labels": [
+                "이태원",
+                "체크",
+                "상담",
+                "대리점",
+                "확인",
+                "중심",
+                "집중",
+                "부분",
+                "위치",
+                "안내"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        3.05,
+                        3.2,
+                        3.33,
+                        3.46,
+                        3.47,
+                        3.52,
+                        3.56,
+                        3.61,
+                        3.62,
+                        3.66
+                    ]
+                }
+            ]
+        },
+        "overall_bottom_va": {
+            "kind": "bar_h",
+            "title": "전체 BOTTOM 10 (형용사)",
+            "unit": "%",
+            "labels": [
+                "통하",
+                "맞추",
+                "따르",
+                "생기",
+                "들리",
+                "떠나",
+                "책임지",
+                "계시",
+                "즐기",
+                "꺼내"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        3.67,
+                        4.34,
+                        4.67,
+                        4.71,
+                        4.84,
+                        4.93,
+                        4.98,
+                        5.01,
+                        5.16,
+                        5.18
+                    ]
+                }
+            ]
+        },
+        "overall_keyword_combo_detail": {
+            "kind": "table",
+            "title": "전체 상세 분석",
+            "unit": "",
+            "rows": [
+                {
+                    "ess_1": "이동",
+                    "ess_2": "휴대",
+                    "combo_doc_freq": 3,
+                    "combo_overall_ctr": 7.55,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 7.55,
+                    "var_imps": 234858.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "휴대",
+                    "combo_doc_freq": 3,
+                    "combo_overall_ctr": 7.55,
+                    "var_keyword": "출퇴근",
+                    "with_var_ctr": 7.55,
+                    "var_imps": 234858.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 6.74,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 7.55,
+                    "var_imps": 234858.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 6.74,
+                    "var_keyword": "출퇴근",
+                    "with_var_ctr": 7.55,
+                    "var_imps": 234858.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 6.74,
+                    "var_keyword": "가방",
+                    "with_var_ctr": 6.95,
+                    "var_imps": 219253.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 6.7,
+                    "var_keyword": "가방",
+                    "with_var_ctr": 7.93,
+                    "var_imps": 235048.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 6.7,
+                    "var_keyword": "출퇴근",
+                    "with_var_ctr": 7.55,
+                    "var_imps": 234858.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 6.7,
+                    "var_keyword": "모두",
+                    "with_var_ctr": 6.94,
+                    "var_imps": 334897.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 6.7,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 6.94,
+                    "var_imps": 335202.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 6.7,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 6.79,
+                    "var_imps": 454137.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 6.7,
+                    "var_keyword": "고객",
+                    "with_var_ctr": 6.67,
+                    "var_imps": 310796.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 6.7,
+                    "var_keyword": "여행",
+                    "with_var_ctr": 6.39,
+                    "var_imps": 262086.0
+                },
+                {
+                    "ess_1": "자전거",
+                    "ess_2": "접이식",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 6.51,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 6.9,
+                    "var_imps": 482928.0
+                },
+                {
+                    "ess_1": "자전거",
+                    "ess_2": "접이식",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 6.51,
+                    "var_keyword": "가능",
+                    "with_var_ctr": 6.23,
+                    "var_imps": 342837.0
+                },
+                {
+                    "ess_1": "접이식",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.46,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 6.99,
+                    "var_imps": 352828.0
+                },
+                {
+                    "ess_1": "접이식",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.46,
+                    "var_keyword": "가능",
+                    "with_var_ctr": 5.97,
+                    "var_imps": 212737.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 6.45,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 7.32,
+                    "var_imps": 192443.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 6.45,
+                    "var_keyword": "사람",
+                    "with_var_ctr": 6.86,
+                    "var_imps": 228779.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 6.45,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 6.45,
+                    "var_imps": 328731.0
+                }
+            ]
+        },
+        "main_top_noun": {
+            "kind": "bar_h",
+            "title": "메인 타겟 TOP 10 (명사)",
+            "unit": "%",
+            "labels": [
+                "편의",
+                "타이어",
+                "회전",
+                "차이",
+                "확장",
+                "제동",
+                "멀리",
+                "로드",
+                "바이크",
+                "유지"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        8.84,
+                        8.76,
+                        8.75,
+                        8.53,
+                        8.34,
+                        8.34,
+                        8.24,
+                        7.91,
+                        7.89,
+                        7.87
+                    ]
+                }
+            ]
+        },
+        "main_top_va": {
+            "kind": "bar_h",
+            "title": "메인 타겟 TOP 10 (형용사)",
+            "unit": "%",
+            "labels": [
+                "만들",
+                "들어가",
+                "알리",
+                "가지",
+                "늘어나",
+                "돌아오",
+                "다니",
+                "위하",
+                "책임지",
+                "원하"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        7.29,
+                        6.68,
+                        6.66,
+                        6.51,
+                        6.5,
+                        6.4,
+                        6.39,
+                        6.26,
+                        6.17,
+                        6.09
+                    ]
+                }
+            ]
+        },
+        "main_bottom_noun": {
+            "kind": "bar_h",
+            "title": "메인 타겟 BOTTOM 10 (명사)",
+            "unit": "%",
+            "labels": [
+                "체크",
+                "이태원",
+                "중심",
+                "상담",
+                "확인",
+                "몰입",
+                "대리점",
+                "집중",
+                "방향",
+                "부분"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        3.16,
+                        3.21,
+                        3.25,
+                        3.28,
+                        3.29,
+                        3.33,
+                        3.38,
+                        3.45,
+                        3.45,
+                        3.46
+                    ]
+                }
+            ]
+        },
+        "main_bottom_va": {
+            "kind": "bar_h",
+            "title": "메인 타겟 BOTTOM 10 (형용사)",
+            "unit": "%",
+            "labels": [
+                "통하",
+                "따르",
+                "떠나",
+                "생기",
+                "느끼",
+                "꺼내",
+                "계시",
+                "보이",
+                "이러",
+                "들리"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        3.73,
+                        4.57,
+                        4.84,
+                        5.02,
+                        5.02,
+                        5.08,
+                        5.29,
+                        5.3,
+                        5.35,
+                        5.45
+                    ]
+                }
+            ]
+        },
+        "main_keyword_combo_detail": {
+            "kind": "table",
+            "title": "메인 타겟 상세 분석",
+            "unit": "",
+            "rows": [
+                {
+                    "ess_1": "이동",
+                    "ess_2": "휴대",
+                    "combo_doc_freq": 3,
+                    "combo_overall_ctr": 8.54,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 8.54,
+                    "var_imps": 93287.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "휴대",
+                    "combo_doc_freq": 3,
+                    "combo_overall_ctr": 8.54,
+                    "var_keyword": "출퇴근",
+                    "with_var_ctr": 8.54,
+                    "var_imps": 93287.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 8.45,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 9.54,
+                    "var_imps": 57351.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 8.45,
+                    "var_keyword": "사람",
+                    "with_var_ctr": 9.05,
+                    "var_imps": 76416.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 8.45,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 8.45,
+                    "var_imps": 97067.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.91,
+                    "var_keyword": "사람",
+                    "with_var_ctr": 9.05,
+                    "var_imps": 76416.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.91,
+                    "var_keyword": "생각",
+                    "with_var_ctr": 8.46,
+                    "var_imps": 76517.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.91,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 8.46,
+                    "var_imps": 76596.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.91,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 8.45,
+                    "var_imps": 97067.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 7.9,
+                    "var_keyword": "가방",
+                    "with_var_ctr": 8.83,
+                    "var_imps": 73754.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 7.9,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 8.54,
+                    "var_imps": 93287.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 7.9,
+                    "var_keyword": "출퇴근",
+                    "with_var_ctr": 8.54,
+                    "var_imps": 93287.0
+                },
+                {
+                    "ess_1": "바퀴",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 7.75,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 9.72,
+                    "var_imps": 58888.0
+                },
+                {
+                    "ess_1": "바퀴",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 7.75,
+                    "var_keyword": "모두",
+                    "with_var_ctr": 7.75,
+                    "var_imps": 90968.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 7.06,
+                    "var_keyword": "출퇴근",
+                    "with_var_ctr": 8.54,
+                    "var_imps": 93287.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 7.06,
+                    "var_keyword": "가방",
+                    "with_var_ctr": 8.39,
+                    "var_imps": 87131.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 7.06,
+                    "var_keyword": "모두",
+                    "with_var_ctr": 8.12,
+                    "var_imps": 113912.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 7.06,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 8.12,
+                    "var_imps": 114017.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 7.06,
+                    "var_keyword": "고객",
+                    "with_var_ctr": 7.81,
+                    "var_imps": 89171.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 7.06,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 7.22,
+                    "var_imps": 139760.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 6,
+                    "combo_overall_ctr": 7.06,
+                    "var_keyword": "여행",
+                    "with_var_ctr": 5.61,
+                    "var_imps": 82488.0
+                }
+            ]
+        },
+        "content_top_analysis": {
+            "kind": "content_card",
+            "title": "성과 top 콘텐츠 분석",
+            "items": [
+                {
+                    "ad_id": 3428,
+                    "fb_ad_id": "120239300382940160",
+                    "uploaded_at": "2026-03-07",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300382940160.jpg",
+                    "ctr": 10.8,
+                    "target_details": [
+                        {
+                            "age": "65+",
+                            "gender": "male",
+                            "ctr": 21.53
+                        },
+                        {
+                            "age": "55-64",
+                            "gender": "male",
+                            "ctr": 14.76
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "female",
+                            "ctr": 12.63
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "male",
+                            "ctr": 11.43
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "female",
+                            "ctr": 10.61
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "male",
+                            "ctr": 9.7
+                        },
+                        {
+                            "age": "55-64",
+                            "gender": "female",
+                            "ctr": 9.17
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "female",
+                            "ctr": 8.66
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "male",
+                            "ctr": 8.04
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "male",
+                            "ctr": 5.0
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "female",
+                            "ctr": 0.0
+                        },
+                        {
+                            "age": "65+",
+                            "gender": "female",
+                            "ctr": 0.0
+                        }
+                    ]
+                },
+                {
+                    "ad_id": 1416,
+                    "fb_ad_id": "120237068330850160",
+                    "uploaded_at": "2026-01-11",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120237068330850160.jpg",
+                    "ctr": 9.34,
+                    "target_details": [
+                        {
+                            "age": "35-44",
+                            "gender": "male",
+                            "ctr": 11.44
+                        },
+                        {
+                            "age": "55-64",
+                            "gender": "female",
+                            "ctr": 11.11
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "female",
+                            "ctr": 10.39
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "female",
+                            "ctr": 10.17
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "male",
+                            "ctr": 9.55
+                        },
+                        {
+                            "age": "55-64",
+                            "gender": "male",
+                            "ctr": 8.73
+                        },
+                        {
+                            "age": "65+",
+                            "gender": "male",
+                            "ctr": 7.63
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "male",
+                            "ctr": 5.36
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "male",
+                            "ctr": 4.92
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "female",
+                            "ctr": 0.0
+                        },
+                        {
+                            "age": "65+",
+                            "gender": "female",
+                            "ctr": 0.0
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "female",
+                            "ctr": 0.0
+                        }
+                    ]
+                },
+                {
+                    "ad_id": 3016,
+                    "fb_ad_id": "120238731513230160",
+                    "uploaded_at": "2026-02-20",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238731513230160.jpg",
+                    "ctr": 9.16,
+                    "target_details": [
+                        {
+                            "age": "65+",
+                            "gender": "female",
+                            "ctr": 33.33
+                        },
+                        {
+                            "age": "55-64",
+                            "gender": "male",
+                            "ctr": 12.75
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "female",
+                            "ctr": 11.92
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "male",
+                            "ctr": 10.84
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "female",
+                            "ctr": 10.53
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "male",
+                            "ctr": 9.25
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "female",
+                            "ctr": 8.7
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "male",
+                            "ctr": 7.78
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "female",
+                            "ctr": 7.04
+                        },
+                        {
+                            "age": "55-64",
+                            "gender": "female",
+                            "ctr": 6.25
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "male",
+                            "ctr": 5.54
+                        },
+                        {
+                            "age": "65+",
+                            "gender": "male",
+                            "ctr": 1.94
+                        },
+                        {
+                            "age": "Unknown",
+                            "gender": "male",
+                            "ctr": 0.0
+                        }
+                    ]
+                }
+            ]
+        },
+        "content_bottom_analysis": {
+            "kind": "content_card",
+            "title": "성과 bottom 콘텐츠 분석",
+            "items": [
+                {
+                    "ad_id": 1413,
+                    "fb_ad_id": "120237068305630160",
+                    "uploaded_at": "2026-01-09",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120237068305630160.jpg",
+                    "ctr": 2.68,
+                    "target_details": [
+                        {
+                            "age": "65+",
+                            "gender": "female",
+                            "ctr": 5.81
+                        },
+                        {
+                            "age": "55-64",
+                            "gender": "female",
+                            "ctr": 4.19
+                        },
+                        {
+                            "age": "55-64",
+                            "gender": "male",
+                            "ctr": 3.71
+                        },
+                        {
+                            "age": "65+",
+                            "gender": "male",
+                            "ctr": 3.26
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "female",
+                            "ctr": 3.03
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "male",
+                            "ctr": 2.92
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "male",
+                            "ctr": 2.41
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "male",
+                            "ctr": 2.24
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "female",
+                            "ctr": 1.75
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "female",
+                            "ctr": 1.54
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "male",
+                            "ctr": 1.41
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "female",
+                            "ctr": 0.97
+                        }
+                    ]
+                },
+                {
+                    "ad_id": 3017,
+                    "fb_ad_id": "120238731513220160",
+                    "uploaded_at": "2026-02-20",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238731513220160.jpg",
+                    "ctr": 2.88,
+                    "target_details": [
+                        {
+                            "age": "55-64",
+                            "gender": "female",
+                            "ctr": 22.73
+                        },
+                        {
+                            "age": "65+",
+                            "gender": "male",
+                            "ctr": 5.71
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "female",
+                            "ctr": 4.26
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "male",
+                            "ctr": 4.08
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "female",
+                            "ctr": 2.83
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "female",
+                            "ctr": 2.6
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "male",
+                            "ctr": 2.59
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "female",
+                            "ctr": 2.5
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "male",
+                            "ctr": 2.32
+                        },
+                        {
+                            "age": "55-64",
+                            "gender": "male",
+                            "ctr": 2.21
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "male",
+                            "ctr": 2.15
+                        },
+                        {
+                            "age": "65+",
+                            "gender": "female",
+                            "ctr": 0.0
+                        }
+                    ]
+                },
+                {
+                    "ad_id": 2868,
+                    "fb_ad_id": "120238179923340160",
+                    "uploaded_at": "2026-02-06",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238179923340160.jpg",
+                    "ctr": 3.03,
+                    "target_details": [
+                        {
+                            "age": "55-64",
+                            "gender": "female",
+                            "ctr": 8.0
+                        },
+                        {
+                            "age": "55-64",
+                            "gender": "male",
+                            "ctr": 6.75
+                        },
+                        {
+                            "age": "65+",
+                            "gender": "male",
+                            "ctr": 5.06
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "female",
+                            "ctr": 5.0
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "male",
+                            "ctr": 4.16
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "female",
+                            "ctr": 4.0
+                        },
+                        {
+                            "age": "25-34",
+                            "gender": "male",
+                            "ctr": 2.83
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "male",
+                            "ctr": 2.64
+                        },
+                        {
+                            "age": "18-24",
+                            "gender": "male",
+                            "ctr": 1.69
+                        },
+                        {
+                            "age": "45-54",
+                            "gender": "female",
+                            "ctr": 0.0
+                        },
+                        {
+                            "age": "35-44",
+                            "gender": "female",
+                            "ctr": 0.0
+                        },
+                        {
+                            "age": "65+",
+                            "gender": "female",
+                            "ctr": 0.0
+                        }
+                    ]
+                }
+            ]
+        },
+        "reaction_likes_top": {
+            "kind": "reaction_bar",
+            "title": "반응 top 콘텐츠 (likes)",
+            "metric": "likes",
+            "metric_col": "total_likes",
+            "overall_avg": 44.74,
+            "metric_avg": 44.74,
+            "is_top": true,
+            "x_scale_max": 76.0,
+            "items": [
+                {
+                    "ad_id": 4147,
+                    "fb_ad_id": "120239860059290160",
+                    "uploaded_at": "2026-03-16",
+                    "caption": "국내 공식 판매점 현황 , ‘바이크스’ 편\n\n브랜드 총판 본사 DDZK는 \n이태원에 위치하고 있고\n\n오프라인에서 직접 느껴보실 수 있도록 \n국내 공식 대리점들이 \n곳곳에 위치하고 있습니다.\n\n서울\nDDZK(용산구) | 벨로데이(성동구) \n에스바이크(노원구) | 라피아토(강동구)\n\n경기\n굴림자전거(남양주) | 나무자전거(고양) \n자전거 스튜디오(김포) | 소닉바이크(의왕)\n나의 날개(안산) | 잔차닷컴(오산)\n\n대전 | 제이바이크\n대구 | 바이시클 메모리즈\n광주 | 밀바이크\n부산 | 이팀장바이크\n충북 청주시 | 씨엔제이자전거 \n제주 | 브리즈사이클러리\n경남 양산 | 몽키자전거\n경남 김해 | 진커스텀\n전남 여수 | 자전거이야기\n\n판매점은 여러분 곁에 \n가장 가까이 위치하고 있으니 \n구매만 결정하세요\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239860059290160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 76,
+                    "total_shares": 3,
+                    "total_saves": 9,
+                    "total_comments": 7,
+                    "total_reaction": 88,
+                    "ctr": 5.05,
+                    "caption_label": "국내 공식 판..."
+                },
+                {
+                    "ad_id": 3016,
+                    "fb_ad_id": "120238731513230160",
+                    "uploaded_at": "2026-02-20",
+                    "caption": "트라이폴드계의 소형 SUV, ‘D10’\n\n26년 1월 25일 \n새로 출시한 D10을 \n우리는 ‘최초의 SUV’라고 \n부르기로 했습니다.\n\n접으면 16인치 만큼 작아지고, \nSUV는 어디든 갈 수 있는\n야성의 광폭 타이어를\n자랑하기 때문이죠. \n\nD10이 강력한 \n네 가지 이유를 알려드릴게요.\n\n첫째, \n유압디스크 브레이크로 인한 \n높은 제동력\n\n둘째, \n광폭 타이어를 장착함으로써 \n높인 노면 안정성\n\n셋째, \n16인치와 큰 차이가 없는 \n폴딩 폭 및 8kg대의 경량과 \n휴대성 유지\n\n넷째, \n프로페셔널 유저를 위한 \n무한한 확장성\n✔️ 20인치 휠셋까지 교체 가능한 구조\n✔️ 범용 변속기\n✔️ 18인치 광폭타이어 전부 호환 가능\n✔️ 트라이폴드 호환 튜닝 액세서리\n\n접으면 데일리, \n펼치면 어드벤처가 되는 D10으로 \n이제 우주만큼 멀리 경험하세요\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238731513230160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 75,
+                    "total_shares": 6,
+                    "total_saves": 22,
+                    "total_comments": 1,
+                    "total_reaction": 103,
+                    "ctr": 9.16,
+                    "caption_label": "트라이폴드계의..."
+                },
+                {
+                    "ad_id": 3428,
+                    "fb_ad_id": "120239300382940160",
+                    "uploaded_at": "2026-03-07",
+                    "caption": "봄의 시작은 바이크스 시티\n(2026 리마스터)와 함께 \n\ncity 2026 remastered\n바이크스 시티가\n새롭게 정의됩니다. \n\n편의의 완결\n실용성을 극대화한 확장형 리어랙, \n회전방지 클램프와 싯포스트\n\n설계의 완결\n고강도 스트레이트 휠셋과 \n정밀 디자인된 독자적 프레임 \n\nDDZK에서 수천 대 이상 판매되어\n가장 사랑받고 있는 제품, \n‘바이크스 시티’ \n\n실버 부품인 텐월 띠가 들어가 \n가죽을 덧대\n더욱 클래식하게 \n타시는 분이 선택을 \n\n블랙 부품엔 \n타이어까지 올 블랙으로 \n깔끔함을 추구하는 분들이 \n주로 선택합니다. \n\n바이크스 시티(2026 리마스터)와\n함께 따뜻한 봄의 시작 어떠세요? \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300382940160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 68,
+                    "total_shares": 5,
+                    "total_saves": 15,
+                    "total_comments": 4,
+                    "total_reaction": 88,
+                    "ctr": 10.8,
+                    "caption_label": "봄의 시작은 ..."
+                },
+                {
+                    "ad_id": 3432,
+                    "fb_ad_id": "120239300158690160",
+                    "uploaded_at": "2026-02-25",
+                    "caption": "우리는 더 뾰족해질 뿐, \n절대 사라지지 않습니다.\n\n어려운 시국임에도 불구하고 \nDDZK는 최근 사무실을 \n한 곳 더 늘렸습니다. \n\n더 제대로 준비를 하자는 \n마음으로요.\n\n이제 스펙은 점점 \n비슷해져 가고 있습니다. \n\n하지만 몇 년 뒤에도 \n고객님들의 곁에서 \n부품을 공급하고 \n정비를 돕는 브랜드는 \n흔치 않을 거예요.\n\n고객님들께 안정적인 \n서비스를 계속 제공하기 위해 \n파트너의 수익과 \n고객들의 일상을 지킬 것입니다. \n\n점점 더 넓어지는 공간만큼 \n더 깊게 책임지겠습니다.\n\n우리는 사라지지 않습니다. \n좀 더 뾰족해질 뿐입니다. \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300158690160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 64,
+                    "total_shares": 1,
+                    "total_saves": 3,
+                    "total_comments": 0,
+                    "total_reaction": 68,
+                    "ctr": 4.65,
+                    "caption_label": "우리는 더 뾰..."
+                },
+                {
+                    "ad_id": 3427,
+                    "fb_ad_id": "120239300383050160",
+                    "uploaded_at": "2026-03-04",
+                    "caption": "올봄은 트라이폴드와 함께 \n제주 여행을 시작해요\n\nDDZK는 올해 유저분들과 함께 \n분기별 국내외로 여행을 떠날 수 있도록 \n기획하고 있습니다.\n\n먼저 다가오는 봄에는\n따뜻한 제주로 향하려고 합니다. \n\n자유로운 여행을 꿈꾸거나 \n트라이폴드와 함께 \n비행기 여행을 안 해본 분들을 위해\n\n이상만 품고 \n아직 못 가셨던 분들이 \n함께 시작하실 수 있도록 \n여행 연계 서비스를 준비했습니다.\n\n완주를 목표로 하기보다 \n자유로운 이동의 경험을 \n추구하는 분들을 위해\n\n제공한 매뉴얼 안에서 \n각자만의 리듬으로 \n자유롭게 움직일 수 있도록 \n진행될 예정이니\n\nDDZK가 준비한 여행에 \n함께 하셔서 여러분들의 \n여행 이야기를 들려주세요.\n\nComing Soon, FLOW IN JEJU\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300383050160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 63,
+                    "total_shares": 2,
+                    "total_saves": 7,
+                    "total_comments": 7,
+                    "total_reaction": 72,
+                    "ctr": 5.81,
+                    "caption_label": "올봄은 트라이..."
+                }
+            ]
+        },
+        "reaction_likes_bottom": {
+            "kind": "reaction_bar",
+            "title": "반응 bottom 콘텐츠 (likes)",
+            "metric": "likes",
+            "metric_col": "total_likes",
+            "overall_avg": 44.74,
+            "metric_avg": 44.74,
+            "is_top": false,
+            "x_scale_max": 76.0,
+            "items": [
+                {
+                    "ad_id": 2667,
+                    "fb_ad_id": "120237904078350160",
+                    "uploaded_at": "2026-01-29",
+                    "caption": "트라이폴드 자전거, 어떻게 사야 후회하지 않을까?\n\n트라이폴드 구입을 고민하고 계시나요?\n그렇다면 \n트라이폴드가 나와 맞는지 확인해 보세요.\n\n✔️ 반복되는 \n출퇴근 일상에서 벗어나 \n조금이라도 여유와 활력을 \n느끼고 싶다.\n\n✔️ 사랑하는 친구, 가족, \n연인과 함께 라이딩을 통해 \n더욱 즐겁고 \n특별한 시간을 갖고 싶다.\n\n✔️ 자전거 입문자로서, \n가벼운 무게와 \n편리한 사용감을 원한다.\n\n✔️ 가치와 품질을 \n동시에 중시하는 \n사람이다.\n\n여기에 해당된다면 \n트라이폴드 자전거가 \n최상의 선택입니다. \n\n처음이라 \n더 고민된다면, \nDDZK에 오셔서 모델별로 \n타보고 결정해 보세요.\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120237904078350160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 7,
+                    "total_shares": 1,
+                    "total_saves": 1,
+                    "total_comments": 0,
+                    "total_reaction": 9,
+                    "ctr": 4.22,
+                    "caption_label": "트라이폴드 자..."
+                },
+                {
+                    "ad_id": 2868,
+                    "fb_ad_id": "120238179923340160",
+                    "uploaded_at": "2026-02-06",
+                    "caption": "온라인을 통한 자전거 구매가 처음인 당신에게\n\nDDZK는 \n전국 곳곳의 대리점과 함께\n가까운 곳에서도\n편하게 상담과 구매가 가능하도록\n고객님들과의 접점을\n넓혀가고 있는데요.\n특히 온라인으로 구매 후 \n처음 마주한 새 자전거는\n누구나 조금은 당황할 수 있습니다.\n그래서 DDZK는\n 꼭 확인하셔야 할 부분을 \n안내해 드리고 있어요.\n\n✓ 주요 볼트와 폴딩 레버가 \n제대로 잠겼는지 확인한다.\n✓ 브레이크/기어가 정상 작동하는지\n짧게 시운전하며 체크한다.\n✓ 체인이 이탈·늘어짐 없이 \n부드럽게 구동되는지 확인한다.\n\n초기 점검은 안전한 라이딩의 시작 \n가까운 DDZK 대리점과 함께하세요 \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238179923340160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 10,
+                    "total_shares": 2,
+                    "total_saves": 1,
+                    "total_comments": 0,
+                    "total_reaction": 13,
+                    "ctr": 3.03,
+                    "caption_label": "온라인을 통한..."
+                },
+                {
+                    "ad_id": 2867,
+                    "fb_ad_id": "120238179916150160",
+                    "uploaded_at": "2026-02-07",
+                    "caption": "자전거 입문자가 매장에서 처음으로 구매할 때 좋은 점들\n\n매장에 오시는 고객님들께 여쭤보면\n한 달 이상 DDZK 콘텐츠를 \n보고 방문하셨다고 합니다.\n그리고 DDZK 방문 후\n만족하는 부분은\n‘구매할 때까지 꼼꼼하게 안내해 주는 편안한 서비스’ \n라고 하시는데요.\n구매하신 고객님의 \n말씀에 따르면,\n\n“’어떤 점을 가장 중요하게 생각하고, \n가장 와닿는 실물 컬러는 무엇이고\n시승 후 어떤 부분이 편했는지’ 등 \n개별 상담이 원활하게 이루어집니다.”\n“제품에 대한 정보 전달 뿐만 아니라\n사용 용도와 색상 등 개인 맞춤형으로\n상담이 이루어진 덕에 결정했어요.”\n“아내에게 이태원 맛집에 가자고 했는데\n직원분이 꼭 가봐야 할 리스트까지\n알려주셔서 즐거웠습니다.”\n\n구매를 고려하고 있다면\n매장에 먼저 방문해 보세요\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238179916150160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 16,
+                    "total_shares": 1,
+                    "total_saves": 2,
+                    "total_comments": 0,
+                    "total_reaction": 19,
+                    "ctr": 3.2,
+                    "caption_label": "자전거 입문자..."
+                },
+                {
+                    "ad_id": 1507,
+                    "fb_ad_id": "120237343551270160",
+                    "uploaded_at": "2026-01-16",
+                    "caption": "일상 속 소중한 순간들, 가끔 놓치기 쉽죠?\n하지만 첫 경험의 강렬한 감정은 오래 기억에 남습니다.\n\n한강길을 따라 타는 자전거 풍경\n햇볕과 한강의 반짝이는 윤슬을 보면서 \n느껴지는 편안한 감각\n\n애매한 거리라 가기 귀찮았던 곳도 \n트라이폴드를 타며 보는 풍경들\n\n귀에는 이어폰을 끼고\n발로는 페달을 밟으며 \n영화 같은 일상을 느끼는 것 \n\n자전거를 타고 가는데 \n마침 가로수길이 불빛으로 물드는 늦은 오후\n\n완전히 몰입하게 되는 그 순간\n트라이폴드가 여러분께 신선한 플로우를 선사합니다.\n반복되는 일상에서 벗어나, 새로운 모험을 떠나세요.\n\n트라이폴드 자전거 DDZK가 \n그 여정을 함께 하겠습니다.\n함께 타면 더 즐거운 우리는 \n트라이폴드 자전거 DDZK입니다.",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120237343551270160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 17,
+                    "total_shares": 0,
+                    "total_saves": 3,
+                    "total_comments": 0,
+                    "total_reaction": 20,
+                    "ctr": 4.54,
+                    "caption_label": "일상 속 소중..."
+                },
+                {
+                    "ad_id": 3017,
+                    "fb_ad_id": "120238731513220160",
+                    "uploaded_at": "2026-02-20",
+                    "caption": "DDZK의 슬로건\n\n언제나 어디서나\n자전거가 어울리지 않을 것 같은 \n장소까지 이동이 가능합니다.\n\n함께 타면 더 즐거운\n가족, 연인, 친구 관계 중심의 \n감성적 가치를 강조합니다.\n\nGo with the Flow\n일상 속 몰입, 집중, \n흐름의 라이프스타일을 표현합니다.\n\nDDZK는 이동 수단을 넘어, \n플로우를 경험하는 \n새로운 방식을 제안합니다\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238731513220160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 18,
+                    "total_shares": 0,
+                    "total_saves": 2,
+                    "total_comments": 2,
+                    "total_reaction": 20,
+                    "ctr": 2.88,
+                    "caption_label": "의 슬로건\n\n..."
+                }
+            ]
+        },
+        "reaction_saves_top": {
+            "kind": "reaction_bar",
+            "title": "반응 top 콘텐츠 (saves)",
+            "metric": "saves",
+            "metric_col": "total_saves",
+            "overall_avg": 5.2,
+            "metric_avg": 5.2,
+            "is_top": true,
+            "x_scale_max": 24.0,
+            "items": [
+                {
+                    "ad_id": 4145,
+                    "fb_ad_id": "120239860038900160",
+                    "uploaded_at": "2026-03-20",
+                    "caption": "[댓글 이벤트] GPS로 그림 그리며 \n라이딩 하는 추천 코스 - 수도권 편\n\n날씨가 점점 더 따뜻해지면서 \n라이딩 하기 딱 좋은 날씨가 되어가고 있어요. \n\n그냥 달리는 것도 좋지만 \n러닝처럼 자전거로도 \nGPS 따라 재밌는 코스들이 있는데\n\n유저분들이 많이 즐기시는 \n코스 추천해 드릴게요.\n\n‘하트' 코스 (약 70km)\n안합 → 안양천 → 학의천 → 양재천 → 탄합 \n→ 반포 → 당산 순환 코스\n\n한강 ‘옷걸이' 코스 (약 30km)\n탄천합수부/잠실한강공원 → 반포, 잠수교 방향으로 직진 \n→ 잠수교 건너서 한강 북단 → 뚝섬 \n→ 잠실철교 → 다시 남단\n\n‘포도송이’ 코스 (약 25km)\n잠실한강공원 → 잠실철교 건너 한강 북단 \n→ 잠실철교 남단 → 여의도, 여의나루, 잠수교 \n→ 중랑천 → 다시 잠실철교\n\n‘장화' 코스 (약 85km)\n중랑천 → 부용천 → 축석고개 옛길 \n→ 수목원길 → 왕숙천 → 한강\n\n가오리코스 (약 80~100km)\n한강길 따라 구리방향에서 출발 → 왕숙천 \n→ 경춘선 자전거길 → 북한강/남한강 자전거길\n\n여러분만의 코스가 있다면 \n댓글로 작성해 주세요.\n아이디어가 채택된 분들께는 \n리워드 상품을 제공드립니다. \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239860038900160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 48,
+                    "total_shares": 7,
+                    "total_saves": 24,
+                    "total_comments": 6,
+                    "total_reaction": 79,
+                    "ctr": 5.0,
+                    "caption_label": "댓글 이벤트]..."
+                },
+                {
+                    "ad_id": 3016,
+                    "fb_ad_id": "120238731513230160",
+                    "uploaded_at": "2026-02-20",
+                    "caption": "트라이폴드계의 소형 SUV, ‘D10’\n\n26년 1월 25일 \n새로 출시한 D10을 \n우리는 ‘최초의 SUV’라고 \n부르기로 했습니다.\n\n접으면 16인치 만큼 작아지고, \nSUV는 어디든 갈 수 있는\n야성의 광폭 타이어를\n자랑하기 때문이죠. \n\nD10이 강력한 \n네 가지 이유를 알려드릴게요.\n\n첫째, \n유압디스크 브레이크로 인한 \n높은 제동력\n\n둘째, \n광폭 타이어를 장착함으로써 \n높인 노면 안정성\n\n셋째, \n16인치와 큰 차이가 없는 \n폴딩 폭 및 8kg대의 경량과 \n휴대성 유지\n\n넷째, \n프로페셔널 유저를 위한 \n무한한 확장성\n✔️ 20인치 휠셋까지 교체 가능한 구조\n✔️ 범용 변속기\n✔️ 18인치 광폭타이어 전부 호환 가능\n✔️ 트라이폴드 호환 튜닝 액세서리\n\n접으면 데일리, \n펼치면 어드벤처가 되는 D10으로 \n이제 우주만큼 멀리 경험하세요\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238731513230160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 75,
+                    "total_shares": 6,
+                    "total_saves": 22,
+                    "total_comments": 1,
+                    "total_reaction": 103,
+                    "ctr": 9.16,
+                    "caption_label": "트라이폴드계의..."
+                },
+                {
+                    "ad_id": 3438,
+                    "fb_ad_id": "120239091030240160",
+                    "uploaded_at": "2026-02-25",
+                    "caption": "수화물 캐리어백 \n렌탈 서비스를 시작합니다\n\nDDZK는 \n고객님들이 더 자유롭고 즐겁게 \n이용할 수 있도록 \n‘렌탈권’ 서비스를 제공합니다.\n\n해외여행이라면 \n수화물 캐리어백이 \n무조건 필요하실 거예요.\n\n롤업 형식에 쉬운 탈부착으로 \n공항, 호텔, 심지어 \n공항 리무진을 탈 때까지 \n이동이 편리해요.\n\n렌탈 서비스 기본 가격은 \n5만 원으로 책정했고 \nDDZK와 함께해 주신 \n팔로우 분들께는 \n3만 원 이용가로 제공합니다.\n\n사용 희망하는 \nDDZK 구매자분들은\n카카오톡 채널로 \n연락주시면 안내드리겠습니다. \n\n자유롭고 즐거운 여행을 \n도와주는 DDZK의\n새로운 서비스를 경험해 보세요.\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239091030240160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 59,
+                    "total_shares": 2,
+                    "total_saves": 18,
+                    "total_comments": 1,
+                    "total_reaction": 79,
+                    "ctr": 5.48,
+                    "caption_label": "수화물 캐리어..."
+                },
+                {
+                    "ad_id": 3428,
+                    "fb_ad_id": "120239300382940160",
+                    "uploaded_at": "2026-03-07",
+                    "caption": "봄의 시작은 바이크스 시티\n(2026 리마스터)와 함께 \n\ncity 2026 remastered\n바이크스 시티가\n새롭게 정의됩니다. \n\n편의의 완결\n실용성을 극대화한 확장형 리어랙, \n회전방지 클램프와 싯포스트\n\n설계의 완결\n고강도 스트레이트 휠셋과 \n정밀 디자인된 독자적 프레임 \n\nDDZK에서 수천 대 이상 판매되어\n가장 사랑받고 있는 제품, \n‘바이크스 시티’ \n\n실버 부품인 텐월 띠가 들어가 \n가죽을 덧대\n더욱 클래식하게 \n타시는 분이 선택을 \n\n블랙 부품엔 \n타이어까지 올 블랙으로 \n깔끔함을 추구하는 분들이 \n주로 선택합니다. \n\n바이크스 시티(2026 리마스터)와\n함께 따뜻한 봄의 시작 어떠세요? \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300382940160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 68,
+                    "total_shares": 5,
+                    "total_saves": 15,
+                    "total_comments": 4,
+                    "total_reaction": 88,
+                    "ctr": 10.8,
+                    "caption_label": "봄의 시작은 ..."
+                },
+                {
+                    "ad_id": 4247,
+                    "fb_ad_id": "120240251613460160",
+                    "uploaded_at": "2026-03-24",
+                    "caption": "야간 라이딩을 하는 당신을 위한 필수 아이템\n\n낮뿐만 아니라 \n밤에도 라이딩을 하는 분들에게 \n꼭 필요한 아이템, 전조등\n\n전조등과 함께 구매하면 좋은 세트 상품인\n전조등 거치대와 후미등\n\n야간 라이딩에 필요한 사항들을 \n확인해 보세요.\n\n1. 트라이폴드 접이식 자전거 특성상 \n전조등을 앞바퀴 위 브레이크암에 결합합니다.\n\n2. 전조등 장착에 필요한 \n전조등 거치대를 장착해 주세요.\n\n3. 접었을 때 간섭이 생기지 않게 하고 \n앞사람의 눈부심 방지를 위해 \n살짝 아래방향으로 맞춰주세요.\n\n4. 빗물에도 안전하게 사용 가능한 \n방수 제품인지, 밝기는 적당한지 \n체크를 모두 꼭 하세요.\n\n전조등•거치대•후미등은 선택 아닌 필수, \n안전하고 즐거운 야간 라이딩을 즐겨보세요\n\n #DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120240251613460160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 21,
+                    "total_shares": 1,
+                    "total_saves": 13,
+                    "total_comments": 0,
+                    "total_reaction": 35,
+                    "ctr": 1.72,
+                    "caption_label": "야간 라이딩을..."
+                }
+            ]
+        },
+        "reaction_saves_bottom": {
+            "kind": "reaction_bar",
+            "title": "반응 bottom 콘텐츠 (saves)",
+            "metric": "saves",
+            "metric_col": "total_saves",
+            "overall_avg": 5.2,
+            "metric_avg": 5.2,
+            "is_top": false,
+            "x_scale_max": 24.0,
+            "items": [
+                {
+                    "ad_id": 2868,
+                    "fb_ad_id": "120238179923340160",
+                    "uploaded_at": "2026-02-06",
+                    "caption": "온라인을 통한 자전거 구매가 처음인 당신에게\n\nDDZK는 \n전국 곳곳의 대리점과 함께\n가까운 곳에서도\n편하게 상담과 구매가 가능하도록\n고객님들과의 접점을\n넓혀가고 있는데요.\n특히 온라인으로 구매 후 \n처음 마주한 새 자전거는\n누구나 조금은 당황할 수 있습니다.\n그래서 DDZK는\n 꼭 확인하셔야 할 부분을 \n안내해 드리고 있어요.\n\n✓ 주요 볼트와 폴딩 레버가 \n제대로 잠겼는지 확인한다.\n✓ 브레이크/기어가 정상 작동하는지\n짧게 시운전하며 체크한다.\n✓ 체인이 이탈·늘어짐 없이 \n부드럽게 구동되는지 확인한다.\n\n초기 점검은 안전한 라이딩의 시작 \n가까운 DDZK 대리점과 함께하세요 \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238179923340160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 10,
+                    "total_shares": 2,
+                    "total_saves": 1,
+                    "total_comments": 0,
+                    "total_reaction": 13,
+                    "ctr": 3.03,
+                    "caption_label": "온라인을 통한..."
+                },
+                {
+                    "ad_id": 2667,
+                    "fb_ad_id": "120237904078350160",
+                    "uploaded_at": "2026-01-29",
+                    "caption": "트라이폴드 자전거, 어떻게 사야 후회하지 않을까?\n\n트라이폴드 구입을 고민하고 계시나요?\n그렇다면 \n트라이폴드가 나와 맞는지 확인해 보세요.\n\n✔️ 반복되는 \n출퇴근 일상에서 벗어나 \n조금이라도 여유와 활력을 \n느끼고 싶다.\n\n✔️ 사랑하는 친구, 가족, \n연인과 함께 라이딩을 통해 \n더욱 즐겁고 \n특별한 시간을 갖고 싶다.\n\n✔️ 자전거 입문자로서, \n가벼운 무게와 \n편리한 사용감을 원한다.\n\n✔️ 가치와 품질을 \n동시에 중시하는 \n사람이다.\n\n여기에 해당된다면 \n트라이폴드 자전거가 \n최상의 선택입니다. \n\n처음이라 \n더 고민된다면, \nDDZK에 오셔서 모델별로 \n타보고 결정해 보세요.\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120237904078350160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 7,
+                    "total_shares": 1,
+                    "total_saves": 1,
+                    "total_comments": 0,
+                    "total_reaction": 9,
+                    "ctr": 4.22,
+                    "caption_label": "트라이폴드 자..."
+                },
+                {
+                    "ad_id": 2664,
+                    "fb_ad_id": "120237904130010160",
+                    "uploaded_at": "2026-01-31",
+                    "caption": "DDZK의 지향점은 ‘이거’예요\n\nDD(당당함)는 자기 확신, \nZK(즐거움)는 \n삶의 리듬을 담고 있어요. \n\n트라이폴드 자전거는 \n단순한 접이식 자전거가 아닌 \n‘움직이는 자유’와 \n‘일상의 확장을 \n도와주는 도구'예요.\n\n작게 접히고, 가볍게 들고 \n어디로든 갈 수 있는 구조\n\n일상 속에서도 \n부담 없이 펼쳐지고, \n여행과 삶을 이어주는 \n감각적 연결의 매개체\n\n운영시간 내 \n편하게 방문해 주세요. \n나에게 맞는 트라이폴드 \n상담 및 시승이 가능합니다.\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120237904130010160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 20,
+                    "total_shares": 0,
+                    "total_saves": 1,
+                    "total_comments": 1,
+                    "total_reaction": 21,
+                    "ctr": 3.78,
+                    "caption_label": "의 지향점은 ..."
+                },
+                {
+                    "ad_id": 4244,
+                    "fb_ad_id": "120240251586970160",
+                    "uploaded_at": "2026-03-23",
+                    "caption": "이미 다양한 자전거를 갖고 있어도 \n트라이폴드를 선택하는 이유\n\n출퇴근용, 대중 교통의 연계, 여행 레저용 등\n다양한 목적에 따라 탈 수 있고\n\n무엇보다 큰 공간을 차지 하지 않아 \n효율적인 휴대성으로 \n라이딩에 더 집중할 수 있죠.\n\n필요에 따라 자전거 앞면에는 \n내 일상과 닮은 가방을 \n쉽게 탈부착해 이동을 \n더욱 편리하게 해요.\n\n나의 일상 속 즐거움과 \n삶의 질을 올려주는 고마운 트라이폴드 \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120240251586970160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 21,
+                    "total_shares": 1,
+                    "total_saves": 1,
+                    "total_comments": 0,
+                    "total_reaction": 23,
+                    "ctr": 3.93,
+                    "caption_label": "이미 다양한 ..."
+                },
+                {
+                    "ad_id": 1416,
+                    "fb_ad_id": "120237068330850160",
+                    "uploaded_at": "2026-01-11",
+                    "caption": "출퇴근 라이딩을 하시는데, 비 오는 날에는 큰 바퀴 로드 자전거로 그대로 비를 맞으며 이동할 수밖에 없었다고 합니다.\n같은 상황에서 접이식 자전거는 잠깐 접어 대중교통과 연결하니 옷도, 가방도 젖지 않았다고 하셨어요.\n비가 오든 눈이 오든 트라이폴드 자전거로 라이딩하니까 걱정 없다고요. 급하면 택시에도 실을 수 있다 했어요.\n이런 접이식 미니벨로 자전거는 타는 사람만 타고, 아는 사람만 타는 거 같아요.\n캠핑의 끝이 미니멀이라면, 자전거의 끝은 트라이폴드 같아요.\n고객분들과 이야기를 나눠보면 로드, MTB, 다른 접이식 자전거까지 모두 경험해 본 분들이 생각보다 많거든요. \n결국 선택의 이유는 휴대성과 일상에서의 편의성이더라고요.",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120237068330850160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 27,
+                    "total_shares": 0,
+                    "total_saves": 1,
+                    "total_comments": 1,
+                    "total_reaction": 28,
+                    "ctr": 9.34,
+                    "caption_label": "출퇴근 라이딩..."
+                }
+            ]
+        },
+        "reaction_shares_top": {
+            "kind": "reaction_bar",
+            "title": "반응 top 콘텐츠 (shares)",
+            "metric": "shares",
+            "metric_col": "total_shares",
+            "overall_avg": 3.17,
+            "metric_avg": 3.17,
+            "is_top": true,
+            "x_scale_max": 11.0,
+            "items": [
+                {
+                    "ad_id": 3019,
+                    "fb_ad_id": "120238731405040160",
+                    "uploaded_at": "2026-02-13",
+                    "caption": "트라이폴드가 도심에 최적화인 이유 \n\n실제 라이더분들의 80%가 \n평균 5km 이내로 탄다는 사실 \n알고 계셨나요?\n\n이 말은 즉슨, \n대부분 사람들에게 필요한 건 \n‘장거리'가 아니라는 의미예요. \n(물론 장거리도 가능하지만요)\n\n왜 트라이폴드가 도심에서 타기에 \n최적화된 자전거인지 \n세 가지 이유를 알려 드릴게요.\n\n첫째, 휴대성과 대중교통의 연계\n삼단접이방식으로 \n대중교통 탑승이 자유로워,\n자전거와 대중교통의 \n‘멀티모달'이 가능합니다.\n\n둘째, 민첩한 저속 주행\n작은 휠은 움직임에 민첩하고, \n평균 속도 18~20km/h로\n짧은 거리에 최적입니다.\n\n셋째, 용이한 보관과 도난 방지\n접은 크기가 작아서 \n원룸 및 사무실에 보관이 쉽고\n밖에 보관할 필요가 없어서 \n도난당할 위험은 현저히 낮습니다.\n\n매일 일상을 함께 하고 싶은 \n가장 친한 친구, 트라이폴드\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238731405040160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 43,
+                    "total_shares": 11,
+                    "total_saves": 6,
+                    "total_comments": 0,
+                    "total_reaction": 60,
+                    "ctr": 4.63,
+                    "caption_label": "트라이폴드가 ..."
+                },
+                {
+                    "ad_id": 4145,
+                    "fb_ad_id": "120239860038900160",
+                    "uploaded_at": "2026-03-20",
+                    "caption": "[댓글 이벤트] GPS로 그림 그리며 \n라이딩 하는 추천 코스 - 수도권 편\n\n날씨가 점점 더 따뜻해지면서 \n라이딩 하기 딱 좋은 날씨가 되어가고 있어요. \n\n그냥 달리는 것도 좋지만 \n러닝처럼 자전거로도 \nGPS 따라 재밌는 코스들이 있는데\n\n유저분들이 많이 즐기시는 \n코스 추천해 드릴게요.\n\n‘하트' 코스 (약 70km)\n안합 → 안양천 → 학의천 → 양재천 → 탄합 \n→ 반포 → 당산 순환 코스\n\n한강 ‘옷걸이' 코스 (약 30km)\n탄천합수부/잠실한강공원 → 반포, 잠수교 방향으로 직진 \n→ 잠수교 건너서 한강 북단 → 뚝섬 \n→ 잠실철교 → 다시 남단\n\n‘포도송이’ 코스 (약 25km)\n잠실한강공원 → 잠실철교 건너 한강 북단 \n→ 잠실철교 남단 → 여의도, 여의나루, 잠수교 \n→ 중랑천 → 다시 잠실철교\n\n‘장화' 코스 (약 85km)\n중랑천 → 부용천 → 축석고개 옛길 \n→ 수목원길 → 왕숙천 → 한강\n\n가오리코스 (약 80~100km)\n한강길 따라 구리방향에서 출발 → 왕숙천 \n→ 경춘선 자전거길 → 북한강/남한강 자전거길\n\n여러분만의 코스가 있다면 \n댓글로 작성해 주세요.\n아이디어가 채택된 분들께는 \n리워드 상품을 제공드립니다. \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239860038900160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 48,
+                    "total_shares": 7,
+                    "total_saves": 24,
+                    "total_comments": 6,
+                    "total_reaction": 79,
+                    "ctr": 5.0,
+                    "caption_label": "댓글 이벤트]..."
+                },
+                {
+                    "ad_id": 3016,
+                    "fb_ad_id": "120238731513230160",
+                    "uploaded_at": "2026-02-20",
+                    "caption": "트라이폴드계의 소형 SUV, ‘D10’\n\n26년 1월 25일 \n새로 출시한 D10을 \n우리는 ‘최초의 SUV’라고 \n부르기로 했습니다.\n\n접으면 16인치 만큼 작아지고, \nSUV는 어디든 갈 수 있는\n야성의 광폭 타이어를\n자랑하기 때문이죠. \n\nD10이 강력한 \n네 가지 이유를 알려드릴게요.\n\n첫째, \n유압디스크 브레이크로 인한 \n높은 제동력\n\n둘째, \n광폭 타이어를 장착함으로써 \n높인 노면 안정성\n\n셋째, \n16인치와 큰 차이가 없는 \n폴딩 폭 및 8kg대의 경량과 \n휴대성 유지\n\n넷째, \n프로페셔널 유저를 위한 \n무한한 확장성\n✔️ 20인치 휠셋까지 교체 가능한 구조\n✔️ 범용 변속기\n✔️ 18인치 광폭타이어 전부 호환 가능\n✔️ 트라이폴드 호환 튜닝 액세서리\n\n접으면 데일리, \n펼치면 어드벤처가 되는 D10으로 \n이제 우주만큼 멀리 경험하세요\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238731513230160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 75,
+                    "total_shares": 6,
+                    "total_saves": 22,
+                    "total_comments": 1,
+                    "total_reaction": 103,
+                    "ctr": 9.16,
+                    "caption_label": "트라이폴드계의..."
+                },
+                {
+                    "ad_id": 3428,
+                    "fb_ad_id": "120239300382940160",
+                    "uploaded_at": "2026-03-07",
+                    "caption": "봄의 시작은 바이크스 시티\n(2026 리마스터)와 함께 \n\ncity 2026 remastered\n바이크스 시티가\n새롭게 정의됩니다. \n\n편의의 완결\n실용성을 극대화한 확장형 리어랙, \n회전방지 클램프와 싯포스트\n\n설계의 완결\n고강도 스트레이트 휠셋과 \n정밀 디자인된 독자적 프레임 \n\nDDZK에서 수천 대 이상 판매되어\n가장 사랑받고 있는 제품, \n‘바이크스 시티’ \n\n실버 부품인 텐월 띠가 들어가 \n가죽을 덧대\n더욱 클래식하게 \n타시는 분이 선택을 \n\n블랙 부품엔 \n타이어까지 올 블랙으로 \n깔끔함을 추구하는 분들이 \n주로 선택합니다. \n\n바이크스 시티(2026 리마스터)와\n함께 따뜻한 봄의 시작 어떠세요? \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300382940160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 68,
+                    "total_shares": 5,
+                    "total_saves": 15,
+                    "total_comments": 4,
+                    "total_reaction": 88,
+                    "ctr": 10.8,
+                    "caption_label": "봄의 시작은 ..."
+                },
+                {
+                    "ad_id": 3433,
+                    "fb_ad_id": "120239300153630160",
+                    "uploaded_at": "2026-02-27",
+                    "caption": "D10만 유일하게 \n‘디스크 브레이크'를 \n선택한 이유\n\n왜 D10만 많은 사람들이 \n사랑하는 ‘림 브레이크’가 아닌 \n‘디스크 브레이크'를 \n선택한 이유는 무엇일까요?\n\n디스크 브레이크가 \n더 낫다는 것이 아닙니다. \n단지 가고자 하는 길이 \n서로 다르기 때문입니다.\n\n거친 노면을 견디기 위해 \nD10의 바퀴가 18인치로 \n바뀌었는데요.\n\n바퀴가 커지면 \n회전 관성도 커지기 때문에 \n늘어난 힘을 가장 안정적으로 \n제어하기 위해서는 \n‘디스크 브레이크’가\n해답이었습니다.\n\n라이딩 스타일에 따라 \n나에게 맞는 모델은 \n모두 다릅니다.\n\n바퀴가 커진 만큼 \n더 멀리 일상을 경험하세요.\n\n당신이 주로 다니는 길은\n어디인가요?\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300153630160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 54,
+                    "total_shares": 4,
+                    "total_saves": 11,
+                    "total_comments": 2,
+                    "total_reaction": 69,
+                    "ctr": 6.2,
+                    "caption_label": "만 유일하게 ..."
+                }
+            ]
+        },
+        "reaction_shares_bottom": {
+            "kind": "reaction_bar",
+            "title": "반응 bottom 콘텐츠 (shares)",
+            "metric": "shares",
+            "metric_col": "total_shares",
+            "overall_avg": 3.17,
+            "metric_avg": 3.17,
+            "is_top": false,
+            "x_scale_max": 11.0,
+            "items": [
+                {
+                    "ad_id": 3425,
+                    "fb_ad_id": "120239300382930160",
+                    "uploaded_at": "2026-03-05",
+                    "caption": "바이크스에서 기획하고 만든 ‘이것’\n\n안전은 기본, 자유로움은 덤이에요\n바이크스의 새로운 힌지 클램프, \n‘퀵릴리즈 힌지 클램프’\n\n✔️ 간단한 설치\n✔️ 확실한 고정력\n✔️ 감성까지 더한 디테일\n\n더 즐거워지는 라이딩을 지금 경험해 보세요\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300382930160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 31,
+                    "total_shares": 0,
+                    "total_saves": 6,
+                    "total_comments": 2,
+                    "total_reaction": 37,
+                    "ctr": 6.34,
+                    "caption_label": "바이크스에서 ..."
+                },
+                {
+                    "ad_id": 4146,
+                    "fb_ad_id": "120239860058260160",
+                    "uploaded_at": "2026-03-16",
+                    "caption": "여러분들만 알고 있는 히든 코스를 알려주세요\n\nDDZK는 고객님들에게 \n루트를 추천할 뿐만 아니라\n\n고객님들만 알고 있는 \n다양한 루트를 이제는 \n함께 나눌 수 있는 곳으로 만들려고 해요\n\n3월 게시일부터 말일까지 \n여러분들만의 히든 코스를 \n댓글로 알려주세요\n\n한 달에 한 번 돌아오는 \n댓글 이벤트의 추첨을 통해 \n할인권과 DDZK만의 앰배서더가 \n될 수 있는 절호의 기회를 드립니다\n\n고객이 먼저 중심이 되고 \n항상 고객의 목소리를 듣습니다\n\n우리는 더 단단하고 \n상호작용 가능한 \n트라이폴드의 연대를 꿈꿉니다\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239860058260160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 30,
+                    "total_shares": 0,
+                    "total_saves": 2,
+                    "total_comments": 4,
+                    "total_reaction": 32,
+                    "ctr": 4.64,
+                    "caption_label": "여러분들만 알..."
+                },
+                {
+                    "ad_id": 2870,
+                    "fb_ad_id": "120238179924030160",
+                    "uploaded_at": "2026-02-08",
+                    "caption": "DDZK 로고의 의미\n\nDDZK의 로고에 대해서도 \n궁금하실 수 있는데요.\n\n인피니트(무한대)처럼 보이는 \n이 로고는 ‘무한대의 몰입 속에서 \n느끼는 즐거움’을 상징해요.\n\n바로 DDZK가 \n지향하는 방향성이기도 하죠.\n\n언제, 어디서나, 모든 곳에서 \n‘자유’와 ‘즐거움’이 만나는 곳\n\n함께 타면 더 즐거운 \n트라이폴드 자전거 DDZK입니다. \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238179924030160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 29,
+                    "total_shares": 0,
+                    "total_saves": 2,
+                    "total_comments": 1,
+                    "total_reaction": 31,
+                    "ctr": 3.86,
+                    "caption_label": "로고의 의미\n..."
+                },
+                {
+                    "ad_id": 2664,
+                    "fb_ad_id": "120237904130010160",
+                    "uploaded_at": "2026-01-31",
+                    "caption": "DDZK의 지향점은 ‘이거’예요\n\nDD(당당함)는 자기 확신, \nZK(즐거움)는 \n삶의 리듬을 담고 있어요. \n\n트라이폴드 자전거는 \n단순한 접이식 자전거가 아닌 \n‘움직이는 자유’와 \n‘일상의 확장을 \n도와주는 도구'예요.\n\n작게 접히고, 가볍게 들고 \n어디로든 갈 수 있는 구조\n\n일상 속에서도 \n부담 없이 펼쳐지고, \n여행과 삶을 이어주는 \n감각적 연결의 매개체\n\n운영시간 내 \n편하게 방문해 주세요. \n나에게 맞는 트라이폴드 \n상담 및 시승이 가능합니다.\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120237904130010160.jpg",
+                    "ig_media_type": "REEL",
+                    "total_likes": 20,
+                    "total_shares": 0,
+                    "total_saves": 1,
+                    "total_comments": 1,
+                    "total_reaction": 21,
+                    "ctr": 3.78,
+                    "caption_label": "의 지향점은 ..."
+                },
+                {
+                    "ad_id": 3430,
+                    "fb_ad_id": "120239300159360160",
+                    "uploaded_at": "2026-02-26",
+                    "caption": "트라이폴드 ‘싯클램프’ \n자가교체 방법\n\n‘싯클램프’란 \n안장을 프레임에 고정해 \n접었을 때 안장이 흔들리거나\n이탈하지 않도록 하는 \n‘고정 장치' 역할을 합니다.\n\n이렇게 중요한 역할을 \n하고 있는 ‘싯클램프’를 \n혼자서도 교체 가능하다는 것을 \n알고 계시나요?\n\n빼는 건 쉽지만 끼우는 게 \n어렵다는 고객님들께 방법을 \n알려 드릴게요.\n\n첫째, \n너트(10mm 너트형 혹은 손으로 돌리는 방식)를 풀어줍니다.\n\n둘째, \n걸쇠가 정중앙에 오도록 \n미리 위치를 확인합니다. \n여기서 핵심은 정렬입니다.\n\n셋째,\n도구를 써서 스프링을 \n충분히 밀어준 뒤\n구멍에 맞춰 쏙 뺍니다.\n\n영상으로도 확인해 보세요\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300159360160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 29,
+                    "total_shares": 0,
+                    "total_saves": 4,
+                    "total_comments": 0,
+                    "total_reaction": 33,
+                    "ctr": 3.89,
+                    "caption_label": "트라이폴드 ‘..."
+                }
+            ]
+        },
+        "target_spend_bubble": {
+            "kind": "target_bubble",
+            "title": "타겟별 광고비 분포",
+            "rows": [
+                {
+                    "age_range": "18-24",
+                    "gender": "female",
+                    "spend": 234960.0,
+                    "spend_ratio": 0.9,
+                    "ctr": 4.42,
+                    "cpc": 80.0
+                },
+                {
+                    "age_range": "18-24",
+                    "gender": "male",
+                    "spend": 1775574.0,
+                    "spend_ratio": 7.0,
+                    "ctr": 3.17,
+                    "cpc": 91.0
+                },
+                {
+                    "age_range": "25-34",
+                    "gender": "female",
+                    "spend": 688126.0,
+                    "spend_ratio": 2.7,
+                    "ctr": 4.96,
+                    "cpc": 100.0
+                },
+                {
+                    "age_range": "25-34",
+                    "gender": "male",
+                    "spend": 4780500.0,
+                    "spend_ratio": 18.9,
+                    "ctr": 4.46,
+                    "cpc": 88.0
+                },
+                {
+                    "age_range": "35-44",
+                    "gender": "female",
+                    "spend": 821666.0,
+                    "spend_ratio": 3.2,
+                    "ctr": 5.88,
+                    "cpc": 101.0
+                },
+                {
+                    "age_range": "35-44",
+                    "gender": "male",
+                    "spend": 8247532.0,
+                    "spend_ratio": 32.5,
+                    "ctr": 5.91,
+                    "cpc": 85.0
+                },
+                {
+                    "age_range": "45-54",
+                    "gender": "female",
+                    "spend": 480354.0,
+                    "spend_ratio": 1.9,
+                    "ctr": 6.31,
+                    "cpc": 103.0
+                },
+                {
+                    "age_range": "45-54",
+                    "gender": "male",
+                    "spend": 4721062.0,
+                    "spend_ratio": 18.6,
+                    "ctr": 6.67,
+                    "cpc": 83.0
+                },
+                {
+                    "age_range": "55-64",
+                    "gender": "female",
+                    "spend": 266399.0,
+                    "spend_ratio": 1.1,
+                    "ctr": 8.96,
+                    "cpc": 95.0
+                },
+                {
+                    "age_range": "55-64",
+                    "gender": "male",
+                    "spend": 2094103.0,
+                    "spend_ratio": 8.3,
+                    "ctr": 7.7,
+                    "cpc": 76.0
+                },
+                {
+                    "age_range": "65+",
+                    "gender": "female",
+                    "spend": 112030.0,
+                    "spend_ratio": 0.4,
+                    "ctr": 6.15,
+                    "cpc": 130.0
+                },
+                {
+                    "age_range": "65+",
+                    "gender": "male",
+                    "spend": 1131055.0,
+                    "spend_ratio": 4.5,
+                    "ctr": 8.6,
+                    "cpc": 75.0
+                }
+            ],
+            "main_age": [
+                "35-44",
+                "45-45"
+            ],
+            "main_gender": "male",
+            "avoid_age": "",
+            "avoid_gender": "65+"
+        }
+    },
+    "follower_demographics_pages": {
+        "is_visible": true,
+        "latest_date": "2026-03-24",
+        "titles": {
+            "section_title": "팔로워 인구통계학 분석",
+            "page_1_title": "성별 및 연령대별 팔로워 분포"
+        }
+    },
+    "purchase_analysis_pages": {
+        "is_visible": false,
+        "titles": {
+            "section_title": "전체 매출 데이터 분석",
+            "page_1_title": "평균 ROAS",
+            "page_2_title": "구매전환 건수"
+        }
+    },
+    "spend_revenue_pages": {
+        "is_visible": false
+    },
+    "purchase_contents_pages": {
+        "is_visible": false
+    },
+    "purchase_age_gender_page": {
+        "is_visible": false
+    },
+    "ctr_follows_scatter": {
+        "rows": [],
+        "ctr_mean": null,
+        "follows_mean": null
+    },
+    "appendix_groups": [
+        {
+            "title": "",
+            "items": [
+                {
+                    "title": "많이 사용한 업종 필수 키워드 - 노출 (전체)",
+                    "subtitle": "키워드가 가장 많이 노출된 타겟",
+                    "headers": [
+                        "랭킹",
+                        "키워드",
+                        "등장 광고 수",
+                        "최다 노출 타겟",
+                        "타겟 노출량",
+                        "노출 비중",
+                        "총 노출량"
+                    ],
+                    "rows": [
+                        [
+                            1,
+                            "자전거",
+                            42,
+                            "35-44 male",
+                            1036637,
+                            "30.2%",
+                            3432566
+                        ],
+                        [
+                            2,
+                            "트라이폴드",
+                            41,
+                            "35-44 male",
+                            1069399,
+                            "30.2%",
+                            3546861
+                        ],
+                        [
+                            3,
+                            "라이딩",
+                            22,
+                            "35-44 male",
+                            499088,
+                            "28.1%",
+                            1777981
+                        ],
+                        [
+                            4,
+                            "일상",
+                            17,
+                            "35-44 male",
+                            448746,
+                            "32.3%",
+                            1389273
+                        ],
+                        [
+                            5,
+                            "휴대",
+                            12,
+                            "35-44 male",
+                            444971,
+                            "32.1%",
+                            1385292
+                        ],
+                        [
+                            6,
+                            "자유",
+                            12,
+                            "35-44 male",
+                            335096,
+                            "31.9%",
+                            1049344
+                        ],
+                        [
+                            7,
+                            "이동",
+                            11,
+                            "35-44 male",
+                            327679,
+                            "33.3%",
+                            985487
+                        ],
+                        [
+                            8,
+                            "제품",
+                            10,
+                            "35-44 male",
+                            269948,
+                            "32.4%",
+                            833391
+                        ],
+                        [
+                            9,
+                            "부품",
+                            8,
+                            "35-44 male",
+                            233027,
+                            "27.3%",
+                            854564
+                        ],
+                        [
+                            10,
+                            "편리",
+                            7,
+                            "35-44 male",
+                            261176,
+                            "38.0%",
+                            686940
+                        ],
+                        [
+                            11,
+                            "장거리",
+                            6,
+                            "35-44 male",
+                            146943,
+                            "24.2%",
+                            606845
+                        ],
+                        [
+                            12,
+                            "접이식",
+                            6,
+                            "35-44 male",
+                            208037,
+                            "37.6%",
+                            552629
+                        ],
+                        [
+                            13,
+                            "브랜드",
+                            6,
+                            "35-44 male",
+                            119137,
+                            "34.4%",
+                            346025
+                        ],
+                        [
+                            14,
+                            "로드",
+                            5,
+                            "35-44 male",
+                            116391,
+                            "28.7%",
+                            405486
+                        ],
+                        [
+                            15,
+                            "바퀴",
+                            4,
+                            "25-34 male",
+                            96372,
+                            "27.1%",
+                            355589
+                        ],
+                        [
+                            16,
+                            "대리점",
+                            4,
+                            "35-44 male",
+                            59994,
+                            "36.9%",
+                            162376
+                        ],
+                        [
+                            17,
+                            "온라인",
+                            3,
+                            "35-44 male",
+                            85687,
+                            "34.5%",
+                            248243
+                        ],
+                        [
+                            18,
+                            "새로운",
+                            1,
+                            "35-44 male",
+                            73520,
+                            "44.8%",
+                            164221
+                        ]
+                    ],
+                    "footnote": "*등장한 전체 키워드 기준"
+                },
+                {
+                    "title": "많이 사용한 업종 필수 키워드 - 클릭 (전체)",
+                    "subtitle": "키워드가 가장 많이 노출된 타겟",
+                    "headers": [
+                        "랭킹",
+                        "키워드",
+                        "등장 광고 수",
+                        "최다 클릭 타겟",
+                        "타겟 클릭량",
+                        "클릭 비중",
+                        "총 클릭량"
+                    ],
+                    "rows": [
+                        [
+                            1,
+                            "자전거",
+                            42,
+                            "35-44 male",
+                            58607,
+                            "32.2%",
+                            182070
+                        ],
+                        [
+                            2,
+                            "트라이폴드",
+                            41,
+                            "35-44 male",
+                            62786,
+                            "32.9%",
+                            190942
+                        ],
+                        [
+                            3,
+                            "라이딩",
+                            22,
+                            "35-44 male",
+                            28552,
+                            "30.3%",
+                            94174
+                        ],
+                        [
+                            4,
+                            "일상",
+                            17,
+                            "35-44 male",
+                            28204,
+                            "36.1%",
+                            78226
+                        ],
+                        [
+                            5,
+                            "휴대",
+                            12,
+                            "35-44 male",
+                            29245,
+                            "35.4%",
+                            82626
+                        ],
+                        [
+                            6,
+                            "자유",
+                            12,
+                            "35-44 male",
+                            18517,
+                            "32.3%",
+                            57366
+                        ],
+                        [
+                            7,
+                            "이동",
+                            11,
+                            "35-44 male",
+                            21026,
+                            "36.0%",
+                            58396
+                        ],
+                        [
+                            8,
+                            "제품",
+                            10,
+                            "35-44 male",
+                            16172,
+                            "33.0%",
+                            49048
+                        ],
+                        [
+                            9,
+                            "부품",
+                            8,
+                            "35-44 male",
+                            14142,
+                            "30.6%",
+                            46226
+                        ],
+                        [
+                            10,
+                            "편리",
+                            7,
+                            "35-44 male",
+                            14601,
+                            "41.8%",
+                            34971
+                        ],
+                        [
+                            11,
+                            "장거리",
+                            6,
+                            "35-44 male",
+                            7788,
+                            "24.8%",
+                            31363
+                        ],
+                        [
+                            12,
+                            "접이식",
+                            6,
+                            "35-44 male",
+                            14132,
+                            "39.3%",
+                            35956
+                        ],
+                        [
+                            13,
+                            "브랜드",
+                            6,
+                            "35-44 male",
+                            5693,
+                            "38.3%",
+                            14851
+                        ],
+                        [
+                            14,
+                            "로드",
+                            5,
+                            "35-44 male",
+                            9209,
+                            "37.2%",
+                            24735
+                        ],
+                        [
+                            15,
+                            "바퀴",
+                            4,
+                            "35-44 male",
+                            7046,
+                            "31.9%",
+                            22096
+                        ],
+                        [
+                            16,
+                            "대리점",
+                            4,
+                            "35-44 male",
+                            2029,
+                            "36.2%",
+                            5610
+                        ],
+                        [
+                            17,
+                            "온라인",
+                            3,
+                            "35-44 male",
+                            4253,
+                            "33.1%",
+                            12867
+                        ],
+                        [
+                            18,
+                            "새로운",
+                            1,
+                            "35-44 male",
+                            6800,
+                            "45.2%",
+                            15040
+                        ]
+                    ],
+                    "footnote": "*등장한 전체 키워드 기준"
+                },
+                {
+                    "title": "많이 사용한 브랜드 변수 키워드 - 노출 (1~25위)",
+                    "subtitle": "키워드가 가장 많이 노출된 타겟",
+                    "headers": [
+                        "랭킹",
+                        "키워드",
+                        "등장 광고 수",
+                        "최다 노출 타겟",
+                        "타겟 노출량",
+                        "노출 비중",
+                        "총 노출량"
+                    ],
+                    "rows": [
+                        [
+                            1,
+                            "함께",
+                            28,
+                            "35-44 male",
+                            721876,
+                            "31.0%",
+                            2329577
+                        ],
+                        [
+                            2,
+                            "고객",
+                            20,
+                            "35-44 male",
+                            545807,
+                            "29.1%",
+                            1876772
+                        ],
+                        [
+                            3,
+                            "아니",
+                            20,
+                            "35-44 male",
+                            474811,
+                            "28.7%",
+                            1654643
+                        ],
+                        [
+                            4,
+                            "드리",
+                            17,
+                            "35-44 male",
+                            395732,
+                            "31.8%",
+                            1246101
+                        ],
+                        [
+                            5,
+                            "경험",
+                            16,
+                            "35-44 male",
+                            510738,
+                            "31.8%",
+                            1605751
+                        ],
+                        [
+                            6,
+                            "선택",
+                            16,
+                            "35-44 male",
+                            409415,
+                            "32.5%",
+                            1257880
+                        ],
+                        [
+                            7,
+                            "가능",
+                            15,
+                            "35-44 male",
+                            483583,
+                            "30.3%",
+                            1597613
+                        ],
+                        [
+                            8,
+                            "이유",
+                            15,
+                            "35-44 male",
+                            471872,
+                            "32.1%",
+                            1467894
+                        ],
+                        [
+                            9,
+                            "모두",
+                            15,
+                            "35-44 male",
+                            411973,
+                            "31.3%",
+                            1317318
+                        ],
+                        [
+                            10,
+                            "여행",
+                            14,
+                            "35-44 male",
+                            367366,
+                            "33.2%",
+                            1107788
+                        ],
+                        [
+                            11,
+                            "사람",
+                            14,
+                            "35-44 male",
+                            341280,
+                            "31.5%",
+                            1081788
+                        ],
+                        [
+                            12,
+                            "위하",
+                            13,
+                            "35-44 male",
+                            401496,
+                            "35.7%",
+                            1124364
+                        ],
+                        [
+                            13,
+                            "가장",
+                            13,
+                            "35-44 male",
+                            327790,
+                            "30.0%",
+                            1093663
+                        ],
+                        [
+                            14,
+                            "이상",
+                            12,
+                            "35-44 male",
+                            333455,
+                            "30.8%",
+                            1083503
+                        ],
+                        [
+                            15,
+                            "즐겁",
+                            12,
+                            "35-44 male",
+                            303980,
+                            "30.9%",
+                            983147
+                        ],
+                        [
+                            16,
+                            "구매",
+                            12,
+                            "35-44 male",
+                            240467,
+                            "35.5%",
+                            677543
+                        ],
+                        [
+                            17,
+                            "필요",
+                            11,
+                            "35-44 male",
+                            281113,
+                            "31.5%",
+                            893781
+                        ],
+                        [
+                            18,
+                            "즐기",
+                            11,
+                            "35-44 male",
+                            216461,
+                            "28.4%",
+                            761141
+                        ],
+                        [
+                            19,
+                            "때문",
+                            10,
+                            "35-44 male",
+                            321280,
+                            "28.2%",
+                            1139184
+                        ],
+                        [
+                            20,
+                            "생각",
+                            10,
+                            "35-44 male",
+                            272523,
+                            "31.8%",
+                            857352
+                        ],
+                        [
+                            21,
+                            "우리",
+                            10,
+                            "35-44 male",
+                            221766,
+                            "31.3%",
+                            707895
+                        ],
+                        [
+                            22,
+                            "어디",
+                            9,
+                            "35-44 male",
+                            296448,
+                            "29.7%",
+                            998268
+                        ],
+                        [
+                            23,
+                            "새롭",
+                            9,
+                            "35-44 male",
+                            290485,
+                            "35.9%",
+                            808902
+                        ],
+                        [
+                            24,
+                            "시작",
+                            9,
+                            "35-44 male",
+                            245454,
+                            "33.4%",
+                            734289
+                        ],
+                        [
+                            25,
+                            "어떻",
+                            9,
+                            "35-44 male",
+                            199018,
+                            "28.5%",
+                            699299
+                        ]
+                    ],
+                    "footnote": "*등장 광고 수 상위 50개 기준"
+                },
+                {
+                    "title": "많이 사용한 브랜드 변수 키워드 - 노출 (26~50위)",
+                    "subtitle": "키워드가 가장 많이 노출된 타겟",
+                    "headers": [
+                        "랭킹",
+                        "키워드",
+                        "등장 광고 수",
+                        "최다 노출 타겟",
+                        "타겟 노출량",
+                        "노출 비중",
+                        "총 노출량"
+                    ],
+                    "rows": [
+                        [
+                            26,
+                            "그래서",
+                            9,
+                            "25-34 male",
+                            170210,
+                            "24.5%",
+                            694494
+                        ],
+                        [
+                            27,
+                            "사용",
+                            9,
+                            "35-44 male",
+                            155478,
+                            "31.8%",
+                            488656
+                        ],
+                        [
+                            28,
+                            "직접",
+                            8,
+                            "35-44 male",
+                            221011,
+                            "31.1%",
+                            709919
+                        ],
+                        [
+                            29,
+                            "가방",
+                            8,
+                            "35-44 male",
+                            215313,
+                            "36.2%",
+                            594431
+                        ],
+                        [
+                            30,
+                            "유저",
+                            8,
+                            "35-44 male",
+                            229375,
+                            "39.1%",
+                            586058
+                        ],
+                        [
+                            31,
+                            "시간",
+                            8,
+                            "35-44 male",
+                            174412,
+                            "30.6%",
+                            569375
+                        ],
+                        [
+                            32,
+                            "이야기",
+                            8,
+                            "35-44 male",
+                            173183,
+                            "30.9%",
+                            561230
+                        ],
+                        [
+                            33,
+                            "많이",
+                            8,
+                            "35-44 male",
+                            138225,
+                            "29.6%",
+                            466991
+                        ],
+                        [
+                            34,
+                            "다양",
+                            8,
+                            "35-44 male",
+                            152754,
+                            "33.6%",
+                            454533
+                        ],
+                        [
+                            35,
+                            "여러분",
+                            8,
+                            "35-44 male",
+                            92848,
+                            "34.3%",
+                            270908
+                        ],
+                        [
+                            36,
+                            "스타일",
+                            7,
+                            "35-44 male",
+                            189135,
+                            "25.6%",
+                            738007
+                        ],
+                        [
+                            37,
+                            "이제",
+                            7,
+                            "35-44 male",
+                            218135,
+                            "29.7%",
+                            734322
+                        ],
+                        [
+                            38,
+                            "알리",
+                            7,
+                            "35-44 male",
+                            209873,
+                            "29.9%",
+                            701044
+                        ],
+                        [
+                            39,
+                            "편하",
+                            7,
+                            "35-44 male",
+                            242704,
+                            "35.0%",
+                            694256
+                        ],
+                        [
+                            40,
+                            "당신",
+                            7,
+                            "25-34 male",
+                            185209,
+                            "28.7%",
+                            644597
+                        ],
+                        [
+                            41,
+                            "계시",
+                            7,
+                            "35-44 male",
+                            176807,
+                            "27.9%",
+                            633595
+                        ],
+                        [
+                            42,
+                            "사랑",
+                            7,
+                            "35-44 male",
+                            172548,
+                            "29.3%",
+                            589719
+                        ],
+                        [
+                            43,
+                            "가볍",
+                            7,
+                            "35-44 male",
+                            207052,
+                            "36.6%",
+                            566448
+                        ],
+                        [
+                            44,
+                            "하나",
+                            7,
+                            "35-44 male",
+                            207678,
+                            "37.5%",
+                            554465
+                        ],
+                        [
+                            45,
+                            "확인",
+                            7,
+                            "25-34 male",
+                            132622,
+                            "24.1%",
+                            550535
+                        ],
+                        [
+                            46,
+                            "생기",
+                            7,
+                            "35-44 male",
+                            148655,
+                            "28.3%",
+                            525512
+                        ],
+                        [
+                            47,
+                            "서비스",
+                            7,
+                            "35-44 male",
+                            174437,
+                            "35.6%",
+                            489914
+                        ],
+                        [
+                            48,
+                            "따르",
+                            7,
+                            "25-34 male",
+                            129988,
+                            "26.7%",
+                            486537
+                        ],
+                        [
+                            49,
+                            "무엇",
+                            7,
+                            "25-34 male",
+                            100023,
+                            "22.9%",
+                            435932
+                        ],
+                        [
+                            50,
+                            "보이",
+                            7,
+                            "35-44 male",
+                            123666,
+                            "28.8%",
+                            429432
+                        ]
+                    ],
+                    "footnote": "*등장 광고 수 상위 50개 기준"
+                },
+                {
+                    "title": "많이 사용한 브랜드 변수 키워드 - 클릭 (1~25위)",
+                    "subtitle": "키워드가 가장 많이 노출된 타겟",
+                    "headers": [
+                        "랭킹",
+                        "키워드",
+                        "등장 광고 수",
+                        "최다 클릭 타겟",
+                        "타겟 클릭량",
+                        "클릭 비중",
+                        "총 클릭량"
+                    ],
+                    "rows": [
+                        [
+                            1,
+                            "함께",
+                            28,
+                            "35-44 male",
+                            38617,
+                            "31.5%",
+                            122737
+                        ],
+                        [
+                            2,
+                            "고객",
+                            20,
+                            "35-44 male",
+                            31347,
+                            "32.2%",
+                            97316
+                        ],
+                        [
+                            3,
+                            "아니",
+                            20,
+                            "35-44 male",
+                            26178,
+                            "30.3%",
+                            86350
+                        ],
+                        [
+                            4,
+                            "드리",
+                            17,
+                            "35-44 male",
+                            23562,
+                            "35.3%",
+                            66700
+                        ],
+                        [
+                            5,
+                            "경험",
+                            16,
+                            "35-44 male",
+                            34516,
+                            "33.5%",
+                            103160
+                        ],
+                        [
+                            6,
+                            "선택",
+                            16,
+                            "35-44 male",
+                            26113,
+                            "34.3%",
+                            76082
+                        ],
+                        [
+                            7,
+                            "가능",
+                            15,
+                            "35-44 male",
+                            28609,
+                            "32.8%",
+                            87153
+                        ],
+                        [
+                            8,
+                            "이유",
+                            15,
+                            "35-44 male",
+                            31143,
+                            "33.8%",
+                            92147
+                        ],
+                        [
+                            9,
+                            "모두",
+                            15,
+                            "35-44 male",
+                            27150,
+                            "34.5%",
+                            78808
+                        ],
+                        [
+                            10,
+                            "여행",
+                            14,
+                            "35-44 male",
+                            21562,
+                            "32.6%",
+                            66157
+                        ],
+                        [
+                            11,
+                            "사람",
+                            14,
+                            "35-44 male",
+                            23524,
+                            "35.7%",
+                            65974
+                        ],
+                        [
+                            12,
+                            "위하",
+                            13,
+                            "35-44 male",
+                            25122,
+                            "35.4%",
+                            70963
+                        ],
+                        [
+                            13,
+                            "가장",
+                            13,
+                            "35-44 male",
+                            20946,
+                            "30.0%",
+                            69733
+                        ],
+                        [
+                            14,
+                            "이상",
+                            12,
+                            "35-44 male",
+                            20325,
+                            "30.0%",
+                            67761
+                        ],
+                        [
+                            15,
+                            "즐겁",
+                            12,
+                            "35-44 male",
+                            14668,
+                            "29.6%",
+                            49575
+                        ],
+                        [
+                            16,
+                            "구매",
+                            12,
+                            "35-44 male",
+                            10796,
+                            "37.1%",
+                            29076
+                        ],
+                        [
+                            17,
+                            "필요",
+                            11,
+                            "35-44 male",
+                            15125,
+                            "34.7%",
+                            43537
+                        ],
+                        [
+                            18,
+                            "즐기",
+                            11,
+                            "35-44 male",
+                            12613,
+                            "32.1%",
+                            39300
+                        ],
+                        [
+                            19,
+                            "때문",
+                            10,
+                            "35-44 male",
+                            21838,
+                            "31.3%",
+                            69708
+                        ],
+                        [
+                            20,
+                            "생각",
+                            10,
+                            "35-44 male",
+                            18138,
+                            "33.1%",
+                            54764
+                        ],
+                        [
+                            21,
+                            "우리",
+                            10,
+                            "35-44 male",
+                            15504,
+                            "34.6%",
+                            44862
+                        ],
+                        [
+                            22,
+                            "어디",
+                            9,
+                            "35-44 male",
+                            18411,
+                            "33.1%",
+                            55624
+                        ],
+                        [
+                            23,
+                            "새롭",
+                            9,
+                            "35-44 male",
+                            19854,
+                            "37.1%",
+                            53494
+                        ],
+                        [
+                            24,
+                            "시작",
+                            9,
+                            "35-44 male",
+                            13898,
+                            "31.4%",
+                            44253
+                        ],
+                        [
+                            25,
+                            "어떻",
+                            9,
+                            "35-44 male",
+                            11824,
+                            "28.7%",
+                            41180
+                        ]
+                    ],
+                    "footnote": "*등장 광고 수 상위 50개 기준"
+                },
+                {
+                    "title": "많이 사용한 브랜드 변수 키워드 - 클릭 (26~50위)",
+                    "subtitle": "키워드가 가장 많이 노출된 타겟",
+                    "headers": [
+                        "랭킹",
+                        "키워드",
+                        "등장 광고 수",
+                        "최다 클릭 타겟",
+                        "타겟 클릭량",
+                        "클릭 비중",
+                        "총 클릭량"
+                    ],
+                    "rows": [
+                        [
+                            26,
+                            "그래서",
+                            9,
+                            "25-34 male",
+                            8429,
+                            "23.6%",
+                            35665
+                        ],
+                        [
+                            27,
+                            "사용",
+                            9,
+                            "35-44 male",
+                            6566,
+                            "32.1%",
+                            20456
+                        ],
+                        [
+                            28,
+                            "직접",
+                            8,
+                            "35-44 male",
+                            12433,
+                            "34.7%",
+                            35791
+                        ],
+                        [
+                            29,
+                            "가방",
+                            8,
+                            "35-44 male",
+                            15243,
+                            "38.4%",
+                            39724
+                        ],
+                        [
+                            30,
+                            "유저",
+                            8,
+                            "35-44 male",
+                            15372,
+                            "40.0%",
+                            38387
+                        ],
+                        [
+                            31,
+                            "시간",
+                            8,
+                            "35-44 male",
+                            8629,
+                            "29.5%",
+                            29268
+                        ],
+                        [
+                            32,
+                            "이야기",
+                            8,
+                            "35-44 male",
+                            11136,
+                            "35.1%",
+                            31732
+                        ],
+                        [
+                            33,
+                            "많이",
+                            8,
+                            "35-44 male",
+                            8177,
+                            "29.2%",
+                            28024
+                        ],
+                        [
+                            34,
+                            "다양",
+                            8,
+                            "35-44 male",
+                            10025,
+                            "37.1%",
+                            27016
+                        ],
+                        [
+                            35,
+                            "여러분",
+                            8,
+                            "35-44 male",
+                            5210,
+                            "35.3%",
+                            14768
+                        ],
+                        [
+                            36,
+                            "스타일",
+                            7,
+                            "35-44 male",
+                            9339,
+                            "23.4%",
+                            39954
+                        ],
+                        [
+                            37,
+                            "이제",
+                            7,
+                            "35-44 male",
+                            15111,
+                            "33.7%",
+                            44837
+                        ],
+                        [
+                            38,
+                            "알리",
+                            7,
+                            "35-44 male",
+                            13974,
+                            "35.4%",
+                            39517
+                        ],
+                        [
+                            39,
+                            "편하",
+                            7,
+                            "35-44 male",
+                            13674,
+                            "34.5%",
+                            39597
+                        ],
+                        [
+                            40,
+                            "당신",
+                            7,
+                            "25-34 male",
+                            7599,
+                            "26.8%",
+                            28402
+                        ],
+                        [
+                            41,
+                            "계시",
+                            7,
+                            "35-44 male",
+                            9349,
+                            "29.5%",
+                            31639
+                        ],
+                        [
+                            42,
+                            "사랑",
+                            7,
+                            "35-44 male",
+                            11144,
+                            "29.4%",
+                            37858
+                        ],
+                        [
+                            43,
+                            "가볍",
+                            7,
+                            "35-44 male",
+                            10744,
+                            "35.5%",
+                            30253
+                        ],
+                        [
+                            44,
+                            "하나",
+                            7,
+                            "35-44 male",
+                            12288,
+                            "37.6%",
+                            32665
+                        ],
+                        [
+                            45,
+                            "확인",
+                            7,
+                            "25-34 male",
+                            4305,
+                            "22.5%",
+                            19096
+                        ],
+                        [
+                            46,
+                            "생기",
+                            7,
+                            "35-44 male",
+                            7458,
+                            "30.2%",
+                            24689
+                        ],
+                        [
+                            47,
+                            "서비스",
+                            7,
+                            "35-44 male",
+                            8633,
+                            "36.5%",
+                            23672
+                        ],
+                        [
+                            48,
+                            "따르",
+                            7,
+                            "25-34 male",
+                            5640,
+                            "24.8%",
+                            22699
+                        ],
+                        [
+                            49,
+                            "무엇",
+                            7,
+                            "35-44 male",
+                            5054,
+                            "20.8%",
+                            24336
+                        ],
+                        [
+                            50,
+                            "보이",
+                            7,
+                            "35-44 male",
+                            6555,
+                            "26.9%",
+                            24350
+                        ]
+                    ],
+                    "footnote": "*등장 광고 수 상위 50개 기준"
+                }
+            ]
+        }
+    ]
+}
