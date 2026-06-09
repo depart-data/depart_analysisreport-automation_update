@@ -1434,4 +1434,690 @@ def _render_purchase_conversion_heatmap(
         spine.set_visible(False)
 
     fig.tight_layout(pad=0.6)
-    return _fig_to_svg(fig)
+    return _fig_to_svg(fig)def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    반응 지표(좋아요/저장/공유) 상하위 콘텐츠 통합 렌더링.
+
+    반환값 구조:
+        {
+            "items":      List[Dict]  - 썸네일·업로드일 정보 (template 상단 그리드용)
+            "chart_svg":  str         - 가로형 막대그래프 SVG (template 하단 차트용)
+        }
+
+    차트 구성:
+        - Y축: 각 콘텐츠의 업로드 날짜 (말줄임 없음, 날짜 형식으로 간결)
+        - X축 막대: metric 수치, 막대 끝에 정확한 수치 표시
+        - 최하단 막대: '전체 평균' 행 (색상으로 구분)
+    """
+    import io
+
+    if not dataset:
+        return {"items": [], "chart_svg": ""}
+
+    items      = dataset.get("items") or []
+    metric_col = dataset.get("metric_col", "total_likes")
+    metric_avg = dataset.get("metric_avg", 0.0)
+    metric     = dataset.get("metric", "likes")
+
+    # 지표 한국어 레이블 매핑
+    metric_label_map = {
+        "likes":  "좋아요",
+        "saves":  "저장",
+        "shares": "공유",
+    }
+    metric_label = metric_label_map.get(metric, metric)
+
+    # 상단 그리드용 아이템 리스트 (썸네일·업로드일만 전달)
+    thumb_items = [
+        {
+            "thumbnail":    item.get("thumbnail"),
+            "uploaded_at":  item.get("uploaded_at"),
+            "ig_media_type": item.get("ig_media_type"),
+            "ctr":           item.get("ctr"),
+        }
+        for item in items
+    ]
+
+    if not items:
+        return {"cards": [], "chart_svg": ""}
+
+    # 차트 데이터 구성: 콘텐츠 5개 + 전체 평균 1개
+    labels = []
+    values = []
+
+    for idx, item in enumerate(items, 1):
+        caption_label = str(item.get("caption_label") or "").strip()
+
+        if caption_label:
+            label = caption_label
+        else:
+            # caption_label이 없는 경우 (구버전 데이터 호환): 업로드 날짜로 대체
+            label = str(item.get("uploaded_at") or f"콘텐츠 {idx}")
+        
+        labels.append(label)
+        values.append(float(item.get(metric_col, 0) or 0))
+
+    n = len(labels)
+
+    is_top = dataset.get("is_top", True)
+
+    base_hex = color_map.get("base", "#4B3B8C")
+    
+    def _hex_to_rgba(hex_color: str, alpha: float):
+        """HEX 색상 문자열을 matplotlib용 RGBA 튜플로 변환한다."""
+        hex_color = hex_color.lstrip("#")
+        r = int(hex_color[0:2], 16) / 255.0
+        g = int(hex_color[2:4], 16) / 255.0
+        b = int(hex_color[4:6], 16) / 255.0
+        return (r, g, b, alpha)
+    
+    content_values = values
+
+    if not content_values:
+        highlight_val = None
+    elif is_top:
+        # 상위 차트: 수치가 max_value와 동일한 막대 전부를 강조
+        # index() 방식은 동점 첫 번째만 반환하므로 값 자체를 저장하여
+        # 루프에서 모든 동점 막대에 동일하게 적용한다.
+        highlight_val = max(content_values)
+    else:
+        # 하위 차트: 수치가 min_value와 동일한 막대 전부를 강조
+        highlight_val = min(content_values)
+
+    bar_colors = []
+    for v in content_values:
+        if highlight_val is not None and v == highlight_val:
+            # 강조 막대: 브랜드 컬러 불투명도 100%
+            bar_colors.append(_hex_to_rgba(base_hex, 1.0))
+        else:
+            # 비강조 막대: 브랜드 컬러 불투명도 40%
+            bar_colors.append(_hex_to_rgba(base_hex, 0.4))
+
+    plt.rcParams["svg.fonttype"] = "none"
+
+    fig_h = min(2.4, max(1.6, n * 0.40))
+    fig, ax = plt.subplots(figsize=(7, fig_h))
+    fig.patch.set_alpha(0)
+    ax.patch.set_alpha(0)
+    fig.subplots_adjust(left=0.1, right=1.1, top=0.95, bottom=0.12)
+
+    y_pos = list(range(n - 1, -1, -1))   # 위→아래: 콘텐츠1 ~ 콘텐츠5 ~ 평균
+
+    bars = ax.barh(
+        y_pos, values,
+        color=bar_colors,
+        height=0.55,
+        edgecolor="none",
+    )
+   
+
+    # ── x축 기준값 결정 ────────────────────────────────────────────────────
+    # x_scale_max: JSON에서 전달된 공유 기준값 (상위/하위 차트 공통 사용).
+    # 이 값이 없거나 0이면 현재 데이터의 최대값을 폴백으로 사용한다.
+    # 단, 폴백도 0인 경우 division by zero를 막기 위해 최소값 1을 보장한다.
+    x_scale_max_from_json = float(dataset.get("x_scale_max") or 0)
+    x_data_max = max(values) if values else 0
+    if x_scale_max_from_json > 0:
+        # JSON에서 공유 기준값이 전달된 경우: 해당 값을 우선 사용
+        x_scale_ref = x_scale_max_from_json
+    elif x_data_max > 0:
+        # JSON 값이 없으면 현재 데이터 최대값으로 대체
+        x_scale_ref = x_data_max
+    else:
+        # 모든 값이 0인 경우: 최소값 1 보장 (division by zero 방지)
+        x_scale_ref = 1
+
+    # 지표별 유니코드 아이콘 매핑
+    metric_icon_map = {
+        "likes":  "\u2665",   # ♥ 하트 (좋아요)
+        "saves":  "\u2605",   # ★ 별 (저장)
+        "shares": "\u21a6",   # ↦ 오른쪽 화살표 (공유)
+    }
+    metric_icon = metric_icon_map.get(metric, "")
+
+    for bar, val in zip(bars, values):
+        ax.text(
+            # 막대 끝 오프셋을 x_scale_ref 기준으로 계산하여 하위 차트에서
+            # 수치가 작아도 텍스트가 과도하게 우측으로 밀리지 않도록 한다.
+            bar.get_width() + x_scale_ref * 0.015,
+            bar.get_y() + bar.get_height() / 2,
+            f"{metric_icon} {int(val):,}",
+            va="center", ha="left",
+            fontsize=7, color="#333333",
+            zorder=10,
+            bbox=dict(
+                facecolor=(1.0, 1.0, 1.0, 0.5),
+                edgecolor="none",
+                pad=1.5,
+                boxstyle="round,pad=0.15",
+            ),
+        )
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(labels, fontsize=7, color="#333333")
+    ax.yaxis.set_tick_params(length=0)
+
+    ax.set_xlabel(metric_label, fontsize=8, color="#555555", labelpad=4)
+    # x축 상한을 x_scale_ref 기준으로 설정한다.
+    # 1.18 배율은 수치 텍스트가 막대 바깥에 표시될 공간을 확보하기 위함이다.
+    ax.set_xlim(0, x_scale_ref * 1.18)   # 수치 텍스트 공간 확보
+    ax.xaxis.set_visible(False)
+    ax.grid(False)
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+
+
+    # 전체 평균 세로 점선 렌더링.
+    _raw_avg = dataset.get("overall_avg")
+    if _raw_avg is None:
+        _raw_avg = dataset.get("metric_avg")
+    if _raw_avg is None:
+        _raw_avg = 0
+    overall_avg_val = float(_raw_avg)
+
+    avg_label_text = f"평균 : {int(round(overall_avg_val)):,}"
+
+    if x_scale_max_from_json > 0 and overall_avg_val > 0:
+        # 평균값이 유효한 경우에만 선과 레이블을 표시
+        ax.axvline(
+            x=overall_avg_val,
+            color="#888888",
+            linestyle=(0, (4, 4)),
+            linewidth=1.2,
+            zorder=5,
+        )
+        ax.text(
+            overall_avg_val,
+            0,
+            avg_label_text,
+            ha="center",
+            va="top",
+            fontsize=6,
+            color="#888888",
+            zorder=6,
+            bbox=dict(
+                facecolor=(1.0, 1.0, 1.0, 0.5),
+                edgecolor="none",
+                pad=1.5,
+                boxstyle="round,pad=0.2",
+            ),
+            transform=ax.get_xaxis_transform(),
+        )
+    # else 분기 제거: 평균이 0이거나 scale이 없으면 선을 그리지 않음
+
+        buf = io.StringIO()
+        fig.savefig(buf, format="svg")
+        plt.close(fig)
+        plt.rcParams["svg.fonttype"] = "path"
+
+        svg = buf.getvalue()
+        idx = svg.find("<svg")
+        chart_svg = svg[idx:] if idx != -1 else svg
+
+        return {"cards": thumb_items, "chart_svg": chart_svg}
+
+
+
+def render_target_spend_bubble(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> str:
+    """타겟(연령×성별) 광고비 비중 버블 그리드 (히트맵 스타일)."""
+    from matplotlib.patches import Patch
+    import io
+    import pandas as pd
+
+    rows = dataset.get("rows") or []
+    if not rows:
+        return ""
+
+    main_age    = dataset.get("main_age")
+    main_gender = dataset.get("main_gender")
+    avoid_age   = dataset.get("avoid_age")
+    avoid_gender= dataset.get("avoid_gender")
+
+    df = pd.DataFrame(rows)
+    df["spend_ratio"] = pd.to_numeric(df["spend_ratio"], errors="coerce").fillna(0)
+    df["cpc"]         = pd.to_numeric(df["cpc"],         errors="coerce").fillna(0)
+
+    age_order = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
+    ages    = [a for a in age_order if a in df["age_range"].values]
+    genders = ["female", "male"]
+    gender_labels = {"female": "여성", "male": "남성"}
+
+    def _canon_age(s):
+        return str(s).strip().lower().replace("_", "-").replace("–", "-").replace(" ", "")
+
+    def _norm(val):
+        if val is None: return []
+        if isinstance(val, (list, tuple)):
+            return [_canon_age(v) for v in val if v]
+        s = _canon_age(val)
+        return [s] if s else []
+
+    def _map_g(g):
+        g = g.lower()
+        return "female" if g in ("f", "여성", "female") else \
+               "male"   if g in ("m", "남성", "male")   else g
+
+    main_ages_n    = _norm(main_age)
+    main_genders_n = [_map_g(g) for g in _norm(main_gender)]
+    avoid_ages_n   = _norm(avoid_age)
+    avoid_genders_n= [_map_g(g) for g in _norm(avoid_gender)]
+
+    COLOR_MAIN  = "#b2ed92"   # 메인 타겟 (초록)
+    COLOR_AVOID = "#9a0500"   # 기피 타겟 (빨강)
+    COLOR_MID   = "#e2931d"   # 중간 (노랑)
+
+    def cell_color(age, gender):
+        a, g = _canon_age(age), gender.lower()
+        is_main  = (not main_ages_n  or a in main_ages_n)  and \
+                   (not main_genders_n or g in main_genders_n)
+        is_avoid = bool(avoid_ages_n) and a in avoid_ages_n and \
+                   (not avoid_genders_n or g in avoid_genders_n)
+        if is_avoid: return COLOR_AVOID
+        if is_main:  return COLOR_MAIN
+        return COLOR_MID
+
+    n_ages = len(ages)
+    
+    plt.rcParams["svg.fonttype"] = "none"
+
+    fig_w = 7.5   # 고정 너비 (필요에 따라 조정)
+    fig_h = 3.2
+    fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+    
+    # 양옆(left, right) 여백을 극단적으로 줄여 차트를 꽉 채웁니다.
+    fig.subplots_adjust(top=0.88, bottom=0.32, left=0.07, right=0.90)
+    fig.patch.set_alpha(0)
+    ax.patch.set_alpha(0)
+    ax.grid(False)
+
+    max_ratio = df["spend_ratio"].max() or 1
+    
+    BASE = 3500
+    
+    plot_width = fig_w * (0.90 - 0.07)
+    col_width = plot_width / n_ages
+    col_pt  = col_width * 72
+    MAX_S   = (col_pt * 0.72) ** 2    # 72%로 축소하여 최대 버블이 셀 안에 머물도록 함
+    MIN_S   = MAX_S * 0.12
+
+    for j, age in enumerate(ages):
+        for i, gender in enumerate(genders):
+            row = df[(df["age_range"] == age) & (df["gender"] == gender)]
+            if row.empty:
+                continue
+
+            ratio = float(row["spend_ratio"].iloc[0])
+            cpc   = float(row["cpc"].iloc[0])
+            size  = MIN_S + (MAX_S - MIN_S) * (ratio / max_ratio)
+            color = cell_color(age, gender)
+
+            ax.scatter(
+                j, -i, s=size, color=color,
+                edgecolors="white", linewidth=1.5, alpha=0.9, zorder=2,
+                clip_on=False,  # [수정 2] 축 경계에 의한 버블 클리핑을 비활성화
+            )
+
+            ax.text(j, -i, f"{ratio:.1f}%\n{int(cpc):,}원",
+                    ha="center", va="center",
+                    fontsize=5, fontweight="normal", zorder=5,
+                    clip_on=False,  # 텍스트도 동일하게 클리핑 해제
+            )
+
+    # 축 라벨 폰트 세팅
+    ax.set_xticks(range(n_ages))
+    ax.set_xticklabels(ages, fontsize=9, fontweight="bold")
+    ax.xaxis.set_ticks_position("top")
+    ax.xaxis.set_label_position("top")
+    
+    ax.set_yticks([0, -1])
+    ax.set_yticklabels([gender_labels.get(g, g) for g in genders], fontsize=9, fontweight="bold")
+    
+    ax.set_xlim(-0.52, n_ages - 0.48)
+    ax.set_ylim(-1.65, 0.65)
+
+    legend_els = [
+        Patch(facecolor=COLOR_MAIN, label="메인타겟"),
+        Patch(facecolor=COLOR_MID, label="중간타겟"),
+        Patch(facecolor=COLOR_AVOID, label="기피타겟"),
+    ]
+    leg = ax.legend(
+    handles=legend_els,
+    loc='lower left',                      # 기준점: 좌하단
+    bbox_to_anchor=(0.0, -0.28),           # axes 좌표 기준, Y=-0.28로 고정
+    bbox_transform=ax.transAxes,           # axes 비율 좌표계 기준
+    ncol=3,
+    fontsize=5,
+    frameon=False,
+    borderpad=0,
+    handletextpad=0.4,
+    title="[색상범례]",
+    title_fontproperties={'weight': 'bold', 'size': 5}
+)
+    leg._legend_box.align = "left"
+    leg.get_title().set_ha("left")
+
+    ax.text(
+        0.0, -0.28,                           # x: 색상범례 우측 공간, y: 범례와 동일 기준
+        "원 크기 = 광고비 비중(%)\n원 안 숫자 = CPC",
+        transform=ax.transAxes,
+        ha="left", va="top",
+        fontsize=5, color="#555555", linespacing=1.6
+    )
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.tick_params(length=0)
+
+    buf = io.StringIO()
+
+    fig.savefig(buf, format="svg")
+    plt.close(fig)
+    plt.rcParams["svg.fonttype"] = "path"
+
+    svg = buf.getvalue()
+    idx = svg.find("<svg")
+    return svg[idx:] if idx != -1 else svg
+
+
+
+def _load_thumbnail_array(path: str):
+    """
+    로컬 경로 또는 URL에서 이미지를 읽어 numpy array로 반환.
+    실패 시 None 반환 (호출부에서 placeholder 처리).
+    """
+    try:
+        from PIL import Image
+        import numpy as np
+
+        # './static/thumbnail/xxx.jpg' 형태의 상대 경로 처리
+        clean = path.strip()
+        if clean.startswith("./"):
+            clean = clean[2:]
+
+        img = Image.open(clean).convert("RGB")
+        # 정사각형 크롭 (중앙)
+        w, h = img.size
+        target_ratio = 4 / 5
+        img_ratio = w / h
+
+
+        if img_ratio > target_ratio:
+            # 가로가 너무 길면 양옆을 자름
+            new_w = int(h * target_ratio)
+            left = (w - new_w) // 2
+            img = img.crop((left, 0, left + new_w, h))
+        else:
+            # 세로가 너무 길면 위아래를 자름
+            new_h = int(w / target_ratio)
+            top = (h - new_h) // 2
+            img = img.crop((0, top, w, top + new_h))
+            
+        # 4:5 비율인 (240, 300) 사이즈로 리사이징
+        img = img.resize((240, 300), Image.LANCZOS)
+        return np.array(img)
+    except Exception:
+        return None
+
+
+
+def _draw_thumbnail_cell(ax, img_array, label_text: str = "", bg_color: str = "#f0f0f0"):
+    """
+    단일 subplot axis에 썸네일 이미지(또는 placeholder)를 채워 그립니다.
+    """
+    ax.axis("off")
+    if img_array is not None:
+        # aspect="equal"로 변경하여 이미지 종횡비를 유지.
+        # 셀 크기에 맞게 중앙 정렬(extent 미지정 시 기본값)로 렌더링된다.
+        ax.imshow(img_array, aspect="equal")
+    else:
+        # placeholder: 배경 색상 + 텍스트
+        ax.set_facecolor(bg_color)
+        ax.text(
+            0.5, 0.5, "이미지\n없음",
+            ha="center", va="center",
+            fontsize=9, color="#888888",
+            transform=ax.transAxes,
+        )
+
+    if label_text:
+        ax.set_xlabel(
+            label_text,
+            fontsize=8, color="#555555",
+            labelpad=3,
+        )
+
+
+def _get_quadrant_representatives(df_quad: pd.DataFrame, n_clusters: int = 2) -> list[dict]:
+    """
+    사분면 내 K-Means (k=2) 클러스터링으로 대표 콘텐츠 2개 선정.
+    StandardScaler 정규화 후 각 군집 중심점과 유클리디안 거리가 가장 가까운
+    실제 데이터 포인트를 반환합니다.
+
+    예외 처리:
+        - 데이터 0개 → 빈 리스트
+        - 데이터 1개 → 그 1개를 리스트로 반환
+        - 데이터 2개 → 두 행 그대로 반환 (K-Means 불필요)
+    """
+    import numpy as np
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.cluster import KMeans
+
+    n = len(df_quad)
+
+    if n == 0:
+        return []
+    if n <= 2:
+        return df_quad.to_dict("records")
+
+    X_raw = df_quad[["ctr", "follows"]].values.astype(float)
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_raw)
+
+    km = KMeans(n_clusters=n_clusters, random_state=42, n_init="auto")
+    km.fit(X_scaled)
+
+    representatives = []
+    used_indices = set()
+
+    for centroid in km.cluster_centers_:
+        dists = np.linalg.norm(X_scaled - centroid, axis=1)
+        # 이미 선택된 인덱스는 건너뜀 (중복 방지)
+        for idx in np.argsort(dists):
+            if idx not in used_indices:
+                representatives.append(df_quad.iloc[idx].to_dict())
+                used_indices.add(idx)
+                break
+
+    return representatives
+
+
+def render_ctr_follows_quadrant_chart(
+    scatter_data: list[dict],
+    ctr_median: float,
+    follows_median: float,
+) -> str:
+    ctr_mean     = ctr_median
+    follows_mean = follows_median
+    """
+    CTR × 팔로우 4사분면 스캐터 플롯 + K-Means 대표 콘텐츠 썸네일 레이아웃.
+    """
+    
+    import matplotlib.gridspec as gridspec
+    from matplotlib.patches import FancyBboxPatch
+    import os
+
+    if not scatter_data:
+        return ""
+
+    df = pd.DataFrame(scatter_data)
+    df["ctr"]     = pd.to_numeric(df["ctr"],     errors="coerce").fillna(0.0)
+    df["follows"] = pd.to_numeric(df["follows"], errors="coerce").fillna(0.0)
+
+    QUAD_COLORS = {
+        "Q1": "#2563EB", "Q2": "#16A34A", "Q3": "#9CA3AF", "Q4": "#DC2626",
+    }
+    QUAD_BG = {
+        "Q1": "#EFF6FF", "Q2": "#F0FDF4", "Q3": "#F9FAFB", "Q4": "#FEF2F2",
+    }
+    QUAD_TITLES = {
+        "Q1": "[핵심 성과 콘텐츠]", "Q2": "[특정 타겟 관심도 우수]",
+        "Q3": "[소재 개선 필요]", "Q4": "[후킹 위주 (브랜드 연결 필요)]",
+    }
+
+    def _quad_label(row):
+        high_ctr = row["ctr"]     > ctr_mean      # 기존 >= 에서 > 로 변경
+        high_fol = row["follows"] > follows_mean  # 기존 복합 조건에서 단순 > 로 통일
+        if   high_ctr and high_fol:      return "Q1"
+        elif not high_ctr and high_fol:  return "Q2"
+        elif not high_ctr and not high_fol: return "Q3"
+        else:                            return "Q4"
+    df["quad"] = df.apply(_quad_label, axis=1)
+
+    quad_reps = {}
+    for q in ["Q1", "Q2", "Q3", "Q4"]:
+        df_q = df[df["quad"] == q].copy()
+        quad_reps[q] = _get_quadrant_representatives(df_q, n_clusters=2)
+
+    # 4사분면 동적 축 (X축, Y축) 계산 로직 (양쪽 3개씩, 데이터 0일 때 분기)
+    def _add_tick(tick_list, val):
+        if not any(abs(t - val) < 1e-7 for t in tick_list):
+            tick_list.append(val)
+
+    ctr_max = float(df["ctr"].max())
+    follows_max = float(df["follows"].max())
+
+    # --- X축 범위 및 눈금 ---
+    x_step = ctr_median / 3.0 if ctr_median > 0 else (ctr_max / 3.0 if ctr_max > 0 else 0.5)
+    if x_step <= 0: x_step = 0.5
+    x_max = ctr_max + x_step if ctr_max > 0 else 1.0
+
+    x_ticks = []
+    for i in range(3, 0, -1):
+        v = ctr_median - i * x_step
+        if v >= 0: _add_tick(x_ticks, v)
+    _add_tick(x_ticks, ctr_median)
+    for i in range(1, 4):
+        v = ctr_median + i * x_step
+        if v <= x_max: _add_tick(x_ticks, v)
+
+    # --- Y축 범위 및 눈금 ---
+    if follows_max <= 0:
+        # 데이터가 모두 0일 경우 중심을 0으로 맞추고 위아래 동일한 간격(-1 ~ 1) 부여
+        y_min, y_max = -1.0, 1.0
+        y_ticks = [-1.0, 0.0, 1.0]
+    else:
+        # 최대값이 0이 아닐 경우: 중앙값 기준으로 3개씩 위아래 분할
+        y_min = -1.0
+        y_step = follows_median / 3.0 if follows_median > 0 else follows_max / 3.0
+        if y_step <= 0: y_step = 1.0
+        y_max = follows_max + y_step
+        
+        y_ticks = [-1.0]
+        for i in range(3, 0, -1):
+            v = follows_median - i * y_step
+            if v >= 0: _add_tick(y_ticks, v)
+        _add_tick(y_ticks, follows_median)
+        for i in range(1, 4):
+            v = follows_median + i * y_step
+            if v <= y_max: _add_tick(y_ticks, v)
+
+    #  차트 기본 사이즈
+    fig = plt.figure(figsize=(22, 10), facecolor="white")
+
+    outer_gs = gridspec.GridSpec(
+        1, 3, figure=fig,
+        width_ratios=[2.5, 3.5, 2.5],         # 좌우 패널 동일 비율로 수정
+        wspace=0.06, left=0.03, right=0.97, top=0.91, bottom=0.09,
+    )
+
+    # thumbnail 행 비율 1.3/1.0의 차이를 1.2/1.2로 균등화하여
+    # Q2/Q3와 Q1/Q4의 썸네일 높이를 동일하게 유지한다.
+    inner_h = [0.18, 1.2, 0.18, 1.2]
+
+    left_inner  = outer_gs[0, 0].subgridspec(4, 2, height_ratios=inner_h, hspace=0.15, wspace=0.08)
+    right_inner = outer_gs[0, 2].subgridspec(4, 2, height_ratios=inner_h, hspace=0.15, wspace=0.08)
+
+    ax_scatter = fig.add_subplot(outer_gs[0, 1])
+
+    ax_scatter.axhspan(follows_median, y_max,  xmin=0, xmax=(ctr_median / x_max),      alpha=0.06, color=QUAD_COLORS["Q2"], zorder=0)
+    ax_scatter.axhspan(follows_median, y_max,  xmin=(ctr_median / x_max), xmax=1,      alpha=0.06, color=QUAD_COLORS["Q1"], zorder=0)
+    ax_scatter.axhspan(y_min, follows_median,  xmin=0, xmax=(ctr_median / x_max),      alpha=0.06, color=QUAD_COLORS["Q3"], zorder=0)
+    ax_scatter.axhspan(y_min, follows_median,  xmin=(ctr_median / x_max), xmax=1,      alpha=0.06, color=QUAD_COLORS["Q4"], zorder=0)
+
+    ax_scatter.axvline(x=ctr_median,     color="#888888", linewidth=1.0, linestyle="--", zorder=1)
+    ax_scatter.axhline(y=follows_median, color="#888888", linewidth=1.0, linestyle="--", zorder=1)
+
+    for q, color in QUAD_COLORS.items():
+        df_q = df[df["quad"] == q]
+        if df_q.empty: continue
+        ax_scatter.scatter(
+            df_q["ctr"], df_q["follows"],
+            color=color, alpha=0.6, edgecolors="#aaaaaa", linewidths=0.5, s=60, zorder=2,
+        )
+
+    for q, reps in quad_reps.items():
+        for rep in reps:
+            ax_scatter.scatter(
+                rep["ctr"], rep["follows"],
+                color=QUAD_COLORS[q], marker="*", s=220, edgecolors="white", linewidths=0.8, zorder=3,
+            )
+
+    ax_scatter.set_xlim(0, x_max)
+    ax_scatter.set_ylim(y_min, y_max)
+    ax_scatter.set_xlabel("CTR",   fontsize=11, labelpad=6, color="#333333")
+    ax_scatter.set_ylabel("팔로우", fontsize=11, labelpad=6, color="#333333")
+
+    if x_ticks:
+        ax_scatter.set_xticks(x_ticks)
+        ax_scatter.set_xticklabels([f"{v:.2f}" for v in x_ticks], fontsize=8, color="#555555")
+    if y_ticks:
+        ax_scatter.set_yticks(y_ticks)
+        ax_scatter.set_yticklabels([f"{int(v)}" if v == int(v) else f"{v:.1f}" for v in y_ticks], fontsize=8, color="#555555")
+
+    ax_scatter.tick_params(axis="both", length=3, color="#cccccc")
+    for spine in ax_scatter.spines.values():
+        spine.set_edgecolor("#dddddd")
+    ax_scatter.grid(False)
+
+    panel_map = [
+        (left_inner,  0, 1, "Q2"),
+        (left_inner,  2, 3, "Q3"),
+        (right_inner, 0, 1, "Q1"),
+        (right_inner, 2, 3, "Q4"),
+    ]
+
+    for inner, t_row, th_row, q in panel_map:
+        color  = QUAD_COLORS[q]
+        bg     = QUAD_BG[q]
+        reps   = quad_reps[q]
+        title  = QUAD_TITLES[q]
+
+        ax_title = fig.add_subplot(inner[t_row, :])
+        ax_title.axis("off")
+        ax_title.set_facecolor(bg)
+        ax_title.text(0.5, 0.5, title, ha="center", va="center", fontsize=9, fontweight="bold", color=color, transform=ax_title.transAxes)
+        ax_title.add_patch(FancyBboxPatch((0, 0), 1, 1, boxstyle="round,pad=0.01", facecolor=bg, edgecolor=color, linewidth=0.8, transform=ax_title.transAxes, clip_on=False))
+
+        for col_idx in range(2):
+            ax_th = fig.add_subplot(inner[th_row, col_idx])
+            if col_idx < len(reps):
+                rep      = reps[col_idx]
+                thumb    = str(rep.get("thumbnail") or "").strip()
+                img_arr  = _load_thumbnail_array(thumb) if thumb else None
+                media_type = str(rep.get("ig_media_type") or "").upper()
+                _draw_thumbnail_cell(ax_th, img_arr, label_text=media_type, bg_color=bg)
+            else:
+                _draw_thumbnail_cell(ax_th, None, label_text="", bg_color="#f5f5f5")
+
+    fig.suptitle("", visible=False)
+
+    out_dir = "static"
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+        
+    out_file = os.path.join(out_dir, "quadrant_chart.png")
+    fig.savefig(out_file, format="png", dpi=120, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    
+
