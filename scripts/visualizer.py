@@ -1434,7 +1434,10 @@ def _render_purchase_conversion_heatmap(
         spine.set_visible(False)
 
     fig.tight_layout(pad=0.6)
-    return _fig_to_svg(fig)def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> Dict[str, Any]:
+    return _fig_to_svg(fig)
+
+
+def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> Dict[str, Any]:
     """
     반응 지표(좋아요/저장/공유) 상하위 콘텐츠 통합 렌더링.
 
