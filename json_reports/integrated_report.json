@@ -1,17 +1,17 @@
 {
     "meta": {
         "account_name": "당당플로우",
-        "period": "2026-01-05 ~ 2026-03-30",
-        "period_ads": "2026-01-12 09:00:00+00:00 ~ 2026-03-30",
-        "period_contents": "2026-01-08 ~ 2026-03-27",
-        "generated_at": "2026-06-09 09:49:20"
+        "period": "2026-01-05 ~ 2026-03-23",
+        "period_ads": "2026-01-12 09:00:00+00:00 ~ 2026-03-23",
+        "period_contents": "2026-01-08 ~ 2026-03-20",
+        "generated_at": "2026-06-10 09:16:59"
     },
     "currency": "",
     "currency_symbol": "원",
     "summary": {
-        "total_ads": 63,
-        "total_contents": 63,
-        "total_keywords": 1144
+        "total_ads": 58,
+        "total_contents": 58,
+        "total_keywords": 1087
     },
     "datasets": {
         "insta_followers": {
@@ -29,8 +29,7 @@
                 "2026-02-23",
                 "2026-03-02",
                 "2026-03-09",
-                "2026-03-16",
-                "2026-03-23"
+                "2026-03-16"
             ],
             "series": [
                 {
@@ -46,8 +45,7 @@
                         1838,
                         1960,
                         1967,
-                        2101,
-                        2126
+                        2101
                     ]
                 }
             ]
@@ -67,8 +65,7 @@
                 "2026-02-23",
                 "2026-03-02",
                 "2026-03-09",
-                "2026-03-16",
-                "2026-03-23"
+                "2026-03-16"
             ],
             "series": [
                 {
@@ -84,8 +81,7 @@
                         1140,
                         3466,
                         443,
-                        5138,
-                        1586
+                        5138
                     ]
                 }
             ]
@@ -105,7 +101,7 @@
                     "data": [
                         9033,
                         5881,
-                        10633
+                        9047
                     ]
                 }
             ]
@@ -125,8 +121,7 @@
                 "2026-02-23",
                 "2026-03-02",
                 "2026-03-09",
-                "2026-03-16",
-                "2026-03-23"
+                "2026-03-16"
             ],
             "series": [
                 {
@@ -142,8 +137,7 @@
                         38240,
                         12191,
                         24967,
-                        23410,
-                        24070
+                        23410
                     ]
                 }
             ]
@@ -163,7 +157,7 @@
                     "data": [
                         495448,
                         101109,
-                        84638
+                        60568
                     ]
                 }
             ]
@@ -185,7 +179,7 @@
                 }
             ],
             "unit": "%",
-            "center_text": "2,126",
+            "center_text": "2,101",
             "center_subtext": "팔로워"
         },
         "age_gender_clean": {
@@ -343,8 +337,7 @@
                 "2026-03-02",
                 "2026-03-09",
                 "2026-03-16",
-                "2026-03-23",
-                "2026-03-30"
+                "2026-03-23"
             ],
             "series": [
                 {
@@ -360,8 +353,7 @@
                         5.35,
                         5.74,
                         5.77,
-                        5.71,
-                        5.63
+                        5.77
                     ]
                 }
             ]
@@ -381,7 +373,7 @@
                     "data": [
                         6.04,
                         5.28,
-                        5.67
+                        5.66
                     ]
                 }
             ]
@@ -394,86 +386,86 @@
                 {
                     "age": "18-24",
                     "gender": "female",
-                    "impressions": 66490,
-                    "clicks": 2938,
-                    "ctr": 4.42
+                    "impressions": 58339,
+                    "clicks": 2613,
+                    "ctr": 4.48
                 },
                 {
                     "age": "18-24",
                     "gender": "male",
-                    "impressions": 617749,
-                    "clicks": 19583,
-                    "ctr": 3.17
+                    "impressions": 493153,
+                    "clicks": 15353,
+                    "ctr": 3.11
                 },
                 {
                     "age": "25-34",
                     "gender": "female",
-                    "impressions": 138987,
-                    "clicks": 6888,
-                    "ctr": 4.96
+                    "impressions": 118980,
+                    "clicks": 5734,
+                    "ctr": 4.82
                 },
                 {
                     "age": "25-34",
                     "gender": "male",
-                    "impressions": 1213778,
-                    "clicks": 54146,
-                    "ctr": 4.46
+                    "impressions": 1016585,
+                    "clicks": 45044,
+                    "ctr": 4.43
                 },
                 {
                     "age": "35-44",
                     "gender": "female",
-                    "impressions": 138456,
-                    "clicks": 8144,
-                    "ctr": 5.88
+                    "impressions": 114628,
+                    "clicks": 6409,
+                    "ctr": 5.59
                 },
                 {
                     "age": "35-44",
                     "gender": "male",
-                    "impressions": 1641088,
-                    "clicks": 96935,
-                    "ctr": 5.91
+                    "impressions": 1396967,
+                    "clicks": 81886,
+                    "ctr": 5.86
                 },
                 {
                     "age": "45-54",
                     "gender": "female",
-                    "impressions": 73957,
-                    "clicks": 4668,
-                    "ctr": 6.31
+                    "impressions": 60779,
+                    "clicks": 3732,
+                    "ctr": 6.14
                 },
                 {
                     "age": "45-54",
                     "gender": "male",
-                    "impressions": 856532,
-                    "clicks": 57104,
-                    "ctr": 6.67
+                    "impressions": 721036,
+                    "clicks": 47396,
+                    "ctr": 6.57
                 },
                 {
                     "age": "55-64",
                     "gender": "female",
-                    "impressions": 31229,
-                    "clicks": 2798,
-                    "ctr": 8.96
+                    "impressions": 27720,
+                    "clicks": 2452,
+                    "ctr": 8.85
                 },
                 {
                     "age": "55-64",
                     "gender": "male",
-                    "impressions": 357404,
-                    "clicks": 27526,
-                    "ctr": 7.7
+                    "impressions": 310223,
+                    "clicks": 24008,
+                    "ctr": 7.74
                 },
                 {
                     "age": "65+",
                     "gender": "female",
-                    "impressions": 14056,
-                    "clicks": 865,
-                    "ctr": 6.15
+                    "impressions": 12870,
+                    "clicks": 770,
+                    "ctr": 5.98
                 },
                 {
                     "age": "65+",
                     "gender": "male",
-                    "impressions": 176369,
-                    "clicks": 15159,
-                    "ctr": 8.6
+                    "impressions": 157158,
+                    "clicks": 13665,
+                    "ctr": 8.7
                 }
             ]
         },
@@ -482,31 +474,31 @@
             "title": "전체 TOP 10 (명사)",
             "unit": "%",
             "labels": [
-                "확장",
-                "제동",
-                "회전",
-                "편의",
-                "타이어",
                 "차이",
-                "바이크",
-                "클래식",
+                "제동",
                 "멀리",
-                "시티"
+                "확장",
+                "바이크",
+                "타이어",
+                "편의",
+                "인치",
+                "콤팩트",
+                "자랑"
             ],
             "series": [
                 {
                     "name": "avg_ctr",
                     "data": [
-                        8.6,
+                        8.85,
                         8.5,
-                        8.39,
-                        8.3,
-                        8.29,
-                        8.19,
-                        8.18,
-                        7.59,
-                        7.52,
-                        7.45
+                        8.26,
+                        8.22,
+                        8.01,
+                        7.93,
+                        7.82,
+                        7.4,
+                        7.34,
+                        7.29
                     ]
                 }
             ]
@@ -517,30 +509,30 @@
             "unit": "%",
             "labels": [
                 "만들",
-                "들어가",
-                "돌아오",
-                "대하",
                 "줄이",
+                "돌아오",
                 "위하",
-                "원하",
-                "늘어나",
+                "대하",
                 "가지",
-                "다르"
+                "원하",
+                "들어가",
+                "다르",
+                "늘어나"
             ],
             "series": [
                 {
                     "name": "avg_ctr",
                     "data": [
-                        7.09,
-                        6.88,
-                        6.49,
+                        7.26,
+                        6.86,
+                        6.55,
+                        6.47,
                         6.44,
-                        6.39,
-                        6.31,
+                        6.28,
                         6.25,
-                        5.96,
-                        5.94,
-                        5.93
+                        6.23,
+                        6.22,
+                        5.91
                     ]
                 }
             ]
@@ -551,30 +543,30 @@
             "unit": "%",
             "labels": [
                 "이태원",
-                "체크",
+                "중심",
                 "상담",
                 "대리점",
+                "안내",
                 "확인",
-                "중심",
-                "집중",
-                "부분",
                 "위치",
-                "안내"
+                "부분",
+                "처음",
+                "총판"
             ],
             "series": [
                 {
                     "name": "avg_ctr",
                     "data": [
-                        3.05,
-                        3.2,
+                        2.91,
+                        3.31,
                         3.33,
-                        3.46,
-                        3.47,
-                        3.52,
-                        3.56,
+                        3.35,
+                        3.39,
+                        3.43,
+                        3.51,
                         3.61,
-                        3.62,
-                        3.66
+                        3.65,
+                        3.68
                     ]
                 }
             ]
@@ -585,30 +577,30 @@
             "unit": "%",
             "labels": [
                 "통하",
-                "맞추",
                 "따르",
+                "맞추",
                 "생기",
-                "들리",
                 "떠나",
+                "즐기",
                 "책임지",
                 "계시",
-                "즐기",
-                "꺼내"
+                "느끼",
+                "드리"
             ],
             "series": [
                 {
                     "name": "avg_ctr",
                     "data": [
-                        3.67,
-                        4.34,
-                        4.67,
+                        3.53,
+                        4.52,
+                        4.54,
                         4.71,
-                        4.84,
-                        4.93,
-                        4.98,
-                        5.01,
-                        5.16,
-                        5.18
+                        4.92,
+                        4.97,
+                        5.02,
+                        5.15,
+                        5.29,
+                        5.37
                     ]
                 }
             ]
@@ -619,117 +611,45 @@
             "unit": "",
             "rows": [
                 {
-                    "ess_1": "이동",
-                    "ess_2": "휴대",
-                    "combo_doc_freq": 3,
-                    "combo_overall_ctr": 7.55,
-                    "var_keyword": "선택",
-                    "with_var_ctr": 7.55,
-                    "var_imps": 234858.0
-                },
-                {
-                    "ess_1": "이동",
-                    "ess_2": "휴대",
-                    "combo_doc_freq": 3,
-                    "combo_overall_ctr": 7.55,
-                    "var_keyword": "출퇴근",
-                    "with_var_ctr": 7.55,
-                    "var_imps": 234858.0
-                },
-                {
-                    "ess_1": "이동",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 6.74,
-                    "var_keyword": "선택",
-                    "with_var_ctr": 7.55,
-                    "var_imps": 234858.0
-                },
-                {
-                    "ess_1": "이동",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 6.74,
-                    "var_keyword": "출퇴근",
-                    "with_var_ctr": 7.55,
-                    "var_imps": 234858.0
-                },
-                {
-                    "ess_1": "이동",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 6.74,
-                    "var_keyword": "가방",
-                    "with_var_ctr": 6.95,
-                    "var_imps": 219253.0
-                },
-                {
                     "ess_1": "휴대",
                     "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 6.7,
-                    "var_keyword": "가방",
-                    "with_var_ctr": 7.93,
-                    "var_imps": 235048.0
-                },
-                {
-                    "ess_1": "휴대",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 6.7,
-                    "var_keyword": "출퇴근",
-                    "with_var_ctr": 7.55,
-                    "var_imps": 234858.0
-                },
-                {
-                    "ess_1": "휴대",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 6.7,
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.8,
                     "var_keyword": "모두",
-                    "with_var_ctr": 6.94,
-                    "var_imps": 334897.0
+                    "with_var_ctr": 7.17,
+                    "var_imps": 288235.0
                 },
                 {
                     "ess_1": "휴대",
                     "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 6.7,
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.8,
                     "var_keyword": "선택",
-                    "with_var_ctr": 6.94,
-                    "var_imps": 335202.0
+                    "with_var_ctr": 7.17,
+                    "var_imps": 288235.0
                 },
                 {
                     "ess_1": "휴대",
                     "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 6.7,
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.8,
                     "var_keyword": "이유",
-                    "with_var_ctr": 6.79,
-                    "var_imps": 454137.0
+                    "with_var_ctr": 6.94,
+                    "var_imps": 407170.0
                 },
                 {
                     "ess_1": "휴대",
                     "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 6.7,
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.8,
                     "var_keyword": "고객",
-                    "with_var_ctr": 6.67,
-                    "var_imps": 310796.0
-                },
-                {
-                    "ess_1": "휴대",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 6.7,
-                    "var_keyword": "여행",
-                    "with_var_ctr": 6.39,
-                    "var_imps": 262086.0
+                    "with_var_ctr": 6.88,
+                    "var_imps": 264134.0
                 },
                 {
                     "ess_1": "자전거",
                     "ess_2": "접이식",
-                    "combo_doc_freq": 6,
+                    "combo_doc_freq": 5,
                     "combo_overall_ctr": 6.51,
                     "var_keyword": "이유",
                     "with_var_ctr": 6.9,
@@ -738,56 +658,182 @@
                 {
                     "ess_1": "자전거",
                     "ess_2": "접이식",
-                    "combo_doc_freq": 6,
+                    "combo_doc_freq": 5,
                     "combo_overall_ctr": 6.51,
                     "var_keyword": "가능",
-                    "with_var_ctr": 6.23,
-                    "var_imps": 342837.0
+                    "with_var_ctr": 6.24,
+                    "var_imps": 342431.0
                 },
                 {
-                    "ess_1": "접이식",
+                    "ess_1": "로드",
                     "ess_2": "트라이폴드",
-                    "combo_doc_freq": 5,
-                    "combo_overall_ctr": 6.46,
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 6.36,
+                    "var_keyword": "생각",
+                    "with_var_ctr": 7.2,
+                    "var_imps": 186402.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 6.36,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 7.2,
+                    "var_imps": 186402.0
+                },
+                {
+                    "ess_1": "로드",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 6.36,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 6.61,
+                    "var_imps": 282069.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 6.27,
                     "var_keyword": "이유",
                     "with_var_ctr": 6.99,
-                    "var_imps": 352828.0
+                    "var_imps": 295677.0
                 },
                 {
-                    "ess_1": "접이식",
+                    "ess_1": "이동",
                     "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 6.27,
+                    "var_keyword": "이야기",
+                    "with_var_ctr": 6.78,
+                    "var_imps": 258469.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 6.27,
+                    "var_keyword": "이상",
+                    "with_var_ctr": 6.54,
+                    "var_imps": 268252.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 6.27,
+                    "var_keyword": "경험",
+                    "with_var_ctr": 6.39,
+                    "var_imps": 378828.0
+                },
+                {
+                    "ess_1": "일상",
+                    "ess_2": "라이딩",
                     "combo_doc_freq": 5,
-                    "combo_overall_ctr": 6.46,
-                    "var_keyword": "가능",
-                    "with_var_ctr": 5.97,
-                    "var_imps": 212737.0
+                    "combo_overall_ctr": 6.14,
+                    "var_keyword": "모두",
+                    "with_var_ctr": 6.8,
+                    "var_imps": 260909.0
                 },
                 {
-                    "ess_1": "로드",
-                    "ess_2": "자전거",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 6.45,
-                    "var_keyword": "이유",
-                    "with_var_ctr": 7.32,
-                    "var_imps": 192443.0
-                },
-                {
-                    "ess_1": "로드",
-                    "ess_2": "자전거",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 6.45,
+                    "ess_1": "일상",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.14,
                     "var_keyword": "사람",
-                    "with_var_ctr": 6.86,
-                    "var_imps": 228779.0
+                    "with_var_ctr": 6.11,
+                    "var_imps": 307924.0
                 },
                 {
-                    "ess_1": "로드",
-                    "ess_2": "자전거",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 6.45,
+                    "ess_1": "일상",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.14,
                     "var_keyword": "선택",
-                    "with_var_ctr": 6.45,
-                    "var_imps": 328731.0
+                    "with_var_ctr": 6.11,
+                    "var_imps": 307924.0
+                },
+                {
+                    "ess_1": "일상",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.14,
+                    "var_keyword": "사랑",
+                    "with_var_ctr": 4.74,
+                    "var_imps": 216217.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.1,
+                    "var_keyword": "경험",
+                    "with_var_ctr": 8.08,
+                    "var_imps": 374673.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.1,
+                    "var_keyword": "자랑",
+                    "with_var_ctr": 7.46,
+                    "var_imps": 426002.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.1,
+                    "var_keyword": "모두",
+                    "with_var_ctr": 7.17,
+                    "var_imps": 288235.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.1,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 6.97,
+                    "var_imps": 717472.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.1,
+                    "var_keyword": "가방",
+                    "with_var_ctr": 6.91,
+                    "var_imps": 300139.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.1,
+                    "var_keyword": "둘째",
+                    "with_var_ctr": 6.83,
+                    "var_imps": 453148.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.1,
+                    "var_keyword": "셋째",
+                    "with_var_ctr": 6.83,
+                    "var_imps": 453148.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.1,
+                    "var_keyword": "첫째",
+                    "with_var_ctr": 6.83,
+                    "var_imps": 453148.0
                 }
             ]
         },
@@ -796,31 +842,31 @@
             "title": "메인 타겟 TOP 10 (명사)",
             "unit": "%",
             "labels": [
-                "편의",
-                "타이어",
-                "회전",
                 "차이",
-                "확장",
-                "제동",
                 "멀리",
-                "로드",
+                "타이어",
+                "제동",
+                "편의",
+                "확장",
+                "유지",
+                "인치",
                 "바이크",
-                "유지"
+                "브레이크"
             ],
             "series": [
                 {
                     "name": "avg_ctr",
                     "data": [
-                        8.84,
-                        8.76,
+                        9.46,
+                        9.4,
+                        8.96,
+                        8.82,
                         8.75,
-                        8.53,
-                        8.34,
-                        8.34,
-                        8.24,
-                        7.91,
-                        7.89,
-                        7.87
+                        8.52,
+                        8.27,
+                        8.26,
+                        8.1,
+                        8.01
                     ]
                 }
             ]
@@ -831,30 +877,30 @@
             "unit": "%",
             "labels": [
                 "만들",
-                "들어가",
-                "알리",
                 "가지",
-                "늘어나",
+                "줄이",
+                "알리",
+                "위하",
+                "들어가",
                 "돌아오",
                 "다니",
-                "위하",
-                "책임지",
-                "원하"
+                "늘어나",
+                "드리"
             ],
             "series": [
                 {
                     "name": "avg_ctr",
                     "data": [
-                        7.29,
-                        6.68,
-                        6.66,
-                        6.51,
-                        6.5,
+                        7.8,
+                        7.07,
+                        7.02,
+                        6.94,
+                        6.8,
+                        6.6,
+                        6.57,
+                        6.49,
                         6.4,
-                        6.39,
-                        6.26,
-                        6.17,
-                        6.09
+                        6.25
                     ]
                 }
             ]
@@ -864,31 +910,31 @@
             "title": "메인 타겟 BOTTOM 10 (명사)",
             "unit": "%",
             "labels": [
-                "체크",
                 "이태원",
                 "중심",
                 "상담",
                 "확인",
-                "몰입",
                 "대리점",
-                "집중",
-                "방향",
-                "부분"
+                "요즘",
+                "안내",
+                "부분",
+                "몰입",
+                "동네"
             ],
             "series": [
                 {
                     "name": "avg_ctr",
                     "data": [
-                        3.16,
-                        3.21,
-                        3.25,
-                        3.28,
-                        3.29,
+                        2.97,
                         3.33,
-                        3.38,
                         3.45,
-                        3.45,
-                        3.46
+                        3.49,
+                        3.62,
+                        3.65,
+                        3.69,
+                        3.73,
+                        3.78,
+                        3.79
                     ]
                 }
             ]
@@ -900,29 +946,29 @@
             "labels": [
                 "통하",
                 "따르",
-                "떠나",
                 "생기",
                 "느끼",
-                "꺼내",
-                "계시",
+                "떠나",
                 "보이",
+                "계시",
                 "이러",
-                "들리"
+                "맞추",
+                "즐기"
             ],
             "series": [
                 {
                     "name": "avg_ctr",
                     "data": [
-                        3.73,
-                        4.57,
-                        4.84,
-                        5.02,
-                        5.02,
-                        5.08,
-                        5.29,
-                        5.3,
-                        5.35,
-                        5.45
+                        3.68,
+                        4.71,
+                        5.0,
+                        5.22,
+                        5.22,
+                        5.34,
+                        5.43,
+                        5.53,
+                        5.64,
+                        5.7
                     ]
                 }
             ]
@@ -933,193 +979,624 @@
             "unit": "",
             "rows": [
                 {
-                    "ess_1": "이동",
-                    "ess_2": "휴대",
-                    "combo_doc_freq": 3,
-                    "combo_overall_ctr": 8.54,
-                    "var_keyword": "선택",
-                    "with_var_ctr": 8.54,
-                    "var_imps": 93287.0
-                },
-                {
-                    "ess_1": "이동",
-                    "ess_2": "휴대",
-                    "combo_doc_freq": 3,
-                    "combo_overall_ctr": 8.54,
-                    "var_keyword": "출퇴근",
-                    "with_var_ctr": 8.54,
-                    "var_imps": 93287.0
-                },
-                {
-                    "ess_1": "로드",
-                    "ess_2": "자전거",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 8.45,
-                    "var_keyword": "이유",
-                    "with_var_ctr": 9.54,
-                    "var_imps": 57351.0
-                },
-                {
-                    "ess_1": "로드",
-                    "ess_2": "자전거",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 8.45,
-                    "var_keyword": "사람",
-                    "with_var_ctr": 9.05,
-                    "var_imps": 76416.0
-                },
-                {
-                    "ess_1": "로드",
-                    "ess_2": "자전거",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 8.45,
-                    "var_keyword": "선택",
-                    "with_var_ctr": 8.45,
-                    "var_imps": 97067.0
-                },
-                {
                     "ess_1": "로드",
                     "ess_2": "트라이폴드",
-                    "combo_doc_freq": 5,
-                    "combo_overall_ctr": 7.91,
-                    "var_keyword": "사람",
-                    "with_var_ctr": 9.05,
-                    "var_imps": 76416.0
-                },
-                {
-                    "ess_1": "로드",
-                    "ess_2": "트라이폴드",
-                    "combo_doc_freq": 5,
-                    "combo_overall_ctr": 7.91,
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 7.96,
                     "var_keyword": "생각",
-                    "with_var_ctr": 8.46,
-                    "var_imps": 76517.0
+                    "with_var_ctr": 8.87,
+                    "var_imps": 97324.0
                 },
                 {
                     "ess_1": "로드",
                     "ess_2": "트라이폴드",
-                    "combo_doc_freq": 5,
-                    "combo_overall_ctr": 7.91,
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 7.96,
                     "var_keyword": "이유",
-                    "with_var_ctr": 8.46,
-                    "var_imps": 76596.0
+                    "with_var_ctr": 8.87,
+                    "var_imps": 97324.0
                 },
                 {
                     "ess_1": "로드",
                     "ess_2": "트라이폴드",
+                    "combo_doc_freq": 4,
+                    "combo_overall_ctr": 7.96,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 8.4,
+                    "var_imps": 133645.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
                     "combo_doc_freq": 5,
-                    "combo_overall_ctr": 7.91,
-                    "var_keyword": "선택",
-                    "with_var_ctr": 8.45,
-                    "var_imps": 97067.0
-                },
-                {
-                    "ess_1": "이동",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 7.9,
-                    "var_keyword": "가방",
-                    "with_var_ctr": 8.83,
-                    "var_imps": 73754.0
-                },
-                {
-                    "ess_1": "이동",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 7.9,
-                    "var_keyword": "선택",
-                    "with_var_ctr": 8.54,
-                    "var_imps": 93287.0
-                },
-                {
-                    "ess_1": "이동",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 7.9,
-                    "var_keyword": "출퇴근",
-                    "with_var_ctr": 8.54,
-                    "var_imps": 93287.0
-                },
-                {
-                    "ess_1": "바퀴",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 7.75,
-                    "var_keyword": "선택",
-                    "with_var_ctr": 9.72,
-                    "var_imps": 58888.0
-                },
-                {
-                    "ess_1": "바퀴",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 4,
-                    "combo_overall_ctr": 7.75,
+                    "combo_overall_ctr": 7.12,
                     "var_keyword": "모두",
-                    "with_var_ctr": 7.75,
-                    "var_imps": 90968.0
+                    "with_var_ctr": 8.03,
+                    "var_imps": 164076.0
                 },
                 {
                     "ess_1": "휴대",
                     "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 7.06,
-                    "var_keyword": "출퇴근",
-                    "with_var_ctr": 8.54,
-                    "var_imps": 93287.0
-                },
-                {
-                    "ess_1": "휴대",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 7.06,
-                    "var_keyword": "가방",
-                    "with_var_ctr": 8.39,
-                    "var_imps": 87131.0
-                },
-                {
-                    "ess_1": "휴대",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 7.06,
-                    "var_keyword": "모두",
-                    "with_var_ctr": 8.12,
-                    "var_imps": 113912.0
-                },
-                {
-                    "ess_1": "휴대",
-                    "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 7.06,
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.12,
                     "var_keyword": "선택",
-                    "with_var_ctr": 8.12,
-                    "var_imps": 114017.0
+                    "with_var_ctr": 8.03,
+                    "var_imps": 164076.0
                 },
                 {
                     "ess_1": "휴대",
                     "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 7.06,
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.12,
                     "var_keyword": "고객",
-                    "with_var_ctr": 7.81,
-                    "var_imps": 89171.0
+                    "with_var_ctr": 7.96,
+                    "var_imps": 126967.0
                 },
                 {
                     "ess_1": "휴대",
                     "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 7.06,
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.12,
                     "var_keyword": "이유",
-                    "with_var_ctr": 7.22,
-                    "var_imps": 139760.0
+                    "with_var_ctr": 7.42,
+                    "var_imps": 210883.0
+                },
+                {
+                    "ess_1": "일상",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.02,
+                    "var_keyword": "모두",
+                    "with_var_ctr": 8.29,
+                    "var_imps": 123937.0
+                },
+                {
+                    "ess_1": "일상",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.02,
+                    "var_keyword": "사람",
+                    "with_var_ctr": 7.09,
+                    "var_imps": 152125.0
+                },
+                {
+                    "ess_1": "일상",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.02,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 7.09,
+                    "var_imps": 152125.0
+                },
+                {
+                    "ess_1": "일상",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 7.02,
+                    "var_keyword": "사랑",
+                    "with_var_ctr": 4.66,
+                    "var_imps": 90481.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 6.96,
+                    "var_keyword": "이야기",
+                    "with_var_ctr": 8.18,
+                    "var_imps": 138058.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 6.96,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 8.04,
+                    "var_imps": 157534.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 6.96,
+                    "var_keyword": "경험",
+                    "with_var_ctr": 7.53,
+                    "var_imps": 191944.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 6.96,
+                    "var_keyword": "이상",
+                    "with_var_ctr": 6.39,
+                    "var_imps": 131455.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.93,
+                    "var_keyword": "경험",
+                    "with_var_ctr": 8.93,
+                    "var_imps": 214295.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.93,
+                    "var_keyword": "모두",
+                    "with_var_ctr": 8.03,
+                    "var_imps": 164076.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.93,
+                    "var_keyword": "이제",
+                    "with_var_ctr": 7.87,
+                    "var_imps": 221993.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.93,
+                    "var_keyword": "장착",
+                    "with_var_ctr": 7.87,
+                    "var_imps": 221993.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.93,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 7.7,
+                    "var_imps": 377403.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.93,
+                    "var_keyword": "자랑",
+                    "with_var_ctr": 7.66,
+                    "var_imps": 236567.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.93,
+                    "var_keyword": "둘째",
+                    "with_var_ctr": 7.48,
+                    "var_imps": 250480.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 6.93,
+                    "var_keyword": "셋째",
+                    "with_var_ctr": 7.48,
+                    "var_imps": 250480.0
+                },
+                {
+                    "ess_1": "자전거",
+                    "ess_2": "접이식",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.87,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 7.33,
+                    "var_imps": 287740.0
+                },
+                {
+                    "ess_1": "자전거",
+                    "ess_2": "접이식",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 6.87,
+                    "var_keyword": "가능",
+                    "with_var_ctr": 5.98,
+                    "var_imps": 201290.0
+                }
+            ]
+        },
+        "avoid_top_noun": {
+            "kind": "bar_h",
+            "title": "기피 타겟 TOP 10 (명사)",
+            "unit": "%",
+            "labels": [
+                "설계",
+                "바이크",
+                "지하철",
+                "클래식",
+                "판매점",
+                "시티",
+                "트렁크",
+                "댓글",
+                "판매",
+                "콤팩트"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        13.29,
+                        13.12,
+                        12.89,
+                        12.74,
+                        12.72,
+                        12.61,
+                        12.59,
+                        12.49,
+                        12.39,
+                        12.36
+                    ]
+                }
+            ]
+        },
+        "avoid_top_va": {
+            "kind": "bar_h",
+            "title": "기피 타겟 TOP 10 (형용사)",
+            "unit": "%",
+            "labels": [
+                "줄이",
+                "원하",
+                "이러",
+                "대하",
+                "계시",
+                "느끼",
+                "편하",
+                "돌아오",
+                "책임지",
+                "위하"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        11.52,
+                        11.48,
+                        11.42,
+                        10.6,
+                        10.38,
+                        10.0,
+                        9.58,
+                        8.78,
+                        8.65,
+                        8.22
+                    ]
+                }
+            ]
+        },
+        "avoid_bottom_noun": {
+            "kind": "bar_h",
+            "title": "기피 타겟 BOTTOM 10 (명사)",
+            "unit": "%",
+            "labels": [
+                "다시",
+                "차이",
+                "액세서리",
+                "지금",
+                "스포티",
+                "정보",
+                "이태원",
+                "요즘",
+                "다양",
+                "안내"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        2.71,
+                        3.41,
+                        3.88,
+                        4.05,
+                        4.08,
+                        4.31,
+                        4.39,
+                        4.45,
+                        4.49,
+                        4.53
+                    ]
+                }
+            ]
+        },
+        "avoid_bottom_va": {
+            "kind": "bar_h",
+            "title": "기피 타겟 BOTTOM 10 (형용사)",
+            "unit": "%",
+            "labels": [
+                "만들",
+                "알리",
+                "드리",
+                "맞추",
+                "통하",
+                "즐기",
+                "다니",
+                "생기",
+                "다르",
+                "따르"
+            ],
+            "series": [
+                {
+                    "name": "avg_ctr",
+                    "data": [
+                        4.33,
+                        4.48,
+                        4.73,
+                        5.01,
+                        5.16,
+                        5.97,
+                        6.15,
+                        6.81,
+                        7.0,
+                        7.33
+                    ]
+                }
+            ]
+        },
+        "avoid_keyword_combo_detail": {
+            "kind": "table",
+            "title": "기피 타겟 상세 분석",
+            "unit": "",
+            "rows": [
+                {
+                    "ess_1": "자전거",
+                    "ess_2": "접이식",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 10.76,
+                    "var_keyword": "가능",
+                    "with_var_ctr": 12.55,
+                    "var_imps": 15680.0
+                },
+                {
+                    "ess_1": "자전거",
+                    "ess_2": "접이식",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 10.76,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 11.23,
+                    "var_imps": 19198.0
                 },
                 {
                     "ess_1": "휴대",
                     "ess_2": "라이딩",
-                    "combo_doc_freq": 6,
-                    "combo_overall_ctr": 7.06,
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 10.4,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 10.44,
+                    "var_imps": 17744.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 10.4,
+                    "var_keyword": "모두",
+                    "with_var_ctr": 8.76,
+                    "var_imps": 8684.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 10.4,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 8.76,
+                    "var_imps": 8684.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "라이딩",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 10.4,
+                    "var_keyword": "고객",
+                    "with_var_ctr": 8.73,
+                    "var_imps": 12545.0
+                },
+                {
+                    "ess_1": "제품",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 10.28,
+                    "var_keyword": "이상",
+                    "with_var_ctr": 11.52,
+                    "var_imps": 11161.0
+                },
+                {
+                    "ess_1": "제품",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 5,
+                    "combo_overall_ctr": 10.28,
+                    "var_keyword": "고객",
+                    "with_var_ctr": 7.21,
+                    "var_imps": 6976.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 9,
+                    "combo_overall_ctr": 9.85,
+                    "var_keyword": "가능",
+                    "with_var_ctr": 12.14,
+                    "var_imps": 12817.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 9,
+                    "combo_overall_ctr": 9.85,
+                    "var_keyword": "가방",
+                    "with_var_ctr": 11.07,
+                    "var_imps": 9403.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 9,
+                    "combo_overall_ctr": 9.85,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 10.75,
+                    "var_imps": 11343.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 9,
+                    "combo_overall_ctr": 9.85,
+                    "var_keyword": "모두",
+                    "with_var_ctr": 8.76,
+                    "var_imps": 8684.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 9,
+                    "combo_overall_ctr": 9.85,
+                    "var_keyword": "대중교통",
+                    "with_var_ctr": 8.66,
+                    "var_imps": 7595.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 9,
+                    "combo_overall_ctr": 9.85,
+                    "var_keyword": "안정감",
+                    "with_var_ctr": 8.31,
+                    "var_imps": 7068.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 9,
+                    "combo_overall_ctr": 9.85,
+                    "var_keyword": "선택",
+                    "with_var_ctr": 7.78,
+                    "var_imps": 13541.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "자전거",
+                    "combo_doc_freq": 9,
+                    "combo_overall_ctr": 9.85,
+                    "var_keyword": "고객",
+                    "with_var_ctr": 7.2,
+                    "var_imps": 6473.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 9.48,
+                    "var_keyword": "이제",
+                    "with_var_ctr": 11.52,
+                    "var_imps": 10037.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 9.48,
+                    "var_keyword": "장착",
+                    "with_var_ctr": 11.52,
+                    "var_imps": 10037.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 9.48,
+                    "var_keyword": "가방",
+                    "with_var_ctr": 11.07,
+                    "var_imps": 9403.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 9.48,
                     "var_keyword": "여행",
-                    "with_var_ctr": 5.61,
-                    "var_imps": 82488.0
+                    "with_var_ctr": 10.9,
+                    "var_imps": 14289.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 9.48,
+                    "var_keyword": "가능",
+                    "with_var_ctr": 10.82,
+                    "var_imps": 14937.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 9.48,
+                    "var_keyword": "자랑",
+                    "with_var_ctr": 10.28,
+                    "var_imps": 14900.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 9.48,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 9.47,
+                    "var_imps": 21044.0
+                },
+                {
+                    "ess_1": "휴대",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 10,
+                    "combo_overall_ctr": 9.48,
+                    "var_keyword": "모두",
+                    "with_var_ctr": 8.76,
+                    "var_imps": 8684.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 8.99,
+                    "var_keyword": "이상",
+                    "with_var_ctr": 11.86,
+                    "var_imps": 16256.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 8.99,
+                    "var_keyword": "이유",
+                    "with_var_ctr": 10.33,
+                    "var_imps": 17169.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 8.99,
+                    "var_keyword": "경험",
+                    "with_var_ctr": 7.3,
+                    "var_imps": 19024.0
+                },
+                {
+                    "ess_1": "이동",
+                    "ess_2": "트라이폴드",
+                    "combo_doc_freq": 7,
+                    "combo_overall_ctr": 8.99,
+                    "var_keyword": "이야기",
+                    "with_var_ctr": 5.45,
+                    "var_imps": 9288.0
                 }
             ]
         },
@@ -1132,7 +1609,7 @@
                     "fb_ad_id": "120239300382940160",
                     "uploaded_at": "2026-03-07",
                     "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300382940160.jpg",
-                    "ctr": 10.8,
+                    "ctr": 10.79,
                     "target_details": [
                         {
                             "age": "65+",
@@ -1167,7 +1644,7 @@
                         {
                             "age": "55-64",
                             "gender": "female",
-                            "ctr": 9.17
+                            "ctr": 9.24
                         },
                         {
                             "age": "45-54",
@@ -1182,7 +1659,7 @@
                         {
                             "age": "18-24",
                             "gender": "male",
-                            "ctr": 5.0
+                            "ctr": 5.02
                         },
                         {
                             "age": "18-24",
@@ -1559,8 +2036,8 @@
             "title": "반응 top 콘텐츠 (likes)",
             "metric": "likes",
             "metric_col": "total_likes",
-            "overall_avg": 44.74,
-            "metric_avg": 44.74,
+            "overall_avg": 45.43,
+            "metric_avg": 45.43,
             "is_top": true,
             "x_scale_max": 76.0,
             "items": [
@@ -1576,7 +2053,7 @@
                     "total_saves": 9,
                     "total_comments": 7,
                     "total_reaction": 88,
-                    "ctr": 5.05,
+                    "ctr": 6.09,
                     "caption_label": "국내 공식 판..."
                 },
                 {
@@ -1606,7 +2083,7 @@
                     "total_saves": 15,
                     "total_comments": 4,
                     "total_reaction": 88,
-                    "ctr": 10.8,
+                    "ctr": 10.79,
                     "caption_label": "봄의 시작은 ..."
                 },
                 {
@@ -1636,7 +2113,7 @@
                     "total_saves": 7,
                     "total_comments": 7,
                     "total_reaction": 72,
-                    "ctr": 5.81,
+                    "ctr": 5.82,
                     "caption_label": "올봄은 트라이..."
                 }
             ]
@@ -1646,8 +2123,8 @@
             "title": "반응 bottom 콘텐츠 (likes)",
             "metric": "likes",
             "metric_col": "total_likes",
-            "overall_avg": 44.74,
-            "metric_avg": 44.74,
+            "overall_avg": 45.43,
+            "metric_avg": 45.43,
             "is_top": false,
             "x_scale_max": 76.0,
             "items": [
@@ -1733,8 +2210,8 @@
             "title": "반응 top 콘텐츠 (saves)",
             "metric": "saves",
             "metric_col": "total_saves",
-            "overall_avg": 5.2,
-            "metric_avg": 5.2,
+            "overall_avg": 5.09,
+            "metric_avg": 5.09,
             "is_top": true,
             "x_scale_max": 24.0,
             "items": [
@@ -1750,7 +2227,7 @@
                     "total_saves": 24,
                     "total_comments": 6,
                     "total_reaction": 79,
-                    "ctr": 5.0,
+                    "ctr": 6.17,
                     "caption_label": "댓글 이벤트]..."
                 },
                 {
@@ -1780,7 +2257,7 @@
                     "total_saves": 18,
                     "total_comments": 1,
                     "total_reaction": 79,
-                    "ctr": 5.48,
+                    "ctr": 5.49,
                     "caption_label": "수화물 캐리어..."
                 },
                 {
@@ -1795,23 +2272,23 @@
                     "total_saves": 15,
                     "total_comments": 4,
                     "total_reaction": 88,
-                    "ctr": 10.8,
+                    "ctr": 10.79,
                     "caption_label": "봄의 시작은 ..."
                 },
                 {
-                    "ad_id": 4247,
-                    "fb_ad_id": "120240251613460160",
-                    "uploaded_at": "2026-03-24",
-                    "caption": "야간 라이딩을 하는 당신을 위한 필수 아이템\n\n낮뿐만 아니라 \n밤에도 라이딩을 하는 분들에게 \n꼭 필요한 아이템, 전조등\n\n전조등과 함께 구매하면 좋은 세트 상품인\n전조등 거치대와 후미등\n\n야간 라이딩에 필요한 사항들을 \n확인해 보세요.\n\n1. 트라이폴드 접이식 자전거 특성상 \n전조등을 앞바퀴 위 브레이크암에 결합합니다.\n\n2. 전조등 장착에 필요한 \n전조등 거치대를 장착해 주세요.\n\n3. 접었을 때 간섭이 생기지 않게 하고 \n앞사람의 눈부심 방지를 위해 \n살짝 아래방향으로 맞춰주세요.\n\n4. 빗물에도 안전하게 사용 가능한 \n방수 제품인지, 밝기는 적당한지 \n체크를 모두 꼭 하세요.\n\n전조등•거치대•후미등은 선택 아닌 필수, \n안전하고 즐거운 야간 라이딩을 즐겨보세요\n\n #DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120240251613460160.jpg",
+                    "ad_id": 3433,
+                    "fb_ad_id": "120239300153630160",
+                    "uploaded_at": "2026-02-27",
+                    "caption": "D10만 유일하게 \n‘디스크 브레이크'를 \n선택한 이유\n\n왜 D10만 많은 사람들이 \n사랑하는 ‘림 브레이크’가 아닌 \n‘디스크 브레이크'를 \n선택한 이유는 무엇일까요?\n\n디스크 브레이크가 \n더 낫다는 것이 아닙니다. \n단지 가고자 하는 길이 \n서로 다르기 때문입니다.\n\n거친 노면을 견디기 위해 \nD10의 바퀴가 18인치로 \n바뀌었는데요.\n\n바퀴가 커지면 \n회전 관성도 커지기 때문에 \n늘어난 힘을 가장 안정적으로 \n제어하기 위해서는 \n‘디스크 브레이크’가\n해답이었습니다.\n\n라이딩 스타일에 따라 \n나에게 맞는 모델은 \n모두 다릅니다.\n\n바퀴가 커진 만큼 \n더 멀리 일상을 경험하세요.\n\n당신이 주로 다니는 길은\n어디인가요?\n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120239300153630160.jpg",
                     "ig_media_type": "CAROUSEL_ALBUM",
-                    "total_likes": 21,
-                    "total_shares": 1,
-                    "total_saves": 13,
-                    "total_comments": 0,
-                    "total_reaction": 35,
-                    "ctr": 1.72,
-                    "caption_label": "야간 라이딩을..."
+                    "total_likes": 54,
+                    "total_shares": 4,
+                    "total_saves": 11,
+                    "total_comments": 2,
+                    "total_reaction": 69,
+                    "ctr": 6.2,
+                    "caption_label": "만 유일하게 ..."
                 }
             ]
         },
@@ -1820,25 +2297,25 @@
             "title": "반응 bottom 콘텐츠 (saves)",
             "metric": "saves",
             "metric_col": "total_saves",
-            "overall_avg": 5.2,
-            "metric_avg": 5.2,
+            "overall_avg": 5.09,
+            "metric_avg": 5.09,
             "is_top": false,
             "x_scale_max": 24.0,
             "items": [
                 {
-                    "ad_id": 2868,
-                    "fb_ad_id": "120238179923340160",
-                    "uploaded_at": "2026-02-06",
-                    "caption": "온라인을 통한 자전거 구매가 처음인 당신에게\n\nDDZK는 \n전국 곳곳의 대리점과 함께\n가까운 곳에서도\n편하게 상담과 구매가 가능하도록\n고객님들과의 접점을\n넓혀가고 있는데요.\n특히 온라인으로 구매 후 \n처음 마주한 새 자전거는\n누구나 조금은 당황할 수 있습니다.\n그래서 DDZK는\n 꼭 확인하셔야 할 부분을 \n안내해 드리고 있어요.\n\n✓ 주요 볼트와 폴딩 레버가 \n제대로 잠겼는지 확인한다.\n✓ 브레이크/기어가 정상 작동하는지\n짧게 시운전하며 체크한다.\n✓ 체인이 이탈·늘어짐 없이 \n부드럽게 구동되는지 확인한다.\n\n초기 점검은 안전한 라이딩의 시작 \n가까운 DDZK 대리점과 함께하세요 \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238179923340160.jpg",
-                    "ig_media_type": "REEL",
-                    "total_likes": 10,
-                    "total_shares": 2,
+                    "ad_id": 1416,
+                    "fb_ad_id": "120237068330850160",
+                    "uploaded_at": "2026-01-11",
+                    "caption": "출퇴근 라이딩을 하시는데, 비 오는 날에는 큰 바퀴 로드 자전거로 그대로 비를 맞으며 이동할 수밖에 없었다고 합니다.\n같은 상황에서 접이식 자전거는 잠깐 접어 대중교통과 연결하니 옷도, 가방도 젖지 않았다고 하셨어요.\n비가 오든 눈이 오든 트라이폴드 자전거로 라이딩하니까 걱정 없다고요. 급하면 택시에도 실을 수 있다 했어요.\n이런 접이식 미니벨로 자전거는 타는 사람만 타고, 아는 사람만 타는 거 같아요.\n캠핑의 끝이 미니멀이라면, 자전거의 끝은 트라이폴드 같아요.\n고객분들과 이야기를 나눠보면 로드, MTB, 다른 접이식 자전거까지 모두 경험해 본 분들이 생각보다 많거든요. \n결국 선택의 이유는 휴대성과 일상에서의 편의성이더라고요.",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120237068330850160.jpg",
+                    "ig_media_type": "CAROUSEL_ALBUM",
+                    "total_likes": 27,
+                    "total_shares": 0,
                     "total_saves": 1,
-                    "total_comments": 0,
-                    "total_reaction": 13,
-                    "ctr": 3.03,
-                    "caption_label": "온라인을 통한..."
+                    "total_comments": 1,
+                    "total_reaction": 28,
+                    "ctr": 9.34,
+                    "caption_label": "출퇴근 라이딩..."
                 },
                 {
                     "ad_id": 2667,
@@ -1871,34 +2348,34 @@
                     "caption_label": "의 지향점은 ..."
                 },
                 {
-                    "ad_id": 4244,
-                    "fb_ad_id": "120240251586970160",
-                    "uploaded_at": "2026-03-23",
-                    "caption": "이미 다양한 자전거를 갖고 있어도 \n트라이폴드를 선택하는 이유\n\n출퇴근용, 대중 교통의 연계, 여행 레저용 등\n다양한 목적에 따라 탈 수 있고\n\n무엇보다 큰 공간을 차지 하지 않아 \n효율적인 휴대성으로 \n라이딩에 더 집중할 수 있죠.\n\n필요에 따라 자전거 앞면에는 \n내 일상과 닮은 가방을 \n쉽게 탈부착해 이동을 \n더욱 편리하게 해요.\n\n나의 일상 속 즐거움과 \n삶의 질을 올려주는 고마운 트라이폴드 \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120240251586970160.jpg",
+                    "ad_id": 2868,
+                    "fb_ad_id": "120238179923340160",
+                    "uploaded_at": "2026-02-06",
+                    "caption": "온라인을 통한 자전거 구매가 처음인 당신에게\n\nDDZK는 \n전국 곳곳의 대리점과 함께\n가까운 곳에서도\n편하게 상담과 구매가 가능하도록\n고객님들과의 접점을\n넓혀가고 있는데요.\n특히 온라인으로 구매 후 \n처음 마주한 새 자전거는\n누구나 조금은 당황할 수 있습니다.\n그래서 DDZK는\n 꼭 확인하셔야 할 부분을 \n안내해 드리고 있어요.\n\n✓ 주요 볼트와 폴딩 레버가 \n제대로 잠겼는지 확인한다.\n✓ 브레이크/기어가 정상 작동하는지\n짧게 시운전하며 체크한다.\n✓ 체인이 이탈·늘어짐 없이 \n부드럽게 구동되는지 확인한다.\n\n초기 점검은 안전한 라이딩의 시작 \n가까운 DDZK 대리점과 함께하세요 \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238179923340160.jpg",
                     "ig_media_type": "REEL",
-                    "total_likes": 21,
-                    "total_shares": 1,
+                    "total_likes": 10,
+                    "total_shares": 2,
                     "total_saves": 1,
                     "total_comments": 0,
-                    "total_reaction": 23,
-                    "ctr": 3.93,
-                    "caption_label": "이미 다양한 ..."
+                    "total_reaction": 13,
+                    "ctr": 3.03,
+                    "caption_label": "온라인을 통한..."
                 },
                 {
-                    "ad_id": 1416,
-                    "fb_ad_id": "120237068330850160",
-                    "uploaded_at": "2026-01-11",
-                    "caption": "출퇴근 라이딩을 하시는데, 비 오는 날에는 큰 바퀴 로드 자전거로 그대로 비를 맞으며 이동할 수밖에 없었다고 합니다.\n같은 상황에서 접이식 자전거는 잠깐 접어 대중교통과 연결하니 옷도, 가방도 젖지 않았다고 하셨어요.\n비가 오든 눈이 오든 트라이폴드 자전거로 라이딩하니까 걱정 없다고요. 급하면 택시에도 실을 수 있다 했어요.\n이런 접이식 미니벨로 자전거는 타는 사람만 타고, 아는 사람만 타는 거 같아요.\n캠핑의 끝이 미니멀이라면, 자전거의 끝은 트라이폴드 같아요.\n고객분들과 이야기를 나눠보면 로드, MTB, 다른 접이식 자전거까지 모두 경험해 본 분들이 생각보다 많거든요. \n결국 선택의 이유는 휴대성과 일상에서의 편의성이더라고요.",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120237068330850160.jpg",
+                    "ad_id": 2870,
+                    "fb_ad_id": "120238179924030160",
+                    "uploaded_at": "2026-02-08",
+                    "caption": "DDZK 로고의 의미\n\nDDZK의 로고에 대해서도 \n궁금하실 수 있는데요.\n\n인피니트(무한대)처럼 보이는 \n이 로고는 ‘무한대의 몰입 속에서 \n느끼는 즐거움’을 상징해요.\n\n바로 DDZK가 \n지향하는 방향성이기도 하죠.\n\n언제, 어디서나, 모든 곳에서 \n‘자유’와 ‘즐거움’이 만나는 곳\n\n함께 타면 더 즐거운 \n트라이폴드 자전거 DDZK입니다. \n\n#DDZK #트라이폴드 #트라이폴드자전거 #접이식자전거 #자전거추천",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/thumbnails/120238179924030160.jpg",
                     "ig_media_type": "CAROUSEL_ALBUM",
-                    "total_likes": 27,
+                    "total_likes": 29,
                     "total_shares": 0,
-                    "total_saves": 1,
+                    "total_saves": 2,
                     "total_comments": 1,
-                    "total_reaction": 28,
-                    "ctr": 9.34,
-                    "caption_label": "출퇴근 라이딩..."
+                    "total_reaction": 31,
+                    "ctr": 3.86,
+                    "caption_label": "로고의 의미\n..."
                 }
             ]
         },
@@ -1907,8 +2384,8 @@
             "title": "반응 top 콘텐츠 (shares)",
             "metric": "shares",
             "metric_col": "total_shares",
-            "overall_avg": 3.17,
-            "metric_avg": 3.17,
+            "overall_avg": 3.27,
+            "metric_avg": 3.27,
             "is_top": true,
             "x_scale_max": 11.0,
             "items": [
@@ -1939,7 +2416,7 @@
                     "total_saves": 24,
                     "total_comments": 6,
                     "total_reaction": 79,
-                    "ctr": 5.0,
+                    "ctr": 6.17,
                     "caption_label": "댓글 이벤트]..."
                 },
                 {
@@ -1969,7 +2446,7 @@
                     "total_saves": 15,
                     "total_comments": 4,
                     "total_reaction": 88,
-                    "ctr": 10.8,
+                    "ctr": 10.79,
                     "caption_label": "봄의 시작은 ..."
                 },
                 {
@@ -1994,8 +2471,8 @@
             "title": "반응 bottom 콘텐츠 (shares)",
             "metric": "shares",
             "metric_col": "total_shares",
-            "overall_avg": 3.17,
-            "metric_avg": 3.17,
+            "overall_avg": 3.27,
+            "metric_avg": 3.27,
             "is_top": false,
             "x_scale_max": 11.0,
             "items": [
@@ -2026,7 +2503,7 @@
                     "total_saves": 2,
                     "total_comments": 4,
                     "total_reaction": 32,
-                    "ctr": 4.64,
+                    "ctr": 5.47,
                     "caption_label": "여러분들만 알..."
                 },
                 {
@@ -2071,7 +2548,7 @@
                     "total_saves": 4,
                     "total_comments": 0,
                     "total_reaction": 33,
-                    "ctr": 3.89,
+                    "ctr": 3.9,
                     "caption_label": "트라이폴드 ‘..."
                 }
             ]
@@ -2083,107 +2560,107 @@
                 {
                     "age_range": "18-24",
                     "gender": "female",
-                    "spend": 234960.0,
-                    "spend_ratio": 0.9,
-                    "ctr": 4.42,
+                    "spend": 208398.0,
+                    "spend_ratio": 1.0,
+                    "ctr": 4.48,
                     "cpc": 80.0
                 },
                 {
                     "age_range": "18-24",
                     "gender": "male",
-                    "spend": 1775574.0,
-                    "spend_ratio": 7.0,
-                    "ctr": 3.17,
-                    "cpc": 91.0
+                    "spend": 1438330.0,
+                    "spend_ratio": 6.7,
+                    "ctr": 3.11,
+                    "cpc": 94.0
                 },
                 {
                     "age_range": "25-34",
                     "gender": "female",
-                    "spend": 688126.0,
+                    "spend": 585622.0,
                     "spend_ratio": 2.7,
-                    "ctr": 4.96,
-                    "cpc": 100.0
+                    "ctr": 4.82,
+                    "cpc": 102.0
                 },
                 {
                     "age_range": "25-34",
                     "gender": "male",
-                    "spend": 4780500.0,
-                    "spend_ratio": 18.9,
-                    "ctr": 4.46,
-                    "cpc": 88.0
+                    "spend": 4031839.0,
+                    "spend_ratio": 18.7,
+                    "ctr": 4.43,
+                    "cpc": 90.0
                 },
                 {
                     "age_range": "35-44",
                     "gender": "female",
-                    "spend": 821666.0,
-                    "spend_ratio": 3.2,
-                    "ctr": 5.88,
-                    "cpc": 101.0
+                    "spend": 675231.0,
+                    "spend_ratio": 3.1,
+                    "ctr": 5.59,
+                    "cpc": 105.0
                 },
                 {
                     "age_range": "35-44",
                     "gender": "male",
-                    "spend": 8247532.0,
-                    "spend_ratio": 32.5,
-                    "ctr": 5.91,
+                    "spend": 7027835.0,
+                    "spend_ratio": 32.6,
+                    "ctr": 5.86,
+                    "cpc": 86.0
+                },
+                {
+                    "age_range": "45-54",
+                    "gender": "female",
+                    "spend": 392767.0,
+                    "spend_ratio": 1.8,
+                    "ctr": 6.14,
+                    "cpc": 105.0
+                },
+                {
+                    "age_range": "45-54",
+                    "gender": "male",
+                    "spend": 4014778.0,
+                    "spend_ratio": 18.6,
+                    "ctr": 6.57,
                     "cpc": 85.0
                 },
                 {
-                    "age_range": "45-54",
-                    "gender": "female",
-                    "spend": 480354.0,
-                    "spend_ratio": 1.9,
-                    "ctr": 6.31,
-                    "cpc": 103.0
-                },
-                {
-                    "age_range": "45-54",
-                    "gender": "male",
-                    "spend": 4721062.0,
-                    "spend_ratio": 18.6,
-                    "ctr": 6.67,
-                    "cpc": 83.0
-                },
-                {
                     "age_range": "55-64",
                     "gender": "female",
-                    "spend": 266399.0,
+                    "spend": 241528.0,
                     "spend_ratio": 1.1,
-                    "ctr": 8.96,
-                    "cpc": 95.0
+                    "ctr": 8.85,
+                    "cpc": 99.0
                 },
                 {
                     "age_range": "55-64",
                     "gender": "male",
-                    "spend": 2094103.0,
-                    "spend_ratio": 8.3,
-                    "ctr": 7.7,
-                    "cpc": 76.0
+                    "spend": 1843250.0,
+                    "spend_ratio": 8.5,
+                    "ctr": 7.74,
+                    "cpc": 77.0
                 },
                 {
                     "age_range": "65+",
                     "gender": "female",
-                    "spend": 112030.0,
-                    "spend_ratio": 0.4,
-                    "ctr": 6.15,
-                    "cpc": 130.0
+                    "spend": 103840.0,
+                    "spend_ratio": 0.5,
+                    "ctr": 5.98,
+                    "cpc": 135.0
                 },
                 {
                     "age_range": "65+",
                     "gender": "male",
-                    "spend": 1131055.0,
-                    "spend_ratio": 4.5,
-                    "ctr": 8.6,
+                    "spend": 1026476.0,
+                    "spend_ratio": 4.8,
+                    "ctr": 8.7,
                     "cpc": 75.0
                 }
             ],
             "main_age": [
                 "35-44",
-                "45-45"
+                "45-54"
             ],
             "main_gender": "male",
-            "avoid_age": "",
-            "avoid_gender": "65+"
+            "avoid_age": "65+",
+            "avoid_gender": ""
         }
     },
     "follower_demographics_pages": {
@@ -2236,155 +2713,155 @@
                         [
                             1,
                             "자전거",
-                            42,
+                            37,
                             "35-44 male",
-                            1036637,
-                            "30.2%",
-                            3432566
+                            942775,
+                            "30.3%",
+                            3114011
                         ],
                         [
                             2,
                             "트라이폴드",
-                            41,
+                            36,
                             "35-44 male",
-                            1069399,
-                            "30.2%",
-                            3546861
+                            976614,
+                            "30.8%",
+                            3166394
                         ],
                         [
                             3,
                             "라이딩",
-                            22,
+                            18,
                             "35-44 male",
-                            499088,
-                            "28.1%",
-                            1777981
+                            418147,
+                            "29.0%",
+                            1443065
                         ],
                         [
                             4,
                             "일상",
-                            17,
+                            15,
                             "35-44 male",
-                            448746,
-                            "32.3%",
-                            1389273
+                            383805,
+                            "32.6%",
+                            1179023
                         ],
                         [
                             5,
                             "휴대",
-                            12,
+                            11,
                             "35-44 male",
-                            444971,
-                            "32.1%",
-                            1385292
+                            435192,
+                            "32.5%",
+                            1338325
                         ],
                         [
                             6,
                             "자유",
-                            12,
+                            11,
                             "35-44 male",
-                            335096,
-                            "31.9%",
-                            1049344
+                            260831,
+                            "30.5%",
+                            854534
                         ],
                         [
                             7,
                             "이동",
-                            11,
+                            10,
                             "35-44 male",
-                            327679,
-                            "33.3%",
-                            985487
+                            284419,
+                            "32.6%",
+                            871908
                         ],
                         [
                             8,
                             "제품",
-                            10,
+                            9,
                             "35-44 male",
-                            269948,
-                            "32.4%",
-                            833391
+                            234889,
+                            "31.7%",
+                            740116
                         ],
                         [
                             9,
                             "부품",
                             8,
                             "35-44 male",
-                            233027,
-                            "27.3%",
-                            854564
+                            183236,
+                            "27.5%",
+                            666928
                         ],
                         [
                             10,
                             "편리",
-                            7,
+                            6,
                             "35-44 male",
-                            261176,
-                            "38.0%",
-                            686940
+                            244852,
+                            "37.9%",
+                            645580
                         ],
                         [
                             11,
                             "장거리",
                             6,
                             "35-44 male",
-                            146943,
-                            "24.2%",
-                            606845
+                            137269,
+                            "24.5%",
+                            560183
                         ],
                         [
                             12,
-                            "접이식",
-                            6,
-                            "35-44 male",
-                            208037,
-                            "37.6%",
-                            552629
-                        ],
-                        [
-                            13,
                             "브랜드",
                             6,
                             "35-44 male",
-                            119137,
-                            "34.4%",
-                            346025
+                            102705,
+                            "35.3%",
+                            290928
+                        ],
+                        [
+                            13,
+                            "접이식",
+                            5,
+                            "35-44 male",
+                            207936,
+                            "37.7%",
+                            552223
                         ],
                         [
                             14,
                             "로드",
-                            5,
+                            4,
                             "35-44 male",
-                            116391,
-                            "28.7%",
-                            405486
+                            97657,
+                            "30.2%",
+                            323082
                         ],
                         [
                             15,
-                            "바퀴",
-                            4,
-                            "25-34 male",
-                            96372,
-                            "27.1%",
-                            355589
-                        ],
-                        [
-                            16,
                             "대리점",
                             4,
                             "35-44 male",
-                            59994,
-                            "36.9%",
-                            162376
+                            54316,
+                            "38.2%",
+                            142275
+                        ],
+                        [
+                            16,
+                            "바퀴",
+                            3,
+                            "35-44 male",
+                            80486,
+                            "27.0%",
+                            298497
                         ],
                         [
                             17,
                             "온라인",
                             3,
                             "35-44 male",
-                            85687,
-                            "34.5%",
-                            248243
+                            73213,
+                            "35.0%",
+                            208917
                         ],
                         [
                             18,
@@ -2414,155 +2891,155 @@
                         [
                             1,
                             "자전거",
-                            42,
+                            37,
                             "35-44 male",
-                            58607,
+                            53317,
                             "32.2%",
-                            182070
+                            165393
                         ],
                         [
                             2,
                             "트라이폴드",
-                            41,
+                            36,
                             "35-44 male",
-                            62786,
-                            "32.9%",
-                            190942
+                            57921,
+                            "33.5%",
+                            173123
                         ],
                         [
                             3,
                             "라이딩",
-                            22,
+                            18,
                             "35-44 male",
-                            28552,
-                            "30.3%",
-                            94174
+                            23977,
+                            "31.2%",
+                            76910
                         ],
                         [
                             4,
                             "일상",
-                            17,
+                            15,
                             "35-44 male",
-                            28204,
-                            "36.1%",
-                            78226
+                            23555,
+                            "36.7%",
+                            64254
                         ],
                         [
                             5,
                             "휴대",
-                            12,
+                            11,
                             "35-44 male",
-                            29245,
-                            "35.4%",
-                            82626
+                            28639,
+                            "35.8%",
+                            80052
                         ],
                         [
                             6,
                             "자유",
-                            12,
+                            11,
                             "35-44 male",
-                            18517,
-                            "32.3%",
-                            57366
+                            13900,
+                            "30.9%",
+                            45016
                         ],
                         [
                             7,
                             "이동",
-                            11,
+                            10,
                             "35-44 male",
-                            21026,
+                            18439,
                             "36.0%",
-                            58396
+                            51188
                         ],
                         [
                             8,
                             "제품",
-                            10,
+                            9,
                             "35-44 male",
-                            16172,
-                            "33.0%",
-                            49048
+                            13589,
+                            "32.7%",
+                            41505
                         ],
                         [
                             9,
                             "부품",
                             8,
                             "35-44 male",
-                            14142,
+                            10670,
                             "30.6%",
-                            46226
+                            34886
                         ],
                         [
                             10,
                             "편리",
-                            7,
+                            6,
                             "35-44 male",
-                            14601,
-                            "41.8%",
-                            34971
+                            13736,
+                            "42.0%",
+                            32712
                         ],
                         [
                             11,
                             "장거리",
                             6,
                             "35-44 male",
-                            7788,
-                            "24.8%",
-                            31363
+                            7186,
+                            "25.0%",
+                            28801
                         ],
                         [
                             12,
-                            "접이식",
-                            6,
-                            "35-44 male",
-                            14132,
-                            "39.3%",
-                            35956
-                        ],
-                        [
-                            13,
                             "브랜드",
                             6,
                             "35-44 male",
-                            5693,
-                            "38.3%",
-                            14851
+                            4744,
+                            "38.8%",
+                            12234
+                        ],
+                        [
+                            13,
+                            "접이식",
+                            5,
+                            "35-44 male",
+                            14131,
+                            "39.3%",
+                            35949
                         ],
                         [
                             14,
                             "로드",
-                            5,
+                            4,
                             "35-44 male",
-                            9209,
-                            "37.2%",
-                            24735
+                            8134,
+                            "39.6%",
+                            20540
                         ],
                         [
                             15,
-                            "바퀴",
-                            4,
-                            "35-44 male",
-                            7046,
-                            "31.9%",
-                            22096
-                        ],
-                        [
-                            16,
                             "대리점",
                             4,
                             "35-44 male",
-                            2029,
+                            1722,
                             "36.2%",
-                            5610
+                            4754
+                        ],
+                        [
+                            16,
+                            "바퀴",
+                            3,
+                            "35-44 male",
+                            6324,
+                            "34.0%",
+                            18575
                         ],
                         [
                             17,
                             "온라인",
                             3,
                             "35-44 male",
-                            4253,
-                            "33.1%",
-                            12867
+                            3609,
+                            "32.4%",
+                            11145
                         ],
                         [
                             18,
@@ -2592,227 +3069,227 @@
                         [
                             1,
                             "함께",
-                            28,
+                            25,
                             "35-44 male",
-                            721876,
-                            "31.0%",
-                            2329577
+                            610154,
+                            "30.5%",
+                            1999998
                         ],
                         [
                             2,
                             "고객",
                             20,
                             "35-44 male",
-                            545807,
-                            "29.1%",
-                            1876772
+                            468593,
+                            "30.4%",
+                            1542194
                         ],
                         [
                             3,
                             "아니",
-                            20,
+                            18,
                             "35-44 male",
-                            474811,
-                            "28.7%",
-                            1654643
+                            418036,
+                            "28.5%",
+                            1468920
                         ],
                         [
                             4,
-                            "드리",
-                            17,
-                            "35-44 male",
-                            395732,
-                            "31.8%",
-                            1246101
-                        ],
-                        [
-                            5,
                             "경험",
                             16,
                             "35-44 male",
-                            510738,
+                            438108,
                             "31.8%",
-                            1605751
+                            1379275
+                        ],
+                        [
+                            5,
+                            "드리",
+                            15,
+                            "35-44 male",
+                            313602,
+                            "32.7%",
+                            959646
                         ],
                         [
                             6,
-                            "선택",
-                            16,
+                            "가능",
+                            14,
                             "35-44 male",
-                            409415,
-                            "32.5%",
-                            1257880
+                            448331,
+                            "31.0%",
+                            1445036
                         ],
                         [
                             7,
-                            "가능",
-                            15,
+                            "선택",
+                            14,
                             "35-44 male",
-                            483583,
-                            "30.3%",
-                            1597613
+                            338770,
+                            "33.3%",
+                            1017118
                         ],
                         [
                             8,
                             "이유",
-                            15,
+                            13,
                             "35-44 male",
-                            471872,
-                            "32.1%",
-                            1467894
+                            442652,
+                            "33.3%",
+                            1328499
                         ],
                         [
                             9,
                             "모두",
-                            15,
+                            13,
                             "35-44 male",
-                            411973,
-                            "31.3%",
-                            1317318
+                            342406,
+                            "31.6%",
+                            1083679
                         ],
                         [
                             10,
                             "여행",
-                            14,
+                            12,
                             "35-44 male",
-                            367366,
-                            "33.2%",
-                            1107788
+                            312904,
+                            "32.3%",
+                            967665
                         ],
                         [
                             11,
                             "사람",
-                            14,
+                            12,
                             "35-44 male",
-                            341280,
-                            "31.5%",
-                            1081788
+                            309402,
+                            "32.1%",
+                            965168
                         ],
                         [
                             12,
-                            "위하",
-                            13,
-                            "35-44 male",
-                            401496,
-                            "35.7%",
-                            1124364
-                        ],
-                        [
-                            13,
-                            "가장",
-                            13,
-                            "35-44 male",
-                            327790,
-                            "30.0%",
-                            1093663
-                        ],
-                        [
-                            14,
                             "이상",
                             12,
                             "35-44 male",
-                            333455,
-                            "30.8%",
-                            1083503
+                            280180,
+                            "29.7%",
+                            943804
+                        ],
+                        [
+                            13,
+                            "위하",
+                            11,
+                            "35-44 male",
+                            359668,
+                            "37.2%",
+                            968032
+                        ],
+                        [
+                            14,
+                            "가장",
+                            11,
+                            "35-44 male",
+                            279753,
+                            "31.0%",
+                            901646
                         ],
                         [
                             15,
                             "즐겁",
-                            12,
+                            11,
                             "35-44 male",
-                            303980,
-                            "30.9%",
-                            983147
+                            253514,
+                            "30.8%",
+                            822826
                         ],
                         [
                             16,
                             "구매",
-                            12,
+                            11,
                             "35-44 male",
-                            240467,
-                            "35.5%",
-                            677543
+                            209614,
+                            "36.4%",
+                            575227
                         ],
                         [
                             17,
-                            "필요",
-                            11,
-                            "35-44 male",
-                            281113,
-                            "31.5%",
-                            893781
-                        ],
-                        [
-                            18,
-                            "즐기",
-                            11,
-                            "35-44 male",
-                            216461,
-                            "28.4%",
-                            761141
-                        ],
-                        [
-                            19,
-                            "때문",
-                            10,
-                            "35-44 male",
-                            321280,
-                            "28.2%",
-                            1139184
-                        ],
-                        [
-                            20,
                             "생각",
                             10,
                             "35-44 male",
-                            272523,
-                            "31.8%",
-                            857352
+                            236417,
+                            "32.4%",
+                            730029
                         ],
                         [
-                            21,
-                            "우리",
-                            10,
+                            18,
+                            "때문",
+                            9,
                             "35-44 male",
-                            221766,
-                            "31.3%",
-                            707895
+                            286740,
+                            "29.1%",
+                            985618
                         ],
                         [
-                            22,
+                            19,
                             "어디",
                             9,
                             "35-44 male",
-                            296448,
-                            "29.7%",
-                            998268
+                            273593,
+                            "30.3%",
+                            902256
                         ],
                         [
-                            23,
+                            20,
+                            "필요",
+                            9,
+                            "35-44 male",
+                            221799,
+                            "30.0%",
+                            740050
+                        ],
+                        [
+                            21,
                             "새롭",
                             9,
                             "35-44 male",
-                            290485,
-                            "35.9%",
-                            808902
+                            219456,
+                            "35.2%",
+                            624123
                         ],
                         [
-                            24,
+                            22,
+                            "즐기",
+                            9,
+                            "35-44 male",
+                            164738,
+                            "27.1%",
+                            607767
+                        ],
+                        [
+                            23,
                             "시작",
                             9,
                             "35-44 male",
-                            245454,
-                            "33.4%",
-                            734289
+                            183595,
+                            "32.3%",
+                            568620
+                        ],
+                        [
+                            24,
+                            "직접",
+                            8,
+                            "35-44 male",
+                            204656,
+                            "31.0%",
+                            659842
                         ],
                         [
                             25,
-                            "어떻",
-                            9,
+                            "우리",
+                            8,
                             "35-44 male",
-                            199018,
-                            "28.5%",
-                            699299
+                            195356,
+                            "31.3%",
+                            624134
                         ]
                     ],
                     "footnote": "*등장 광고 수 상위 50개 기준"
@@ -2833,227 +3310,227 @@
                         [
                             26,
                             "그래서",
-                            9,
+                            8,
                             "25-34 male",
-                            170210,
-                            "24.5%",
-                            694494
+                            135558,
+                            "23.4%",
+                            580547
                         ],
                         [
                             27,
-                            "사용",
-                            9,
+                            "어떻",
+                            8,
                             "35-44 male",
-                            155478,
-                            "31.8%",
-                            488656
+                            141098,
+                            "26.3%",
+                            536808
                         ],
                         [
                             28,
-                            "직접",
-                            8,
-                            "35-44 male",
-                            221011,
-                            "31.1%",
-                            709919
-                        ],
-                        [
-                            29,
-                            "가방",
-                            8,
-                            "35-44 male",
-                            215313,
-                            "36.2%",
-                            594431
-                        ],
-                        [
-                            30,
                             "유저",
                             8,
                             "35-44 male",
-                            229375,
-                            "39.1%",
-                            586058
+                            201702,
+                            "39.9%",
+                            505134
                         ],
                         [
-                            31,
-                            "시간",
-                            8,
-                            "35-44 male",
-                            174412,
-                            "30.6%",
-                            569375
-                        ],
-                        [
-                            32,
-                            "이야기",
-                            8,
-                            "35-44 male",
-                            173183,
-                            "30.9%",
-                            561230
-                        ],
-                        [
-                            33,
-                            "많이",
-                            8,
-                            "35-44 male",
-                            138225,
-                            "29.6%",
-                            466991
-                        ],
-                        [
-                            34,
-                            "다양",
-                            8,
-                            "35-44 male",
-                            152754,
-                            "33.6%",
-                            454533
-                        ],
-                        [
-                            35,
-                            "여러분",
-                            8,
-                            "35-44 male",
-                            92848,
-                            "34.3%",
-                            270908
-                        ],
-                        [
-                            36,
-                            "스타일",
-                            7,
-                            "35-44 male",
-                            189135,
-                            "25.6%",
-                            738007
-                        ],
-                        [
-                            37,
-                            "이제",
-                            7,
-                            "35-44 male",
-                            218135,
-                            "29.7%",
-                            734322
-                        ],
-                        [
-                            38,
-                            "알리",
-                            7,
-                            "35-44 male",
-                            209873,
-                            "29.9%",
-                            701044
-                        ],
-                        [
-                            39,
+                            29,
                             "편하",
                             7,
                             "35-44 male",
-                            242704,
-                            "35.0%",
-                            694256
+                            226849,
+                            "34.7%",
+                            653418
                         ],
                         [
-                            40,
-                            "당신",
-                            7,
-                            "25-34 male",
-                            185209,
-                            "28.7%",
-                            644597
-                        ],
-                        [
-                            41,
-                            "계시",
+                            30,
+                            "이제",
                             7,
                             "35-44 male",
-                            176807,
-                            "27.9%",
-                            633595
+                            193274,
+                            "29.7%",
+                            650099
                         ],
                         [
-                            42,
-                            "사랑",
+                            31,
+                            "스타일",
                             7,
                             "35-44 male",
-                            172548,
-                            "29.3%",
-                            589719
+                            159154,
+                            "27.1%",
+                            586982
                         ],
                         [
-                            43,
-                            "가볍",
+                            32,
+                            "알리",
                             7,
                             "35-44 male",
-                            207052,
-                            "36.6%",
-                            566448
+                            183703,
+                            "31.4%",
+                            584223
                         ],
                         [
-                            44,
-                            "하나",
+                            33,
+                            "이야기",
                             7,
                             "35-44 male",
-                            207678,
-                            "37.5%",
-                            554465
+                            156119,
+                            "30.3%",
+                            516046
                         ],
                         [
-                            45,
-                            "확인",
-                            7,
-                            "25-34 male",
-                            132622,
-                            "24.1%",
-                            550535
-                        ],
-                        [
-                            46,
-                            "생기",
+                            34,
+                            "시간",
                             7,
                             "35-44 male",
-                            148655,
-                            "28.3%",
-                            525512
+                            155461,
+                            "31.4%",
+                            494629
                         ],
                         [
-                            47,
+                            35,
+                            "다양",
+                            7,
+                            "35-44 male",
+                            131743,
+                            "32.8%",
+                            401233
+                        ],
+                        [
+                            36,
+                            "느끼",
+                            7,
+                            "35-44 male",
+                            125715,
+                            "32.0%",
+                            393221
+                        ],
+                        [
+                            37,
                             "서비스",
                             7,
                             "35-44 male",
-                            174437,
-                            "35.6%",
-                            489914
+                            130969,
+                            "35.9%",
+                            364816
+                        ],
+                        [
+                            38,
+                            "사용",
+                            7,
+                            "35-44 male",
+                            116746,
+                            "32.8%",
+                            356132
+                        ],
+                        [
+                            39,
+                            "바이크",
+                            7,
+                            "35-44 male",
+                            87009,
+                            "36.4%",
+                            238726
+                        ],
+                        [
+                            40,
+                            "둘째",
+                            6,
+                            "35-44 male",
+                            279497,
+                            "35.8%",
+                            780287
+                        ],
+                        [
+                            41,
+                            "셋째",
+                            6,
+                            "35-44 male",
+                            279497,
+                            "35.8%",
+                            780287
+                        ],
+                        [
+                            42,
+                            "첫째",
+                            6,
+                            "35-44 male",
+                            279497,
+                            "35.8%",
+                            780287
+                        ],
+                        [
+                            43,
+                            "편안",
+                            6,
+                            "35-44 male",
+                            179261,
+                            "28.7%",
+                            624578
+                        ],
+                        [
+                            44,
+                            "안정",
+                            6,
+                            "35-44 male",
+                            248789,
+                            "40.2%",
+                            619465
+                        ],
+                        [
+                            45,
+                            "이용",
+                            6,
+                            "35-44 male",
+                            210739,
+                            "34.1%",
+                            617235
+                        ],
+                        [
+                            46,
+                            "고민",
+                            6,
+                            "35-44 male",
+                            164704,
+                            "28.1%",
+                            586863
+                        ],
+                        [
+                            47,
+                            "보관",
+                            6,
+                            "35-44 male",
+                            191891,
+                            "33.9%",
+                            566273
                         ],
                         [
                             48,
-                            "따르",
-                            7,
-                            "25-34 male",
-                            129988,
-                            "26.7%",
-                            486537
+                            "캐리어",
+                            6,
+                            "35-44 male",
+                            184502,
+                            "34.3%",
+                            538111
                         ],
                         [
                             49,
-                            "무엇",
-                            7,
-                            "25-34 male",
-                            100023,
-                            "22.9%",
-                            435932
+                            "가볍",
+                            6,
+                            "35-44 male",
+                            193141,
+                            "36.6%",
+                            527878
                         ],
                         [
                             50,
-                            "보이",
-                            7,
+                            "가방",
+                            6,
                             "35-44 male",
-                            123666,
-                            "28.8%",
-                            429432
+                            183517,
+                            "35.5%",
+                            516258
                         ]
                     ],
                     "footnote": "*등장 광고 수 상위 50개 기준"
@@ -3074,227 +3551,227 @@
                         [
                             1,
                             "함께",
-                            28,
+                            25,
                             "35-44 male",
-                            38617,
-                            "31.5%",
-                            122737
+                            31259,
+                            "30.7%",
+                            101807
                         ],
                         [
                             2,
                             "고객",
                             20,
                             "35-44 male",
-                            31347,
-                            "32.2%",
-                            97316
+                            27447,
+                            "33.4%",
+                            82054
                         ],
                         [
                             3,
                             "아니",
-                            20,
+                            18,
                             "35-44 male",
-                            26178,
-                            "30.3%",
-                            86350
+                            22540,
+                            "30.0%",
+                            75174
                         ],
                         [
                             4,
-                            "드리",
-                            17,
-                            "35-44 male",
-                            23562,
-                            "35.3%",
-                            66700
-                        ],
-                        [
-                            5,
                             "경험",
                             16,
                             "35-44 male",
-                            34516,
+                            29762,
                             "33.5%",
-                            103160
+                            88873
+                        ],
+                        [
+                            5,
+                            "드리",
+                            15,
+                            "35-44 male",
+                            18758,
+                            "36.4%",
+                            51510
                         ],
                         [
                             6,
-                            "선택",
-                            16,
+                            "가능",
+                            14,
                             "35-44 male",
-                            26113,
-                            "34.3%",
-                            76082
+                            26339,
+                            "33.3%",
+                            79108
                         ],
                         [
                             7,
-                            "가능",
-                            15,
+                            "선택",
+                            14,
                             "35-44 male",
-                            28609,
-                            "32.8%",
-                            87153
+                            20984,
+                            "35.7%",
+                            58754
                         ],
                         [
                             8,
                             "이유",
-                            15,
+                            13,
                             "35-44 male",
-                            31143,
-                            "33.8%",
-                            92147
+                            29343,
+                            "34.8%",
+                            84426
                         ],
                         [
                             9,
                             "모두",
-                            15,
+                            13,
                             "35-44 male",
-                            27150,
-                            "34.5%",
-                            78808
+                            22408,
+                            "34.9%",
+                            64184
                         ],
                         [
                             10,
                             "여행",
-                            14,
+                            12,
                             "35-44 male",
-                            21562,
-                            "32.6%",
-                            66157
+                            18586,
+                            "31.8%",
+                            58506
                         ],
                         [
                             11,
                             "사람",
-                            14,
+                            12,
                             "35-44 male",
-                            23524,
-                            "35.7%",
-                            65974
+                            21580,
+                            "36.4%",
+                            59289
                         ],
                         [
                             12,
-                            "위하",
-                            13,
-                            "35-44 male",
-                            25122,
-                            "35.4%",
-                            70963
-                        ],
-                        [
-                            13,
-                            "가장",
-                            13,
-                            "35-44 male",
-                            20946,
-                            "30.0%",
-                            69733
-                        ],
-                        [
-                            14,
                             "이상",
                             12,
                             "35-44 male",
-                            20325,
-                            "30.0%",
-                            67761
+                            16616,
+                            "29.1%",
+                            57175
+                        ],
+                        [
+                            13,
+                            "위하",
+                            11,
+                            "35-44 male",
+                            22760,
+                            "36.3%",
+                            62644
+                        ],
+                        [
+                            14,
+                            "가장",
+                            11,
+                            "35-44 male",
+                            17322,
+                            "30.6%",
+                            56700
                         ],
                         [
                             15,
                             "즐겁",
-                            12,
+                            11,
                             "35-44 male",
-                            14668,
-                            "29.6%",
-                            49575
+                            11839,
+                            "29.0%",
+                            40853
                         ],
                         [
                             16,
                             "구매",
-                            12,
+                            11,
                             "35-44 male",
-                            10796,
-                            "37.1%",
-                            29076
+                            9201,
+                            "37.5%",
+                            24513
                         ],
                         [
                             17,
-                            "필요",
-                            11,
-                            "35-44 male",
-                            15125,
-                            "34.7%",
-                            43537
-                        ],
-                        [
-                            18,
-                            "즐기",
-                            11,
-                            "35-44 male",
-                            12613,
-                            "32.1%",
-                            39300
-                        ],
-                        [
-                            19,
-                            "때문",
-                            10,
-                            "35-44 male",
-                            21838,
-                            "31.3%",
-                            69708
-                        ],
-                        [
-                            20,
                             "생각",
                             10,
                             "35-44 male",
-                            18138,
-                            "33.1%",
-                            54764
+                            15899,
+                            "33.6%",
+                            47249
                         ],
                         [
-                            21,
-                            "우리",
-                            10,
+                            18,
+                            "때문",
+                            9,
                             "35-44 male",
-                            15504,
-                            "34.6%",
-                            44862
+                            19762,
+                            "32.1%",
+                            61509
                         ],
                         [
-                            22,
+                            19,
                             "어디",
                             9,
                             "35-44 male",
-                            18411,
-                            "33.1%",
-                            55624
+                            17046,
+                            "33.8%",
+                            50388
                         ],
                         [
-                            23,
+                            20,
+                            "필요",
+                            9,
+                            "35-44 male",
+                            11424,
+                            "33.7%",
+                            33893
+                        ],
+                        [
+                            21,
                             "새롭",
                             9,
                             "35-44 male",
-                            19854,
+                            14514,
                             "37.1%",
-                            53494
+                            39126
                         ],
                         [
-                            24,
+                            22,
+                            "즐기",
+                            9,
+                            "35-44 male",
+                            9311,
+                            "30.8%",
+                            30248
+                        ],
+                        [
+                            23,
                             "시작",
                             9,
                             "35-44 male",
-                            13898,
-                            "31.4%",
-                            44253
+                            9719,
+                            "29.7%",
+                            32773
+                        ],
+                        [
+                            24,
+                            "직접",
+                            8,
+                            "35-44 male",
+                            11567,
+                            "34.5%",
+                            33535
                         ],
                         [
                             25,
-                            "어떻",
-                            9,
+                            "우리",
+                            8,
                             "35-44 male",
-                            11824,
-                            "28.7%",
-                            41180
+                            13789,
+                            "34.7%",
+                            39787
                         ]
                     ],
                     "footnote": "*등장 광고 수 상위 50개 기준"
@@ -3315,227 +3792,227 @@
                         [
                             26,
                             "그래서",
-                            9,
+                            8,
                             "25-34 male",
-                            8429,
-                            "23.6%",
-                            35665
+                            6967,
+                            "22.9%",
+                            30386
                         ],
                         [
                             27,
-                            "사용",
-                            9,
+                            "어떻",
+                            8,
                             "35-44 male",
-                            6566,
-                            "32.1%",
-                            20456
+                            7809,
+                            "26.2%",
+                            29782
                         ],
                         [
                             28,
-                            "직접",
-                            8,
-                            "35-44 male",
-                            12433,
-                            "34.7%",
-                            35791
-                        ],
-                        [
-                            29,
-                            "가방",
-                            8,
-                            "35-44 male",
-                            15243,
-                            "38.4%",
-                            39724
-                        ],
-                        [
-                            30,
                             "유저",
                             8,
                             "35-44 male",
-                            15372,
-                            "40.0%",
-                            38387
+                            14015,
+                            "40.8%",
+                            34380
                         ],
                         [
-                            31,
-                            "시간",
-                            8,
-                            "35-44 male",
-                            8629,
-                            "29.5%",
-                            29268
-                        ],
-                        [
-                            32,
-                            "이야기",
-                            8,
-                            "35-44 male",
-                            11136,
-                            "35.1%",
-                            31732
-                        ],
-                        [
-                            33,
-                            "많이",
-                            8,
-                            "35-44 male",
-                            8177,
-                            "29.2%",
-                            28024
-                        ],
-                        [
-                            34,
-                            "다양",
-                            8,
-                            "35-44 male",
-                            10025,
-                            "37.1%",
-                            27016
-                        ],
-                        [
-                            35,
-                            "여러분",
-                            8,
-                            "35-44 male",
-                            5210,
-                            "35.3%",
-                            14768
-                        ],
-                        [
-                            36,
-                            "스타일",
-                            7,
-                            "35-44 male",
-                            9339,
-                            "23.4%",
-                            39954
-                        ],
-                        [
-                            37,
-                            "이제",
-                            7,
-                            "35-44 male",
-                            15111,
-                            "33.7%",
-                            44837
-                        ],
-                        [
-                            38,
-                            "알리",
-                            7,
-                            "35-44 male",
-                            13974,
-                            "35.4%",
-                            39517
-                        ],
-                        [
-                            39,
+                            29,
                             "편하",
                             7,
                             "35-44 male",
-                            13674,
-                            "34.5%",
-                            39597
+                            12323,
+                            "34.1%",
+                            36188
                         ],
                         [
-                            40,
-                            "당신",
-                            7,
-                            "25-34 male",
-                            7599,
-                            "26.8%",
-                            28402
-                        ],
-                        [
-                            41,
-                            "계시",
+                            30,
+                            "이제",
                             7,
                             "35-44 male",
-                            9349,
-                            "29.5%",
-                            31639
+                            13752,
+                            "33.5%",
+                            41034
                         ],
                         [
-                            42,
-                            "사랑",
+                            31,
+                            "스타일",
                             7,
                             "35-44 male",
-                            11144,
-                            "29.4%",
-                            37858
+                            7827,
+                            "24.1%",
+                            32443
                         ],
                         [
-                            43,
-                            "가볍",
+                            32,
+                            "알리",
                             7,
                             "35-44 male",
-                            10744,
-                            "35.5%",
-                            30253
+                            12174,
+                            "36.8%",
+                            33103
                         ],
                         [
-                            44,
-                            "하나",
+                            33,
+                            "이야기",
                             7,
                             "35-44 male",
-                            12288,
-                            "37.6%",
-                            32665
+                            10182,
+                            "34.9%",
+                            29215
                         ],
                         [
-                            45,
-                            "확인",
-                            7,
-                            "25-34 male",
-                            4305,
-                            "22.5%",
-                            19096
-                        ],
-                        [
-                            46,
-                            "생기",
+                            34,
+                            "시간",
                             7,
                             "35-44 male",
-                            7458,
-                            "30.2%",
-                            24689
+                            7666,
+                            "29.9%",
+                            25612
                         ],
                         [
-                            47,
+                            35,
+                            "다양",
+                            7,
+                            "35-44 male",
+                            8691,
+                            "37.3%",
+                            23323
+                        ],
+                        [
+                            36,
+                            "느끼",
+                            7,
+                            "35-44 male",
+                            6148,
+                            "29.7%",
+                            20678
+                        ],
+                        [
+                            37,
                             "서비스",
                             7,
                             "35-44 male",
-                            8633,
-                            "36.5%",
-                            23672
+                            6092,
+                            "36.6%",
+                            16646
+                        ],
+                        [
+                            38,
+                            "사용",
+                            7,
+                            "35-44 male",
+                            4512,
+                            "32.1%",
+                            14078
+                        ],
+                        [
+                            39,
+                            "바이크",
+                            7,
+                            "35-44 male",
+                            6662,
+                            "34.9%",
+                            19108
+                        ],
+                        [
+                            40,
+                            "둘째",
+                            6,
+                            "35-44 male",
+                            19088,
+                            "39.2%",
+                            48740
+                        ],
+                        [
+                            41,
+                            "셋째",
+                            6,
+                            "35-44 male",
+                            19088,
+                            "39.2%",
+                            48740
+                        ],
+                        [
+                            42,
+                            "첫째",
+                            6,
+                            "35-44 male",
+                            19088,
+                            "39.2%",
+                            48740
+                        ],
+                        [
+                            43,
+                            "편안",
+                            6,
+                            "35-44 male",
+                            10170,
+                            "31.3%",
+                            32463
+                        ],
+                        [
+                            44,
+                            "안정",
+                            6,
+                            "35-44 male",
+                            16822,
+                            "40.1%",
+                            41925
+                        ],
+                        [
+                            45,
+                            "이용",
+                            6,
+                            "35-44 male",
+                            13499,
+                            "39.7%",
+                            33987
+                        ],
+                        [
+                            46,
+                            "고민",
+                            6,
+                            "35-44 male",
+                            8850,
+                            "29.5%",
+                            29956
+                        ],
+                        [
+                            47,
+                            "보관",
+                            6,
+                            "35-44 male",
+                            10542,
+                            "33.0%",
+                            31898
                         ],
                         [
                             48,
-                            "따르",
-                            7,
-                            "25-34 male",
-                            5640,
-                            "24.8%",
-                            22699
+                            "캐리어",
+                            6,
+                            "35-44 male",
+                            10299,
+                            "33.9%",
+                            30418
                         ],
                         [
                             49,
-                            "무엇",
-                            7,
+                            "가볍",
+                            6,
                             "35-44 male",
-                            5054,
-                            "20.8%",
-                            24336
+                            9746,
+                            "35.7%",
+                            27269
                         ],
                         [
                             50,
-                            "보이",
-                            7,
+                            "가방",
+                            6,
                             "35-44 male",
-                            6555,
-                            "26.9%",
-                            24350
+                            12862,
+                            "37.9%",
+                            33970
                         ]
                     ],
                     "footnote": "*등장 광고 수 상위 50개 기준"

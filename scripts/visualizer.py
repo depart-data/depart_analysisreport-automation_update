@@ -1117,9 +1117,9 @@ def render_target_spend_bubble(dataset: Dict[str, Any], color_map: Dict[str, Any
     avoid_ages_n   = _norm(avoid_age)
     avoid_genders_n= [_map_g(g) for g in _norm(avoid_gender)]
 
-    COLOR_MAIN  = "#b2ed92"   # 메인 타겟 (초록)
-    COLOR_AVOID = "#9a0500"   # 기피 타겟 (빨강)
-    COLOR_MID   = "#e2931d"   # 중간 (노랑)
+    COLOR_MAIN  = "#d0f4bc"   # 메인 타겟 (초록)
+    COLOR_AVOID = "#b84541"   # 기피 타겟 (빨강)
+    COLOR_MID   = "#f9bd63"   # 중간 (주황)
 
     def cell_color(age, gender):
         a, g = _canon_age(age), gender.lower()
@@ -1174,7 +1174,7 @@ def render_target_spend_bubble(dataset: Dict[str, Any], color_map: Dict[str, Any
 
             ax.text(j, -i, f"{ratio:.1f}%\n{int(cpc):,}원",
                     ha="center", va="center",
-                    fontsize=5, fontweight="normal", zorder=5,
+                    fontsize=5, fontweight="bold", zorder=5,
                     clip_on=False,  # 텍스트도 동일하게 클리핑 해제
             )
 
