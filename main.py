@@ -86,6 +86,24 @@ def _safe_name(token: Any) -> str:
     return re.sub(r"[^0-9A-Za-z_.-]", "_", text)
 
 
+def _crop_to_feed_ratio(path: Path) -> None:
+    """세로 비율이 인스타그램 피드 기본 비율(4:5)보다 길면 중앙 기준으로 크롭."""
+    try:
+        from PIL import Image
+        img = Image.open(path)
+        w, h = img.size
+        target_h = int(w * 5 / 4)
+        if h <= target_h:
+            return
+        top = (h - target_h) // 2
+        img = img.crop((0, top, w, top + target_h))
+        fmt = Image.registered_extensions().get(path.suffix.lower(), "JPEG").upper()
+        fmt = fmt if fmt in {"JPEG", "PNG", "WEBP"} else "JPEG"
+        img.save(path, format=fmt, quality=92)
+    except Exception:
+        pass
+
+
 def _materialize_content_thumbnails(items: list[dict[str, Any]], output_dir: str = "static/thumbnail") -> None:
     if not items:
         return
@@ -141,6 +159,7 @@ def _materialize_content_thumbnails(items: list[dict[str, Any]], output_dir: str
 
         # 로컬에 파일이 이미 있으면 S3 다운로드 없이 바로 사용
         if local_file.exists() and local_file.stat().st_size > 0:
+            _crop_to_feed_ratio(local_file)
             local_src = f"./{local_file.as_posix()}"
             item["thumbnail"] = local_src
             cache[src] = local_src
@@ -157,6 +176,7 @@ def _materialize_content_thumbnails(items: list[dict[str, Any]], output_dir: str
                 print(f"thumbnail download failed: bucket={bucket} key={key} err={exc}")
                 continue
 
+        _crop_to_feed_ratio(local_file)
         local_src = f"./{local_file.as_posix()}"
         item["thumbnail"] = local_src
         cache[src] = local_src
