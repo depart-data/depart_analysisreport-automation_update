@@ -662,13 +662,13 @@ def _render_heatmap(rows: List[Dict[str, Any]], metric: str, color_map: Dict[str
     df = pd.DataFrame(rows)
     if df.empty or metric not in df.columns:
         return ""
-    if "age" not in df.columns or "gender" not in df.columns:
+    if "age_range" not in df.columns or "gender" not in df.columns:
         return ""
 
-    pivot = df.pivot_table(index="gender", columns="age", values=metric, aggfunc="mean")
+    pivot = df.pivot_table(index="gender", columns="age_range", values=metric, aggfunc="mean")
     imp_pivot = None
     if metric == "ctr" and "impressions" in df.columns:
-        imp_pivot = df.pivot_table(index="gender", columns="age", values="impressions", aggfunc="mean")
+        imp_pivot = df.pivot_table(index="gender", columns="age_range", values="impressions", aggfunc="mean")
 
     age_order = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
     gender_order = ["female", "male"]
@@ -779,7 +779,7 @@ def render_table_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], metri
         if heatmap_svg:
             return heatmap_svg
 
-    if "age" in rows[0] and "gender" in rows[0] and "ctr" in rows[0]:
+    if "age_range" in rows[0] and "gender" in rows[0] and "ctr" in rows[0]:
         heatmap_svg = _render_heatmap(rows, "ctr", color_map)
         if heatmap_svg:
             return heatmap_svg
@@ -803,7 +803,7 @@ def render_content_card(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> L
             detail_df = pd.DataFrame(details)
             if (
                 not detail_df.empty
-                and {"age", "gender", "ctr"}.issubset(detail_df.columns)
+                and {"age_range", "gender", "ctr"}.issubset(detail_df.columns)
             ):
                 detail_df["gender"] = detail_df["gender"].astype(str).str.strip()
                 detail_df = detail_df[detail_df["gender"].str.lower() != "unknown"]
@@ -818,7 +818,7 @@ def render_content_card(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> L
                 detail_df = detail_df.sort_values("ctr", ascending=False).head(6)
                 labels = []
                 for _, row in detail_df.iterrows():
-                    age_text = str(row["age"]).strip()
+                    age_text = str(row["age_range"]).strip()
                     gender_text = str(row["gender"]).strip()
                     gender_low = gender_text.lower()
                     if gender_low == "female":
@@ -1026,7 +1026,7 @@ def render_purchase_pie_chart(rows: List[Dict[str, Any]], color_map: Dict[str, A
         return str(g)
 
     labels = [
-        f"{str(row['age']).strip()} {_gender_label(row['gender'])}"
+        f"{str(row['age_range']).strip()} {_gender_label(row['gender'])}"
         for _, row in df.iterrows()
     ]
     values = df["purchases"].tolist()
@@ -1372,10 +1372,10 @@ def _render_purchase_conversion_heatmap(
     df = pd.DataFrame(rows)
     if df.empty or "purchases" not in df.columns:
         return ""
-    if "age" not in df.columns or "gender" not in df.columns:
+    if "age_range" not in df.columns or "gender" not in df.columns:
         return ""
 
-    pivot = df.pivot_table(index="gender", columns="age", values="purchases", aggfunc="sum")
+    pivot = df.pivot_table(index="gender", columns="age_range", values="purchases", aggfunc="sum")
 
     age_order = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
     gender_order = ["female", "male"]

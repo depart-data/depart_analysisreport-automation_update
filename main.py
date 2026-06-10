@@ -210,7 +210,7 @@ def _top_targets(rows, metric: str, limit: int = 2, filter_low_imps: bool = Fals
     # purchases는 합계 기준, 나머지는 기존처럼 행 기준 정렬
     if metric == "purchases":
         df_sorted = (
-            df_filtered.groupby(["age", "gender"], as_index=False)[metric]
+            df_filtered.groupby(["age_range", "gender"], as_index=False)[metric]
             .sum()
             .sort_values(by=metric, ascending=False)
         )
@@ -220,7 +220,7 @@ def _top_targets(rows, metric: str, limit: int = 2, filter_low_imps: bool = Fals
 
     results = []
     for idx, row in enumerate(df_sorted.head(limit).itertuples(), 1):
-        age = str(getattr(row, "age", "") or "")
+        age = str(getattr(row, "age_range", "") or "")
         gender = str(getattr(row, "gender", "") or "")
 
         if gender.lower() == "female":
@@ -343,7 +343,7 @@ def _target_ctr(rows, age: Any = None, gender: Any = None):
     age_values = _selector_values(age)
     gender_values = _selector_values(gender)
     if age_values:
-        df = df[df["age"].astype(str).isin(age_values)]
+        df = df[df["age_range"].astype(str).isin(age_values)]
     if gender_values:
         df = df[df["gender"].astype(str).isin(gender_values)]
     if df.empty:
@@ -508,12 +508,12 @@ def run():
     start_time = time.time()
 
     config = {
-        "target_id": 29,
-        "fb_ad_account_id":"act_2112797419492230",
-        "start":"2025-11-17",
-        "end": "2026-03-29",
+        "target_id": 25,
+        "fb_ad_account_id":"act_4260950964221595",
+        "start":"2026-01-26",
+        "end": "2026-06-01",
         "main_age": ["25-34", "35-44"],
-        "main_gender": "",
+        "main_gender": "female",
         "avoid_age": "",
         "avoid_gender": "",
         "currency": ""  # ""=원화, "dollar"=달러

@@ -445,8 +445,8 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
     # 2. 개별 광고 데이터 가져오기 (uploaded_at, ig_permalink 포함)
     
     ads_query = f"""
-    SELECT 
-        ad.id, 
+    SELECT
+        ad.id AS ad_id,
         ad.ad_name,
         ad.fb_ad_id,
         ig.ig_timestamp as uploaded_at, -- 업로드일로 사용
@@ -508,7 +508,7 @@ def get_a_content_target_ctr_data(ad_id, date_start, date_end):
     
     query = f"""
         SELECT 
-            apd.age_range AS age, apd.gender,
+            apd.age_range, apd.gender,
             ROUND((SUM(apd.clicks)::numeric / NULLIF(SUM(apd.impressions), 0)::numeric) * 100, 2) as ctr
         FROM ads ad
         JOIN ad_sets ads ON ad.ad_set_id = ads.id
@@ -536,9 +536,9 @@ def get_target_avg_imp_ctr(account_id, date_start, date_end):
     
     query = f"""
         SELECT 
-        apd.age_range AS age, 
-        apd.gender, 
-        SUM(apd.impressions) AS impressions, 
+        apd.age_range,
+        apd.gender,
+        SUM(apd.impressions) AS impressions,
         SUM(apd.clicks) AS clicks,
         -- NULLIF를 사용하여 분모(impressions)가 0이면 NULL로 처리
         -- CTR 공식은 (클릭 / 노출) * 100입니다.
@@ -1215,26 +1215,26 @@ def get_essence_target_performance(account_id, date_start, date_end):
     res.single_ess AS "키워드",
     res.total_ad_count AS "등장 광고 수",
     -- 노출 파트
-    MAX(CASE WHEN res.imp_rank = 1 THEN res.age || ' ' || res.gender END) AS "최다 노출 타겟",
+    MAX(CASE WHEN res.imp_rank = 1 THEN res.age_range || ' ' || res.gender END) AS "최다 노출 타겟",
     MAX(CASE WHEN res.imp_rank = 1 THEN res.target_imp END)::bigint AS "타겟 노출량",
     ROUND(MAX(CASE WHEN res.imp_rank = 1 THEN res.target_imp END)::numeric / NULLIF(MAX(res.total_imp), 0) * 100, 1) || '%%' AS "노출 비중",
     MAX(res.total_imp)::bigint AS "총 노출량",
     -- 클릭 파트
-    MAX(CASE WHEN res.clk_rank = 1 THEN res.age || ' ' || res.gender END) AS "최다 클릭 타겟",
+    MAX(CASE WHEN res.clk_rank = 1 THEN res.age_range || ' ' || res.gender END) AS "최다 클릭 타겟",
     MAX(CASE WHEN res.clk_rank = 1 THEN res.target_clk END)::bigint AS "타겟 클릭량",
     ROUND(MAX(CASE WHEN res.clk_rank = 1 THEN res.target_clk END)::numeric / NULLIF(MAX(res.total_clk), 0) * 100, 1) || '%%' AS "클릭 비중",
     MAX(res.total_clk)::bigint AS "총 클릭량"
     FROM (
         SELECT 
-            ts.single_ess, ts.age, ts.gender, ts.target_imp, ts.target_clk,
+            ts.single_ess, ts.age_range, ts.gender, ts.target_imp, ts.target_clk,
             summ.total_ad_count,
             SUM(ts.target_imp) OVER(PARTITION BY ts.single_ess) as total_imp,
             SUM(ts.target_clk) OVER(PARTITION BY ts.single_ess) as total_clk,
-            RANK() OVER (PARTITION BY ts.single_ess ORDER BY ts.target_imp DESC, ts.age) as imp_rank,
-            RANK() OVER (PARTITION BY ts.single_ess ORDER BY ts.target_clk DESC, ts.age) as clk_rank
+            RANK() OVER (PARTITION BY ts.single_ess ORDER BY ts.target_imp DESC, ts.age_range) as imp_rank,
+            RANK() OVER (PARTITION BY ts.single_ess ORDER BY ts.target_clk DESC, ts.age_range) as clk_rank
         FROM (
-            SELECT 
-                ak_u.single_ess, p.age, p.gender,
+            SELECT
+                ak_u.single_ess, p.age_range, p.gender,
                 SUM(p.imp) as target_imp,
                 SUM(p.clk) as target_clk
             FROM (
@@ -1244,7 +1244,7 @@ def get_essence_target_performance(account_id, date_start, date_end):
             ) ak_u
             INNER JOIN (
                 SELECT 
-                    apd.ad_id, apd.age_range AS age, apd.gender,
+                    apd.ad_id, apd.age_range, apd.gender,
                     SUM(apd.impressions) as imp, SUM(apd.clicks) as clk
                 FROM ad_performance_daily apd
                 INNER JOIN ads a ON apd.ad_id = a.id
@@ -1290,7 +1290,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
     res.single_var AS "키워드",
     res.total_ad_count AS "등장 광고 수",
 
-    MAX(CASE WHEN res.imp_rank = 1 THEN res.age || ' ' || res.gender END) AS "최다 노출 타겟",
+    MAX(CASE WHEN res.imp_rank = 1 THEN res.age_range || ' ' || res.gender END) AS "최다 노출 타겟",
     MAX(CASE WHEN res.imp_rank = 1 THEN res.target_imp END)::bigint AS "타겟 노출량",
     ROUND(
         MAX(CASE WHEN res.imp_rank = 1 THEN res.target_imp END)::numeric
@@ -1299,7 +1299,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
     ) || '%%' AS "노출 비중",
     MAX(res.total_imp)::bigint AS "총 노출량",
 
-    MAX(CASE WHEN res.clk_rank = 1 THEN res.age || ' ' || res.gender END) AS "최다 클릭 타겟",
+    MAX(CASE WHEN res.clk_rank = 1 THEN res.age_range || ' ' || res.gender END) AS "최다 클릭 타겟",
     MAX(CASE WHEN res.clk_rank = 1 THEN res.target_clk END)::bigint AS "타겟 클릭량",
     ROUND(
         MAX(CASE WHEN res.clk_rank = 1 THEN res.target_clk END)::numeric
@@ -1311,7 +1311,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
     FROM (
         SELECT 
             ts.single_var,
-            ts.age,
+            ts.age_range,
             ts.gender,
             ts.target_imp,
             ts.target_clk,
@@ -1322,18 +1322,18 @@ def get_variable_target_performance(account_id, date_start, date_end):
 
             RANK() OVER (
                 PARTITION BY ts.single_var
-                ORDER BY ts.target_imp DESC, ts.age
+                ORDER BY ts.target_imp DESC, ts.age_range
             ) as imp_rank,
 
             RANK() OVER (
                 PARTITION BY ts.single_var
-                ORDER BY ts.target_clk DESC, ts.age
+                ORDER BY ts.target_clk DESC, ts.age_range
             ) as clk_rank
 
         FROM (
-            SELECT 
+            SELECT
                 ak_u.single_var,
-                p.age,
+                p.age_range,
                 p.gender,
                 SUM(p.imp) as target_imp,
                 SUM(p.clk) as target_clk
@@ -1350,7 +1350,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
             INNER JOIN (
                 SELECT 
                     apd.ad_id,
-                    apd.age_range AS age,
+                    apd.age_range,
                     apd.gender,
 
                     SUM(apd.impressions) as imp,
@@ -1517,7 +1517,7 @@ def get_purchase_count_weekly(account_id, date_start, date_end):
 
         WHERE a.account_id = {account_id}
             AND apd.as_of_date >= '{date_start}'::date
-            ND apd.as_of_date <= '{date_end}'::date
+            AND apd.as_of_date <= '{date_end}'::date
             AND apd.purchase_count IS NOT NULL
             AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
 
@@ -1744,7 +1744,7 @@ def get_purchase_contents_data(account_id, date_start, date_end):
 
     query = f"""
         SELECT
-            a.source_instagram_media_id AS content_key,
+            a.source_ig_media_id AS content_key,
             MIN(ig.ig_timestamp) AS uploaded_at,
             MAX(NULLIF(a.thumb_link, '')) AS thumbnail,
             STRING_AGG(DISTINCT a.ad_name, ' / ') AS ad_names,
@@ -1753,7 +1753,7 @@ def get_purchase_contents_data(account_id, date_start, date_end):
             COALESCE(SUM(apd.purchase_count), 0) AS purchases
         FROM ad_performance_daily apd
         JOIN ads a ON apd.ad_id = a.id
-        JOIN ad_sets ads ON a.ad_set_id = ads.ad_id
+        JOIN ad_sets ads ON a.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
         JOIN ig_contents ig ON a.source_ig_media_id = ig.fb_ig_media_id
         WHERE a.account_id = {account_id}
@@ -1821,7 +1821,7 @@ def get_a_content_target_purchase_data(ad_ids, date_start, date_end):
           AND apd.gender != 'unknown'
         GROUP BY apd.age_range, apd.gender
         HAVING COALESCE(SUM(apd.purchase_count), 0) > 0
-        ORDER BY purchases_ DESC, apd.age_range
+        ORDER BY purchases DESC, apd.age_range
     """
 
     df = pd.read_sql(query, engine)
@@ -1900,8 +1900,8 @@ def get_follower_demographics_latest_date(account_id, date_start, date_end):
     query = """
         SELECT MAX(iid.as_of_date) AS latest_date
         FROM ig_insights_demographics iid
-        JOIN ig_account ig
-          ON igg.ig_id = ig.id
+        JOIN ig_accounts ig
+          ON iid.ig_id = ig.id
         JOIN ad_accounts aa
           ON ig.id = aa.ig_account_id
         WHERE aa.id = %(account_id)s
@@ -2006,7 +2006,7 @@ def get_demographics_ratio(account_id, date_start, date_end, dimension="gender",
                         WHEN {unknown_condition} THEN '알 수 없음'
                         ELSE '{known_label}'
                     END AS category,
-                    SUM(iid.follower) AS value
+                    SUM(iid.followers) AS value
                 FROM ig_insights_demographics iid
                 JOIN ig_accounts ig
                   ON iid.ig_id = ig.id
