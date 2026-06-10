@@ -22,6 +22,7 @@ from matplotlib.ticker import FuncFormatter
 import numpy as np
 import pandas as pd
 import base64
+import math 
 
 
 
@@ -399,13 +400,37 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
     if not plotted_values:
         return ""
 
+   # 이전 분기 평균선 정보 (Y축 범위 계산 + 평균선 그리기 양쪽에서 공통 사용)
+    prev_quarter_avg = dataset.get("prev_quarter_avg")
+    prev_avg_val = None
+    if prev_quarter_avg and prev_quarter_avg.get("avg") is not None:
+        prev_avg_val = float(prev_quarter_avg["avg"])
+
     # Y축 범위 설정
-    y_min, y_max = min(plotted_values), max(plotted_values)
-    y_span = y_max - y_min
+    data_min, data_max = min(plotted_values), max(plotted_values)
+
+    # 이전 분기 평균이 주별 데이터 범위를 벗어나면 y축 범위 계산에 포함
+    range_min = min(data_min, prev_avg_val) if prev_avg_val is not None else data_min
+    range_max = max(data_max, prev_avg_val) if prev_avg_val is not None else data_max
+
+    y_span = range_max - range_min
     y_pad = max(y_span * 0.22, 0.3)
 
-    y_low = 0 if unit == "%" else y_min - y_pad * 0.2
-    y_high = y_max + y_pad
+    if unit == "%":
+        # CTR처럼 변동폭이 작은 % 지표는 0부터 시작하면 변화량이 잘 보이지 않으므로,
+        # 주별 데이터 최솟값이 1.5%를 초과하면 0.5 단위로 내림한 값을 시작값으로 사용한다.
+        if data_min > 1.5:
+            y_low = max(0.0, math.floor((data_min - 0.5) * 2) / 2)
+        else:
+            y_low = 0.0
+
+        # 이전 분기 평균이 시작값보다 낮으면, 평균선이 가려지지 않도록 시작값을 더 낮춘다.
+        if prev_avg_val is not None and prev_avg_val < y_low:
+            y_low = max(0.0, math.floor((prev_avg_val - 0.5) * 2) / 2)
+    else:
+        y_low = range_min - y_pad * 0.2
+
+    y_high = range_max + y_pad
 
     if abs(y_high - y_low) < 1e-12:
         y_high = y_low + 1.0
@@ -496,11 +521,23 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
             # 1. 점선 그리기 (얌전한 회색)
             ax.axhline(y=avg_val, color="#8c8c89", linestyle="--", linewidth=1.5, zorder=999)
             
+            # 현재 기간 평균 라벨: "{연도}년 {분기}분기 평균" 형식으로 통일
+            current_quarter = dataset.get("current_quarter")
+            if current_quarter and current_quarter.get("year") and current_quarter.get("quarter"):
+                cur_label = f"{current_quarter['year']}년 {current_quarter['quarter']}분기 평균"
+            else:
+                # current_quarter 메타가 없는 차트를 위한 기존 방식 유지
+                if labels and len(labels) >= 2:
+                    period_text = f"{str(labels[0])} ~ {str(labels[-1])}"
+                else:
+                    period_text = "분석 기간 전체"
+                cur_label = f"{period_text} 평균"
+
             # 2. 텍스트 라벨 (왼쪽 고정, 회색 글씨)
             ax.text(
                 x=0.02,
                 y=avg_val,
-                s=f"평균: {avg_val:,.1f}{unit}",
+                s=f"{cur_label}: {avg_val:,.1f}{unit}",
                 color="#5d5d5b",
                 fontsize=10,
                 fontweight="bold",
@@ -511,13 +548,9 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
             )
 
             # 3. 차트 하단 평균선 기준 설명
-            if labels and len(labels) >= 2:
-                period_text = f"{str(labels[0])} ~ {str(labels[-1])}"
-            else:
-                period_text = "분석 기간 전체"
             ax.text(
                 0.01, -0.13,
-                f"평균선 기준 : {period_text} 평균",
+                f"----- : {cur_label}",
                 transform=ax.transAxes,
                 ha='left', va='top',
                 fontsize=10,
@@ -525,6 +558,38 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                 clip_on=False,
             )
             
+            # 4. 이전 분기 평균선 (빨간색 계열)
+            if prev_quarter_avg and prev_quarter_avg.get("avg") is not None:
+                prev_year = prev_quarter_avg.get("year")
+                prev_quarter = prev_quarter_avg.get("quarter")
+
+                # 4-1. 점선 그리기 (빨간색 계열)
+                ax.axhline(y=prev_avg_val, color="#e53935", linestyle="--", linewidth=1.5, zorder=998)
+
+                # 4-2. 텍스트 라벨 (왼쪽 고정, 빨간색 글씨)
+                ax.text(
+                    x=0.02,
+                    y=prev_avg_val,
+                    s=f"{prev_year}년 {prev_quarter}분기 평균: {prev_avg_val:,.1f}{unit}",
+                    color="#e53935",
+                    fontsize=10,
+                    fontweight="bold",
+                    ha="left", va="bottom",
+                    bbox=dict(facecolor="white", edgecolor="none", alpha=0.9, pad=3),
+                    zorder=997,
+                    transform=ax.get_yaxis_transform()
+                )
+
+                # 4-3. 차트 하단 설명 (2번째 줄: 이전 분기 평균, 빨간색 계열)
+                ax.text(
+                    0.01, -0.24,
+                    f"----- : {prev_year}년 {prev_quarter}분기 평균",
+                    transform=ax.transAxes,
+                    ha='left', va='top',
+                    fontsize=10,
+                    color="#e53935",
+                    clip_on=False,
+                )
     # =======================================================
 
     return _fig_to_svg(fig)

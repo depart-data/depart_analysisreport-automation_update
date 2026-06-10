@@ -410,6 +410,89 @@ def get_organic_monthly_data(account_id, date_start, date_end):
 
     return monthly_df
 
+
+# ----------------------------------
+# 이전 분기 평균선 데이터
+# ----------------------------------
+
+def get_quarter_info(date_value):
+    """date_value가 속한 (연도, 분기번호)를 반환. 보고서 '현재 기간'의 분기 라벨에 사용."""
+    if isinstance(date_value, str):
+        dt = datetime.strptime(date_value, "%Y-%m-%d")
+    else:
+        dt = date_value
+
+    quarter = (dt.month - 1) // 3 + 1
+    return dt.year, quarter
+
+def get_prev_quarter_range(date_end):
+    """
+    date_end가 속한 분기의 '직전' 분기 (연도, 분기번호, 시작일, 종료일)을 반환.
+    Q1(1~3월) -> 작년 Q4(10~12월)
+    Q2(4~6월) -> Q1(1~3월)
+    Q3(7~9월) -> Q2(4~6월)
+    Q4(10~12월) -> Q3(7~9월)
+    """
+    if isinstance(date_end, str):
+        end_dt = datetime.strptime(date_end, "%Y-%m-%d")
+    else:
+        end_dt = date_end
+
+    quarter = (end_dt.month - 1) // 3 + 1
+
+    if quarter == 1:
+        prev_year, prev_quarter = end_dt.year - 1, 4
+    else:
+        prev_year, prev_quarter = end_dt.year, quarter - 1
+
+    start_month = (prev_quarter - 1) * 3 + 1
+    start_date = datetime(prev_year, start_month, 1).date()
+
+    if prev_quarter == 4:
+        end_date = datetime(prev_year, 12, 31).date()
+    else:
+        end_date = (datetime(prev_year, start_month + 3, 1) - timedelta(days=1)).date()
+
+    return prev_year, prev_quarter, start_date, end_date
+
+
+def get_prev_quarter_organic_avg(account_id, date_end):
+    """이전 분기 오가닉 조회수(주별) 평균"""
+    year, quarter, start_date, end_date = get_prev_quarter_range(date_end)
+    df = get_organic_data(account_id, str(start_date), str(end_date))
+    if df is None or df.empty or 'organic_impressions' not in df.columns:
+        return None
+    vals = df['organic_impressions'].dropna()
+    if vals.empty:
+        return None
+    return {"year": year, "quarter": quarter, "avg": float(vals.mean())}
+
+
+def get_prev_quarter_profile_visits_avg(fb_ad_account_id, date_end):
+    """이전 분기 프로필 방문수(주별) 평균"""
+    year, quarter, start_date, end_date = get_prev_quarter_range(date_end)
+    df = get_instagram_followers(fb_ad_account_id, str(start_date), str(end_date))
+    if df is None or df.empty or 'profile_views' not in df.columns:
+        return None
+    vals = df['profile_views'].dropna()
+    if vals.empty:
+        return None
+    return {"year": year, "quarter": quarter, "avg": float(vals.mean())}
+
+
+def get_prev_quarter_ctr_avg(account_id, date_end):
+    """이전 분기 CTR(주별) 평균"""
+    year, quarter, start_date, end_date = get_prev_quarter_range(date_end)
+    df = get_ctr_data(account_id, str(start_date), str(end_date))
+    if df is None or df.empty or 'ctr' not in df.columns:
+        return None
+    vals = df['ctr'].dropna()
+    if vals.empty:
+        return None
+    return {"year": year, "quarter": quarter, "avg": float(vals.mean())}
+
+
+
 # 인스타그램 프로필 방문수 데이터 가져오기
 
 # 전체 노출 수 및 threshold 가져오기

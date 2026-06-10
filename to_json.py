@@ -20,6 +20,7 @@ from scripts.processor import (
     has_follower_demographics_data, get_follower_demographics_latest_date, get_demographics_ratio, get_follower_age_gender_known_only, get_age_known_unknown_by_age, get_follower_age_gender_distribution,  # 팔로워 인구통계 추가
     get_target_spend_distribution, 
     get_ctr_follows_scatter_data, get_prev_quarter_ctr_follows_means,
+    get_prev_quarter_organic_avg, get_prev_quarter_profile_visits_avg, get_prev_quarter_ctr_avg, get_quarter_info,
 )
 
 import re
@@ -62,6 +63,10 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     # 실제 집계 마지막 날: date_end가 속한 주의 직전 일요일
     end_dt = datetime.strptime(end, "%Y-%m-%d")
     actual_end = (end_dt - timedelta(days=end_dt.weekday())).strftime("%Y-%m-%d")
+
+    # 평균선 라벨 통일용: 현재 기간(end 기준)이 속한 분기 정보
+    cur_q_year, cur_q_quarter = get_quarter_info(end)
+    current_quarter_info = {"year": cur_q_year, "quarter": cur_q_quarter}
 
     acc_name = get_account_name(target_id)
     ad_start, ad_end = get_ad_period(target_id, start, end)
@@ -146,9 +151,15 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     # 'date' -> 'updated_at'으로 수정
     add_ds("insta_followers", "line", "팔로워 추이", insta_df, "명", "updated_at", ["follower_count"])
     
-    # 'profile_visit_count' -> 'profile_views'로 수정
-    # (주별) 추가
-    add_ds("insta_profile_visits", "line", "프로필 방문 수(주별)", insta_df, "회", "updated_at", ["profile_views"])
+    # 주별
+    prev_q_profile_visits = get_prev_quarter_profile_visits_avg(fb_ad_account_id, end)
+    profile_visits_meta = {"current_quarter": current_quarter_info}
+    if prev_q_profile_visits:
+        profile_visits_meta["prev_quarter_avg"] = prev_q_profile_visits
+    add_ds(
+        "insta_profile_visits", "line", "프로필 방문 수(주별)", insta_df, "회", "updated_at", ["profile_views"],
+        extra_meta=profile_visits_meta
+    )
 
     # 월별 프로필 방문수 데이터 로드
     profile_monthly_df = get_profile_visits_monthly(fb_ad_account_id, start, end)
@@ -164,7 +175,14 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     )
     
     organic_df = get_organic_data(target_id, start, end)  # (주별) 추가
-    add_ds("organic_trend", "line", "오가닉 조회수 추이 (주별)", organic_df, "회", "date_start", ["organic_impressions"])
+    prev_q_organic = get_prev_quarter_organic_avg(target_id, end)
+    organic_meta = {"current_quarter": current_quarter_info}
+    if prev_q_organic:
+        organic_meta["prev_quarter_avg"] = prev_q_organic
+    add_ds(
+        "organic_trend", "line", "오가닉 조회수 추이 (주별)", organic_df, "회", "date_start", ["organic_impressions"],
+        extra_meta=organic_meta
+    )
 
     # 4주 단위 월별 데이터 바로 가져오기
     organic_monthly_df = get_organic_monthly_data(target_id, start, end)
@@ -292,7 +310,14 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     # 2. CTR 추이
     print("CTR 추이 생성 중...")
     ctr_weekly_df = get_ctr_data(target_id, start, end)
-    add_ds("ctr_trend_weekly", "line", "주별 CTR 추이", ctr_weekly_df, "%", "week_start", ["ctr"])
+    prev_q_ctr = get_prev_quarter_ctr_avg(target_id, end)
+    ctr_meta = {"current_quarter": current_quarter_info}
+    if prev_q_ctr:
+        ctr_meta["prev_quarter_avg"] = prev_q_ctr
+    add_ds(
+        "ctr_trend_weekly", "line", "주별 CTR 추이", ctr_weekly_df, "%", "week_start", ["ctr"],
+        extra_meta=ctr_meta
+    )
     ctr_monthly_df = get_ctr_monthly_data(target_id, start, end)
     add_ds("ctr_trend_monthly", "line", "월별 CTR 추이", ctr_monthly_df, "%", "month_start", ["ctr"])
 
