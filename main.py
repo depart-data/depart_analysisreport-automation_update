@@ -8,7 +8,7 @@ from typing import Any
 from urllib.parse import unquote, urlparse
 import pandas as pd
 from scripts.processor import _normalize_keyword_by_pos, _best_adverb_score, kiwi, VERB_ADJ_TAGS
-from scripts.visualizer import (build_color_map, complementary_hex, render_dataset, is_dark_color,
+from scripts.visualizer import (build_color_map, complementary_hex, render_dataset, is_dark_color, 
                                 render_bubble_chart, render_purchase_pie_chart, render_follower_gender_doughnut_chart, render_follower_age_gender_stacked_barh_chart,
                                 render_target_spend_bubble, render_ctr_follows_quadrant_chart,)
 from scripts.reporter import generate_html
@@ -86,24 +86,6 @@ def _safe_name(token: Any) -> str:
     return re.sub(r"[^0-9A-Za-z_.-]", "_", text)
 
 
-def _crop_to_feed_ratio(path: Path) -> None:
-    """세로 비율이 인스타그램 피드 기본 비율(4:5)보다 길면 중앙 기준으로 크롭."""
-    try:
-        from PIL import Image
-        img = Image.open(path)
-        w, h = img.size
-        target_h = int(w * 5 / 4)
-        if h <= target_h:
-            return
-        top = (h - target_h) // 2
-        img = img.crop((0, top, w, top + target_h))
-        fmt = Image.registered_extensions().get(path.suffix.lower(), "JPEG").upper()
-        fmt = fmt if fmt in {"JPEG", "PNG", "WEBP"} else "JPEG"
-        img.save(path, format=fmt, quality=92)
-    except Exception:
-        pass
-
-
 def _materialize_content_thumbnails(items: list[dict[str, Any]], output_dir: str = "static/thumbnail") -> None:
     if not items:
         return
@@ -159,7 +141,6 @@ def _materialize_content_thumbnails(items: list[dict[str, Any]], output_dir: str
 
         # 로컬에 파일이 이미 있으면 S3 다운로드 없이 바로 사용
         if local_file.exists() and local_file.stat().st_size > 0:
-            _crop_to_feed_ratio(local_file)
             local_src = f"./{local_file.as_posix()}"
             item["thumbnail"] = local_src
             cache[src] = local_src
@@ -176,7 +157,6 @@ def _materialize_content_thumbnails(items: list[dict[str, Any]], output_dir: str
                 print(f"thumbnail download failed: bucket={bucket} key={key} err={exc}")
                 continue
 
-        _crop_to_feed_ratio(local_file)
         local_src = f"./{local_file.as_posix()}"
         item["thumbnail"] = local_src
         cache[src] = local_src
@@ -230,7 +210,7 @@ def _top_targets(rows, metric: str, limit: int = 2, filter_low_imps: bool = Fals
     # purchases는 합계 기준, 나머지는 기존처럼 행 기준 정렬
     if metric == "purchases":
         df_sorted = (
-            df_filtered.groupby(["age_range", "gender"], as_index=False)[metric]
+            df_filtered.groupby(["age", "gender"], as_index=False)[metric]
             .sum()
             .sort_values(by=metric, ascending=False)
         )
@@ -240,7 +220,7 @@ def _top_targets(rows, metric: str, limit: int = 2, filter_low_imps: bool = Fals
 
     results = []
     for idx, row in enumerate(df_sorted.head(limit).itertuples(), 1):
-        age = str(getattr(row, "age_range", "") or "")
+        age = str(getattr(row, "age", "") or "")
         gender = str(getattr(row, "gender", "") or "")
 
         if gender.lower() == "female":
@@ -363,7 +343,7 @@ def _target_ctr(rows, age: Any = None, gender: Any = None):
     age_values = _selector_values(age)
     gender_values = _selector_values(gender)
     if age_values:
-        df = df[df["age_range"].astype(str).isin(age_values)]
+        df = df[df["age"].astype(str).isin(age_values)]
     if gender_values:
         df = df[df["gender"].astype(str).isin(gender_values)]
     if df.empty:
@@ -502,10 +482,8 @@ def export_to_pdf(html_path, output_pdf_path):
     with sync_playwright() as p:
         # 브라우저 실행 (백그라운드)
         browser = p.chromium.launch(args=["--allow-file-access-from-files", "--disable-web-security"])
-        # device_scale_factor=2 로 래스터 이미지(썸네일)를 2배 해상도로 렌더링
-        context = browser.new_context(device_scale_factor=2)
-        page = context.new_page()
-
+        page = browser.new_page()
+        
         # 1. HTML 파일 로드 (절대 경로 권장)
         import os
         file_url = f"file://{os.path.abspath(html_path)}"
@@ -523,21 +501,21 @@ def export_to_pdf(html_path, output_pdf_path):
     print(f" PDF 저장 완료: {output_pdf_path}")
 
 # 변수 지정 함수
-# target_id 에 account_id
 def run():
     start_time = time.time()
 
     config = {
-        "target_id": 25,
-        "fb_ad_account_id":"act_4260950964221595",
-        "start":"2026-01-26",
-        "end": "2026-06-01",
-        "main_age": ["25-34", "35-44"],
-        "main_gender": "female",
+        "target_id": "14", # account_id
+        "fb_ad_account_id":"act_799496024940107",
+        "start":"2026-03-30", #YYYY-MM-DD
+        "end": "2026-06-10",
+        "main_age": ["35-44", "25-34"],
+        "main_gender": "", # male, female
         "avoid_age": "",
         "avoid_gender": "",
         "currency": ""  # ""=원화, "dollar"=달러
     }
+
     target_id, fb_ad_account_id = config["target_id"], config["fb_ad_account_id"]
     start, end = config["start"], config["end"]
     main_age, main_gender = config["main_age"], config["main_gender"]
@@ -555,7 +533,7 @@ def run():
                     avoid_age=avoid_age, avoid_gender=avoid_gender, currency=currency)
     
     report_path = "json_reports/integrated_report.json"
-    theme_color = "#8C8C89"
+    theme_color = "#081F2C"
 
     report_json = _load_report(report_path)
     _apply_display_predicate_suffix(report_json)
@@ -780,6 +758,61 @@ def run():
         bottom_items = []
     _materialize_content_thumbnails(top_items + bottom_items)
 
+
+    # ── CTR × 팔로우 산점도 ───────────────────────────────────
+    scatter_block    = report_json.get("ctr_follows_scatter", {})
+    scatter_rows     = scatter_block.get("rows", [])
+    scatter_ctr_mean    = scatter_block.get("ctr_mean")
+    scatter_fol_mean    = scatter_block.get("follows_mean")
+
+    # 썸네일 S3 → 로컬 다운로드 (기존 materialize 패턴 동일하게 적용)
+    _materialize_content_thumbnails(scatter_rows)
+
+    # quadrant_chart_b64 초기화: 조건을 통과하지 못하면 빈 문자열 그대로 유지된다.
+    quadrant_chart_b64 = ""
+
+    # scatter_fol_mean이 None이거나 0이면 팔로워 지표가 없는 기간이므로 차트를 생성하지 않는다.
+    # - None: 이전 분기 데이터 자체가 존재하지 않는 경우
+    # - 0: 팔로워 지표가 수집되지 않아 평균이 0으로 계산된 경우
+    # 두 조건을 모두 통과한 경우(값이 있고 0보다 큰 경우)에만 차트를 렌더링한다.
+    if scatter_fol_mean is not None and scatter_fol_mean != 0:
+        quadrant_chart_b64 = render_ctr_follows_quadrant_chart(
+            scatter_data  = scatter_rows,
+            ctr_median    = scatter_ctr_mean,
+            follows_median= scatter_fol_mean,
+        )
+
+    # 반응 기반 콘텐츠 썸네일 처리 (추가)
+    reaction_datasets = {}
+
+    # 반응 기반 콘텐츠 썸네일 처리 (추가)
+    reaction_datasets = {}
+    for metric in ['likes', 'saves', 'shares']:
+        for suffix in ['top', 'bottom']:
+            key = f"reaction_{metric}_{suffix}"
+            ds  = datasets.get(key)
+            if not ds:
+                reaction_datasets[key] = {"cards": [], "chart_svg": ""}
+                continue
+
+            rendered = render_dataset(ds, color_map)
+
+            if isinstance(rendered, dict):
+                # render_reaction_bar 반환값: {"items": [...], "chart_svg": "..."}
+                # 썸네일 S3 다운로드는 cards 리스트에 대해 수행한다.
+                _materialize_content_thumbnails(rendered.get("cards", []))
+                reaction_datasets[key] = rendered
+            else:
+                # 예상치 못한 반환 타입 방어
+                reaction_datasets[key] = {"cards": [], "chart_svg": ""}
+
+
+    # 타겟별 광고비 버블
+    target_bubble_svg = render_target_spend_bubble(
+        datasets.get("target_spend_bubble") or {}, color_map
+    )
+
+
     target_rows = (datasets.get("target_heatmap") or {}).get("rows") or []
     impressions_rank, impressions_footnote = _top_targets(target_rows, "impressions")
     ctr_rank, ctr_footnote = _top_targets(target_rows, "ctr", filter_low_imps=True)
@@ -813,6 +846,8 @@ def run():
                 target_details = item.get("target_details") or []
                 item["chart"] = render_purchase_pie_chart(target_details, color_map) if target_details else ""
 
+
+
     context = {
         "css_path": "./templates/report.css",
         "theme": theme,
@@ -840,8 +875,23 @@ def run():
             "bottom_note": "",
             "bottom": bottom_items,
             "overall_ctr": overall_ctr,
+            # 반응 기반 콘텐츠 (6종)
+            "reaction_likes_top":     reaction_datasets.get("reaction_likes_top",     {"cards": [], "chart_svg": ""}),
+            "reaction_likes_bottom":  reaction_datasets.get("reaction_likes_bottom",  {"cards": [], "chart_svg": ""}),
+            "reaction_saves_top":     reaction_datasets.get("reaction_saves_top",     {"cards": [], "chart_svg": ""}),
+            "reaction_saves_bottom":  reaction_datasets.get("reaction_saves_bottom",  {"cards": [], "chart_svg": ""}),
+            "reaction_shares_top":    reaction_datasets.get("reaction_shares_top",    {"cards": [], "chart_svg": ""}),
+            "reaction_shares_bottom": reaction_datasets.get("reaction_shares_bottom", {"cards": [], "chart_svg": ""}),
         },
+        "target_bubble": {"chart": target_bubble_svg},                  # ← 추가
         "charts": charts,
+       
+        "quadrant_chart": {
+            "image":       quadrant_chart_b64,
+            "ctr_mean":    scatter_ctr_mean,     # median → mean
+            "follows_mean": scatter_fol_mean,    # median → mean
+        },
+
         "annotations": {
             "ctr": [],
             "organic": [],

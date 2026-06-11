@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from scripts.db_connector import get_engine
+from datetime import datetime, timedelta
 
 # .env에서 NLTK_DATA 경로 로드 후 nltk 초기화
 try:
@@ -69,8 +70,8 @@ def get_active_ad_count(account_id, date_start, date_end):
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} = 3
                 OR c.name ILIKE '%%depart%%' 
-                OR c.name LIKE '%%디파트%%' OR c.
-                name ILIKE '%%de;part%%')
+                OR c.name LIKE '%%디파트%%' 
+                OR c.name ILIKE '%%de;part%%')
     """
 
     df = pd.read_sql(query, engine)
@@ -409,6 +410,89 @@ def get_organic_monthly_data(account_id, date_start, date_end):
 
     return monthly_df
 
+
+# ----------------------------------
+# 이전 분기 평균선 데이터
+# ----------------------------------
+
+def get_quarter_info(date_value):
+    """date_value가 속한 (연도, 분기번호)를 반환. 보고서 '현재 기간'의 분기 라벨에 사용."""
+    if isinstance(date_value, str):
+        dt = datetime.strptime(date_value, "%Y-%m-%d")
+    else:
+        dt = date_value
+
+    quarter = (dt.month - 1) // 3 + 1
+    return dt.year, quarter
+
+def get_prev_quarter_range(date_end):
+    """
+    date_end가 속한 분기의 '직전' 분기 (연도, 분기번호, 시작일, 종료일)을 반환.
+    Q1(1~3월) -> 작년 Q4(10~12월)
+    Q2(4~6월) -> Q1(1~3월)
+    Q3(7~9월) -> Q2(4~6월)
+    Q4(10~12월) -> Q3(7~9월)
+    """
+    if isinstance(date_end, str):
+        end_dt = datetime.strptime(date_end, "%Y-%m-%d")
+    else:
+        end_dt = date_end
+
+    quarter = (end_dt.month - 1) // 3 + 1
+
+    if quarter == 1:
+        prev_year, prev_quarter = end_dt.year - 1, 4
+    else:
+        prev_year, prev_quarter = end_dt.year, quarter - 1
+
+    start_month = (prev_quarter - 1) * 3 + 1
+    start_date = datetime(prev_year, start_month, 1).date()
+
+    if prev_quarter == 4:
+        end_date = datetime(prev_year, 12, 31).date()
+    else:
+        end_date = (datetime(prev_year, start_month + 3, 1) - timedelta(days=1)).date()
+
+    return prev_year, prev_quarter, start_date, end_date
+
+
+def get_prev_quarter_organic_avg(account_id, date_end):
+    """이전 분기 오가닉 조회수(주별) 평균"""
+    year, quarter, start_date, end_date = get_prev_quarter_range(date_end)
+    df = get_organic_data(account_id, str(start_date), str(end_date))
+    if df is None or df.empty or 'organic_impressions' not in df.columns:
+        return None
+    vals = df['organic_impressions'].dropna()
+    if vals.empty:
+        return None
+    return {"year": year, "quarter": quarter, "avg": float(vals.mean())}
+
+
+def get_prev_quarter_profile_visits_avg(fb_ad_account_id, date_end):
+    """이전 분기 프로필 방문수(주별) 평균"""
+    year, quarter, start_date, end_date = get_prev_quarter_range(date_end)
+    df = get_instagram_followers(fb_ad_account_id, str(start_date), str(end_date))
+    if df is None or df.empty or 'profile_views' not in df.columns:
+        return None
+    vals = df['profile_views'].dropna()
+    if vals.empty:
+        return None
+    return {"year": year, "quarter": quarter, "avg": float(vals.mean())}
+
+
+def get_prev_quarter_ctr_avg(account_id, date_end):
+    """이전 분기 CTR(주별) 평균"""
+    year, quarter, start_date, end_date = get_prev_quarter_range(date_end)
+    df = get_ctr_data(account_id, str(start_date), str(end_date))
+    if df is None or df.empty or 'ctr' not in df.columns:
+        return None
+    vals = df['ctr'].dropna()
+    if vals.empty:
+        return None
+    return {"year": year, "quarter": quarter, "avg": float(vals.mean())}
+
+
+
 # 인스타그램 프로필 방문수 데이터 가져오기
 
 # 전체 노출 수 및 threshold 가져오기
@@ -445,8 +529,8 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
     # 2. 개별 광고 데이터 가져오기 (uploaded_at, ig_permalink 포함)
     
     ads_query = f"""
-    SELECT
-        ad.id AS ad_id,
+    SELECT 
+        ad.id, 
         ad.ad_name,
         ad.fb_ad_id,
         ig.ig_timestamp as uploaded_at, -- 업로드일로 사용
@@ -492,7 +576,7 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
         else:
             thumb_val = str(thumb_val).strip() or None
         results.append({
-            'ad_id': row['ad_id'],
+            'ad_id': row['id'],
             'fb_ad_id': row.get('fb_ad_id'),
             'uploaded_at': row['uploaded_at'].date() if pd.notna(row['uploaded_at']) else None,
             'thumbnail': thumb_val,
@@ -502,13 +586,183 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
     return results # 이제 3개의 데이터가 담긴 리스트를 반환합니다.
 
 
+# 반응 기반 콘텐츠 성과 (좋아요+저장+공유 합산) 상위/하위 3개
+def get_content_reaction_data(account_id, date_start, date_end, is_top=True, metric='total_reaction'):
+    engine = get_engine()
+    order_direction = "DESC" if is_top else "ASC"
+
+    metric_col_map = {
+        'total_reaction': "COALESCE(ici.likes, 0) + COALESCE(ici.shares, 0) + COALESCE(ici.saved, 0)",
+        'likes':  "ici.likes",
+        'saves':  "ici.saved",
+        'shares': "ici.shares",
+    }
+    order_expr = metric_col_map.get(metric, metric_col_map['total_reaction'])
+
+    outer_order_map = {
+        "ici.likes":  "total_likes",
+        "ici.saved":  "total_saves",
+        "ici.shares": "total_shares",
+        # total_reaction은 복합 표현식이므로 SELECT에서 부여한 별칭 그대로 사용한다.
+        "COALESCE(ici.likes, 0) + COALESCE(ici.shares, 0) + COALESCE(ici.saved, 0)": "total_reaction",
+    }
+    # order_expr와 일치하는 별칭이 없으면 total_reaction을 기본값으로 사용한다.
+    outer_order_expr = outer_order_map.get(order_expr, "total_reaction")
+
+
+
+    query = f"""
+    SELECT
+        ad_id,
+        fb_ad_id,
+        uploaded_at,
+        caption,
+        thumbnail,
+        ig_media_type,
+        total_likes,
+        total_shares,
+        total_saves,
+        total_comments,
+        total_reaction,
+        ctr
+    FROM (
+        -- 내부 쿼리: fb_ig_media_id 기준으로 중복을 제거한다.
+        -- DISTINCT ON (ig.fb_ig_media_id) 는 각 Instagram 콘텐츠에 대해
+        -- ORDER BY 절에서 첫 번째로 정렬된 행 1개만 남긴다.
+        -- 같은 콘텐츠를 참조하는 광고가 여러 개여도 지표 기준 최우선 광고 1개만 선택된다.
+        SELECT DISTINCT ON (ig.fb_ig_media_id)
+            ad.id                                           AS ad_id,
+            ad.fb_ad_id,
+            ig.ig_timestamp                                 AS uploaded_at,
+            ig.caption                                      AS caption,
+            NULLIF(ad.thumb_link, '')                       AS thumbnail,
+            ig.ig_media_type,
+            ici.likes                                       AS total_likes,
+            ici.shares                                      AS total_shares,
+            ici.saved                                       AS total_saves,
+            ici.comments                                    AS total_comments,
+            COALESCE(ici.likes, 0)
+                + COALESCE(ici.shares, 0)
+                + COALESCE(ici.saved, 0)                    AS total_reaction,
+            (
+            SELECT ROUND(
+                (SUM(apd2.clicks)::numeric / NULLIF(SUM(apd2.impressions), 0)) * 100, 2
+            )
+            FROM ad_performance_daily apd2
+            WHERE apd2.ad_id = ad.id
+              AND apd2.as_of_date >= '{date_start}'
+              AND apd2.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
+            )                                               AS ctr
+        FROM ads ad
+            JOIN ad_sets ads ON ad.ad_set_id = ads.id
+            JOIN campaigns c ON ads.campaign_id = c.id
+            JOIN ig_contents ig
+                ON ad.source_ig_media_id = ig.fb_ig_media_id
+            JOIN LATERAL (
+                SELECT likes, shares, saved, comments
+                FROM ig_content_insights
+                WHERE content_id = ig.id
+                ORDER BY as_of_date DESC
+                LIMIT 1
+            ) ici ON true
+        WHERE ad.account_id = {account_id}
+            AND ig.ig_timestamp IS NOT NULL
+            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
+            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date
+                <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+            AND ({account_id} = 3
+                OR c.name ILIKE '%%depart%%'
+                OR c.name LIKE '%%디파트%%'
+                OR c.name ILIKE '%%de;part%%')
+        -- DISTINCT ON 기준 컬럼이 ORDER BY 첫 번째에 와야 한다.
+        -- 그 뒤에 지표 정렬을 추가하면 동일 콘텐츠 중 지표 최우선 행이 선택된다.
+        ORDER BY ig.fb_ig_media_id, {order_expr} {order_direction}
+    ) deduped
+    -- 중복 제거 후 원하는 지표 기준으로 재정렬하여 상위/하위 5개를 선택한다.
+    ORDER BY {outer_order_expr} {order_direction}
+    LIMIT 5;
+    """
+
+    ads_df = pd.read_sql(query, engine)
+    if ads_df.empty:
+        return []
+
+    results = []
+    for _, row in ads_df.iterrows():
+        thumb_val = row.get('thumbnail')
+        if pd.isna(thumb_val):
+            thumb_val = None
+        else:
+            thumb_val = str(thumb_val).strip() or None
+
+        results.append({
+            'ad_id':          row['ad_id'],
+            'fb_ad_id':       row.get('fb_ad_id'),
+            'uploaded_at':    row['uploaded_at'].date() if pd.notna(row['uploaded_at']) else None,
+            'caption':        str(row.get('caption') or '').strip(),
+            'thumbnail':      thumb_val,
+            'ig_media_type':  row.get('ig_media_type'),
+            'total_likes':    int(row['total_likes'] or 0),
+            'total_shares':   int(row['total_shares'] or 0),
+            'total_saves':    int(row['total_saves'] or 0),
+            'total_comments': int(row['total_comments'] or 0),
+            'total_reaction': int(row['total_reaction'] or 0),
+            'ctr': float(row['ctr'] or 0),
+        })
+
+    return results
+
+
+def get_reaction_metric_avg(account_id, date_start, date_end, metric='likes'):
+    """
+    전체 기간(date_start ~ date_end), 전체 콘텐츠를 대상으로
+    지정 반응 지표(likes / saves / shares)의 평균값을 반환한다.
+    LIMIT 없이 집계하므로 get_content_reaction_data의 5개 샘플 평균과 다르다.
+    """
+    engine = get_engine()
+
+    # 지표별 집계 컬럼 표현식
+    metric_col_map = {
+        'likes':  'ici.likes',
+        'saves':  'ici.saved',
+        'shares': 'ici.shares',
+    }
+    agg_expr = metric_col_map.get(metric, 'ici.likes')
+
+    query = f"""
+    SELECT
+        ROUND(AVG(COALESCE({agg_expr}, 0))::numeric, 2) AS metric_avg
+    FROM ad_accounts aa
+        JOIN ig_accounts ia ON ia.id = aa.ig_account_id
+        JOIN ig_contents ic  ON ic.ig_id = ia.id
+        JOIN LATERAL (
+            SELECT likes, saved, shares
+            FROM ig_content_insights
+            WHERE content_id = ic.id
+            ORDER BY as_of_date DESC
+            LIMIT 1
+        ) ici ON true
+    WHERE aa.id = {account_id}
+        AND ic.ig_timestamp IS NOT NULL
+        AND (ic.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
+        AND (ic.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date
+            <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+    """
+
+    result = pd.read_sql(query, engine)
+    if result.empty or pd.isna(result['metric_avg'].iloc[0]):
+        return 0.0
+    return float(result['metric_avg'].iloc[0])
+
+
+
 # 특정 광고들의 타겟별 CTR 데이터
 def get_a_content_target_ctr_data(ad_id, date_start, date_end):
     engine = get_engine()
     
     query = f"""
         SELECT 
-            apd.age_range, apd.gender,
+            apd.age_range AS age, apd.gender,
             ROUND((SUM(apd.clicks)::numeric / NULLIF(SUM(apd.impressions), 0)::numeric) * 100, 2) as ctr
         FROM ads ad
         JOIN ad_sets ads ON ad.ad_set_id = ads.id
@@ -536,9 +790,9 @@ def get_target_avg_imp_ctr(account_id, date_start, date_end):
     
     query = f"""
         SELECT 
-        apd.age_range,
-        apd.gender,
-        SUM(apd.impressions) AS impressions,
+        apd.age_range AS age, 
+        apd.gender, 
+        SUM(apd.impressions) AS impressions, 
         SUM(apd.clicks) AS clicks,
         -- NULLIF를 사용하여 분모(impressions)가 0이면 NULL로 처리
         -- CTR 공식은 (클릭 / 노출) * 100입니다.
@@ -572,7 +826,7 @@ def get_target_avg_imp_ctr_threshold(account_id, date_start, date_end, threshold
     
     query = f"""
         SELECT 
-        apd.age_range, 
+        apd.age_range AS age, 
         apd.gender, 
         SUM(apd.impressions) AS impressions, 
         SUM(apd.clicks) AS clicks,
@@ -644,10 +898,20 @@ def _build_target_filter(target_age=None, target_gender=None):
 
     genders = _to_str_list(target_gender)
     if genders:
-        if len(genders) == 1:
-            clauses.append(f"apd.gender = {_sql_quote(genders[0])}")
+        mapped_genders = []
+        for g in genders:
+            g_low = str(g).strip().lower()
+            if g_low in ['f', '여성']:
+                mapped_genders.append('female')
+            elif g_low in ['m', '남성']:
+                mapped_genders.append('male')
+            else:
+                mapped_genders.append(g)
+        
+        if len(mapped_genders) == 1:
+            clauses.append(f"apd.gender = {_sql_quote(mapped_genders[0])}")
         else:
-            gender_list = ", ".join(_sql_quote(g) for g in genders)
+            gender_list = ", ".join(_sql_quote(g) for g in mapped_genders)
             clauses.append(f"apd.gender IN ({gender_list})")
 
     return "".join(f" AND {c}" for c in clauses)
@@ -716,8 +980,6 @@ VERB_ADJ_TAGS = {"VA", "VV"}
 ADVERB_TAGS = {"MAG", "MAJ"}
 VALID_KEYWORD_TAGS = NOUN_TAGS | VERB_ADJ_TAGS
 BLOCKED_KEYWORD_FORMS = {"포로"}
-# 동사 시제/양상 선어말어미로 시작하는 형태 — 한국어 명사가 될 수 없는 패턴
-_VERB_MORPHEME_PREFIXES = ("었", "았", "겠", "셨", "였", "었었", "았었")
 
 
 @lru_cache(maxsize=50000)
@@ -780,50 +1042,6 @@ def _best_adverb_score(raw_text):
     return best_score
 
 
-@lru_cache(maxsize=50000)
-def _best_verb_adj_score(raw_text):
-    """
-    VV/VA 및 불규칙 활용(VV-R, VV-I, VA-R, VA-I 등) 포함한 최선 동사/형용사 점수 반환.
-    _keyword_pos_candidates는 1글자 동사 형태를 length 필터로 제거해 verb_adj_best가 None이 되므로,
-    이 함수로 별도 추적한다. (예: '입지' → '입'(VV-R)+지 분석의 -19.0 점수를 포착)
-    """
-    text = str(raw_text).strip()
-    if not text:
-        return None
-
-    best_score = None
-    for tokens, score in kiwi.analyze(text, top_n=5):
-        if not tokens:
-            continue
-        first = tokens[0]
-        ftag = str(first.tag)
-        if ftag.startswith("VV") or ftag.startswith("VA"):
-            cur = float(score)
-            if best_score is None or cur > best_score:
-                best_score = cur
-    return best_score
-
-
-@lru_cache(maxsize=50000)
-def _best_overall_score(raw_text):
-    """
-    kiwi.analyze top_n=5 분석 후보 중 가장 높은(낮은 음의) 점수를 반환.
-    NNG 명사 후보 점수가 최선 점수보다 5점 이상 낮으면 해당 단어를 명사로 보지 않는다.
-    (예: '스럽지' → 최선 -26.0(XSA-I+EF), NNG 후보 -34.9 → 차이 8.9 → 명사 차단)
-    """
-    text = str(raw_text).strip()
-    if not text:
-        return None
-    best = None
-    for tokens, score in kiwi.analyze(text, top_n=5):
-        if not tokens:
-            continue
-        cur = float(score)
-        if best is None or cur > best:
-            best = cur
-    return best
-
-
 def _is_blocked_keyword_form(form):
     token = str(form).strip()
     if not token:
@@ -836,20 +1054,12 @@ def _looks_like_predicate_stem(form):
     """
     '강하'처럼 명사/용언 어간이 겹치는 경우를 분리하기 위한 보조 판별.
     form + '다'를 재분석해 동일 어형이 VA/VV로 해석되면 용언 어간으로 본다.
-
-    '조이다'처럼 '다' 앞에서 VV 대신 NNG+VCP(이다)로 분석되는 경우도 있으므로,
-    '고'/'면' 어미를 추가로 시도해 VV 어간을 더 정확히 검출한다.
-    (예: analyze('조이다') → 조(NNG)+이(VCP)+다 최상위  →  VV 미검출
-         analyze('조이고') → 조이(VV)+고(EC) 최상위  →  VV 검출 ✓)
     """
     stem = str(form).strip()
     if not stem:
         return False
 
-    # --- '다' 어미: 단일 VV/VA 체크 + XR/NNG/NNP+XSA/XSV 합성 패턴 체크 ---
-    # top_n=1: 최선 해석만 신뢰. 하위 순위의 VA 해석으로 인한 오분류 방지
-    # (예: '기차다' → 1위 NNG+VCP+EF 이므로 명사. 2위 VA는 무시해야 함)
-    for tokens, _ in kiwi.analyze(f"{stem}다", top_n=1):
+    for tokens, _ in kiwi.analyze(f"{stem}다", top_n=3):
         if not tokens:
             continue
 
@@ -857,21 +1067,9 @@ def _looks_like_predicate_stem(form):
         if first and first.form == stem and first.tag in VERB_ADJ_TAGS:
             return True
 
-        # 예: 강/XR + 하/XSA + 다/EF  또는  코디/NNG + 하/XSV + 다/EF  또는  여유/NNG + 롭/XSA-I + 다/EF
+        # 예: 강/XR + 하/XSA + 다/EF
         if len(tokens) >= 2 and tokens[0].form + tokens[1].form == stem:
-            if (tokens[0].tag in {"XR", "NNG", "NNP"}
-                    and (tokens[1].tag in {"XSA", "XSV"}
-                         or str(tokens[1].tag).startswith("XSA"))):
-                return True
-
-    # --- '고'/'면' 어미: '다' 분석에서 VV가 드러나지 않는 어간 보완 검출 ---
-    # '조이고' → 조이(VV)+고(EC) 최상위  /  top_n=1: 최선 해석만 신뢰
-    for ending in ("고", "면"):
-        for tokens, _ in kiwi.analyze(f"{stem}{ending}", top_n=1):
-            if not tokens:
-                continue
-            first = next((tok for tok in tokens if tok.tag in VALID_KEYWORD_TAGS), None)
-            if first and first.form == stem and first.tag in VERB_ADJ_TAGS:
+            if tokens[0].tag == "XR" and tokens[1].tag in {"XSA", "XSV"}:
                 return True
 
     return False
@@ -910,44 +1108,12 @@ def _normalize_keyword_by_pos(text, pos_type='noun'):
         # 용언 후보가 더 우세하면 명사로 강제 변환하지 않는다.
         if verb_adj_best is not None and verb_adj_best[2] >= noun_best[2]:
             return None
-        # 부사 해석이 더 우세하면 명사로 분류하지 않는다 (예: 제대로→제대, 갑자기→갑자 오분류 방지)
-        adverb_score = _best_adverb_score(text)
-        if adverb_score is not None and adverb_score >= noun_best[2]:
-            return None
-        # VV-R 등 불규칙 동사 포함 동사/형용사 해석이 명사와 점수 차이 1.5 이내면 동사로 판단
-        # (예: '입지' → NNG -18.3 vs VV-R+EF -19.0, 차이 0.7 → 차단)
-        va_score = _best_verb_adj_score(text)
-        if va_score is not None and va_score >= noun_best[2] - 1.5:
-            return None
-        # 명사 후보 점수가 전체 최선 점수보다 5점 이상 낮으면 명사로 보지 않는다
-        # (예: '스럽지' → 최선 -26.0(XSA-I+EF), NNG -34.9 → 차이 8.9 → 차단)
-        best_overall = _best_overall_score(text)
-        if best_overall is not None and noun_best[2] < best_overall - 5.0:
-            return None
         noun_form = noun_best[0]
-        # 원문 전체가 명사 후보로 존재하면 부분 추출보다 우선
-        # (예: '아우터' → '아우'(NNG)+'터' 보다 낮은 점수의 '아우터'(NNG) 단일 분석을 선택)
-        if noun_form != text:
-            for form, tag, _ in candidates:
-                if form == text and tag in NOUN_TAGS:
-                    noun_form = text
-                    break
         if _is_blocked_keyword_form(noun_form):
-            return None
-        # 동사 시제 모핌으로 시작하는 형태는 명사가 아님 (예: 었기, 았는데)
-        if noun_form.startswith(_VERB_MORPHEME_PREFIXES):
             return None
         # 어간형(예: 강하)이 명사로 오인되는 케이스를 차단
         if _looks_like_predicate_stem(noun_form):
             return None
-        # 조사가 붙은 형태(예: 핏과)가 NNG로 오인된 경우를 차단
-        for toks, score in kiwi.analyze(noun_form, top_n=8):
-            if (len(toks) >= 2
-                    and str(toks[-1].tag).startswith("J")
-                    and noun_form.endswith(toks[-1].form)
-                    and len(noun_form) - len(toks[-1].form) >= 1
-                    and score >= noun_best[2] - 4.0):
-                return None
         return noun_form
 
     if pos_type == "verb_adj":
@@ -1215,26 +1381,26 @@ def get_essence_target_performance(account_id, date_start, date_end):
     res.single_ess AS "키워드",
     res.total_ad_count AS "등장 광고 수",
     -- 노출 파트
-    MAX(CASE WHEN res.imp_rank = 1 THEN res.age_range || ' ' || res.gender END) AS "최다 노출 타겟",
+    MAX(CASE WHEN res.imp_rank = 1 THEN res.age || ' ' || res.gender END) AS "최다 노출 타겟",
     MAX(CASE WHEN res.imp_rank = 1 THEN res.target_imp END)::bigint AS "타겟 노출량",
     ROUND(MAX(CASE WHEN res.imp_rank = 1 THEN res.target_imp END)::numeric / NULLIF(MAX(res.total_imp), 0) * 100, 1) || '%%' AS "노출 비중",
     MAX(res.total_imp)::bigint AS "총 노출량",
     -- 클릭 파트
-    MAX(CASE WHEN res.clk_rank = 1 THEN res.age_range || ' ' || res.gender END) AS "최다 클릭 타겟",
+    MAX(CASE WHEN res.clk_rank = 1 THEN res.age || ' ' || res.gender END) AS "최다 클릭 타겟",
     MAX(CASE WHEN res.clk_rank = 1 THEN res.target_clk END)::bigint AS "타겟 클릭량",
     ROUND(MAX(CASE WHEN res.clk_rank = 1 THEN res.target_clk END)::numeric / NULLIF(MAX(res.total_clk), 0) * 100, 1) || '%%' AS "클릭 비중",
     MAX(res.total_clk)::bigint AS "총 클릭량"
     FROM (
         SELECT 
-            ts.single_ess, ts.age_range, ts.gender, ts.target_imp, ts.target_clk,
+            ts.single_ess, ts.age, ts.gender, ts.target_imp, ts.target_clk,
             summ.total_ad_count,
             SUM(ts.target_imp) OVER(PARTITION BY ts.single_ess) as total_imp,
             SUM(ts.target_clk) OVER(PARTITION BY ts.single_ess) as total_clk,
-            RANK() OVER (PARTITION BY ts.single_ess ORDER BY ts.target_imp DESC, ts.age_range) as imp_rank,
-            RANK() OVER (PARTITION BY ts.single_ess ORDER BY ts.target_clk DESC, ts.age_range) as clk_rank
+            RANK() OVER (PARTITION BY ts.single_ess ORDER BY ts.target_imp DESC, ts.age) as imp_rank,
+            RANK() OVER (PARTITION BY ts.single_ess ORDER BY ts.target_clk DESC, ts.age) as clk_rank
         FROM (
-            SELECT
-                ak_u.single_ess, p.age_range, p.gender,
+            SELECT 
+                ak_u.single_ess, p.age, p.gender,
                 SUM(p.imp) as target_imp,
                 SUM(p.clk) as target_clk
             FROM (
@@ -1244,7 +1410,7 @@ def get_essence_target_performance(account_id, date_start, date_end):
             ) ak_u
             INNER JOIN (
                 SELECT 
-                    apd.ad_id, apd.age_range, apd.gender,
+                    apd.ad_id, apd.age_range AS age, apd.gender,
                     SUM(apd.impressions) as imp, SUM(apd.clicks) as clk
                 FROM ad_performance_daily apd
                 INNER JOIN ads a ON apd.ad_id = a.id
@@ -1290,7 +1456,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
     res.single_var AS "키워드",
     res.total_ad_count AS "등장 광고 수",
 
-    MAX(CASE WHEN res.imp_rank = 1 THEN res.age_range || ' ' || res.gender END) AS "최다 노출 타겟",
+    MAX(CASE WHEN res.imp_rank = 1 THEN res.age || ' ' || res.gender END) AS "최다 노출 타겟",
     MAX(CASE WHEN res.imp_rank = 1 THEN res.target_imp END)::bigint AS "타겟 노출량",
     ROUND(
         MAX(CASE WHEN res.imp_rank = 1 THEN res.target_imp END)::numeric
@@ -1299,7 +1465,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
     ) || '%%' AS "노출 비중",
     MAX(res.total_imp)::bigint AS "총 노출량",
 
-    MAX(CASE WHEN res.clk_rank = 1 THEN res.age_range || ' ' || res.gender END) AS "최다 클릭 타겟",
+    MAX(CASE WHEN res.clk_rank = 1 THEN res.age || ' ' || res.gender END) AS "최다 클릭 타겟",
     MAX(CASE WHEN res.clk_rank = 1 THEN res.target_clk END)::bigint AS "타겟 클릭량",
     ROUND(
         MAX(CASE WHEN res.clk_rank = 1 THEN res.target_clk END)::numeric
@@ -1311,7 +1477,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
     FROM (
         SELECT 
             ts.single_var,
-            ts.age_range,
+            ts.age,
             ts.gender,
             ts.target_imp,
             ts.target_clk,
@@ -1322,18 +1488,18 @@ def get_variable_target_performance(account_id, date_start, date_end):
 
             RANK() OVER (
                 PARTITION BY ts.single_var
-                ORDER BY ts.target_imp DESC, ts.age_range
+                ORDER BY ts.target_imp DESC, ts.age
             ) as imp_rank,
 
             RANK() OVER (
                 PARTITION BY ts.single_var
-                ORDER BY ts.target_clk DESC, ts.age_range
+                ORDER BY ts.target_clk DESC, ts.age
             ) as clk_rank
 
         FROM (
-            SELECT
+            SELECT 
                 ak_u.single_var,
-                p.age_range,
+                p.age,
                 p.gender,
                 SUM(p.imp) as target_imp,
                 SUM(p.clk) as target_clk
@@ -1350,7 +1516,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
             INNER JOIN (
                 SELECT 
                     apd.ad_id,
-                    apd.age_range,
+                    apd.age_range AS age,
                     apd.gender,
 
                     SUM(apd.impressions) as imp,
@@ -1580,7 +1746,7 @@ def get_purchase_age_gender_heatmap(account_id, date_start, date_end):
 
     query = f"""
         SELECT
-            apd.age_range,
+            apd.age_range AS age,
             apd.gender,
             COALESCE(SUM(apd.purchase_count), 0) AS purchases
 
@@ -1811,7 +1977,7 @@ def get_a_content_target_purchase_data(ad_ids, date_start, date_end):
 
     query = f"""
         SELECT
-            apd.age_range,
+            apd.age_range AS age,
             apd.gender,
             COALESCE(SUM(apd.purchase_count), 0) AS purchases
         FROM ad_performance_daily apd
@@ -2260,3 +2426,141 @@ def get_follower_age_gender_distribution(account_id, date_start, date_end):
     )
 
     return None if df.empty else df
+
+
+
+# 타겟별(연령×성별) 광고비 분포 (unknown 제외)
+def get_target_spend_distribution(account_id, date_start, date_end):
+    engine = get_engine()
+
+    query = f"""
+    SELECT
+        apd.age_range,
+        apd.gender,
+        SUM(apd.spend)                                              AS spend,
+        ROUND(
+            SUM(apd.spend)::numeric
+            / NULLIF(SUM(SUM(apd.spend)) OVER (), 0)::numeric * 100, 1
+        )                                                           AS spend_ratio,
+        ROUND((SUM(apd.clicks)::numeric
+            / NULLIF(SUM(apd.impressions), 0)::numeric) * 100, 2)  AS ctr,
+        ROUND(SUM(apd.spend)::numeric
+            / NULLIF(SUM(apd.clicks), 0)::numeric, 0)              AS cpc
+    FROM ads ad
+        JOIN ad_sets ads ON ad.ad_set_id = ads.id
+        JOIN campaigns c  ON ads.campaign_id = c.id
+        LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
+    WHERE ad.account_id = {account_id}
+        AND apd.as_of_date >= '{date_start}'
+        AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
+        AND apd.gender  NOT IN ('unknown', 'Unknown')
+        AND apd.age_range NOT IN ('unknown', 'Unknown')
+        AND ({account_id} = 3
+            OR c.name ILIKE '%%depart%%'
+            OR c.name LIKE '%%디파트%%'
+            OR c.name ILIKE '%%de;part%%')
+    GROUP BY apd.age_range, apd.gender
+    ORDER BY apd.age_range, apd.gender;
+    """
+
+    df = pd.read_sql(query, engine)
+    if df.empty:
+        return None
+
+    return df
+
+
+
+# ─────────────────────────────────────────────────────────────
+# CTR × 팔로우 4사분면 스캐터 데이터
+# ─────────────────────────────────────────────────────────────
+
+def get_ctr_follows_scatter_data(account_id: int, date_start: str, date_end: str) -> list[dict]:
+    """
+    콘텐츠별 CTR(광고 성과)과 팔로우 발생수(IG 콘텐츠 인사이트)를
+    하나의 row로 결합하여 반환합니다.
+
+    연결 경로:
+        ad_accounts → campaigns → ad_sets → ads
+        ads.source_ig_media_id = ig_contents.fb_ig_media_id
+        ig_contents.id = ig_content_insights.content_id
+    """
+    engine = get_engine()
+
+    query = """
+        SELECT
+            ic.id                                          AS content_id,
+            ic.fb_ig_media_id,
+            COALESCE(ic.thumbnail_url, ic.media_url)       AS thumbnail,
+            ic.ig_permalink,
+            ic.ig_media_type,
+            ic.ig_timestamp,
+            -- CTR: 기간 내 노출 가중 집계
+            ROUND(
+                (SUM(apd.clicks)::float
+                 / NULLIF(SUM(apd.impressions)::float, 0) * 100
+                )::numeric, 4
+            )                                              AS ctr,
+            -- follows: 기간 내 합계
+            COALESCE(SUM(ici.follows), 0)                  AS follows
+        FROM ig_contents ic
+        -- 광고 성과 연결
+        JOIN ads a             ON a.source_ig_media_id = ic.fb_ig_media_id
+        JOIN ad_sets  ads_t    ON a.ad_set_id          = ads_t.id
+        JOIN campaigns cp      ON ads_t.campaign_id    = cp.id
+        JOIN ad_accounts aa    ON cp.ad_account_id     = aa.id
+        JOIN ad_performance_daily apd ON apd.ad_id     = a.id
+        -- IG 콘텐츠 인사이트 연결
+        JOIN ig_content_insights ici  ON ici.content_id = ic.id
+        WHERE aa.id = %(account_id)s
+          AND apd.as_of_date BETWEEN %(date_start)s AND %(date_end)s
+          AND ici.as_of_date BETWEEN %(date_start)s AND %(date_end)s
+        GROUP BY
+            ic.id, ic.fb_ig_media_id, ic.thumbnail_url,
+            ic.media_url, ic.ig_permalink, ic.ig_media_type, ic.ig_timestamp
+        HAVING SUM(apd.impressions) > 0
+        ORDER BY ic.ig_timestamp DESC
+    """
+
+    df = pd.read_sql(
+        query, engine,
+        params={"account_id": account_id, "date_start": date_start, "date_end": date_end}
+    )
+
+    if df.empty:
+        return []
+
+    df["ctr"]     = pd.to_numeric(df["ctr"],     errors="coerce").fillna(0.0)
+    df["follows"] = pd.to_numeric(df["follows"], errors="coerce").fillna(0.0)
+
+    return df.to_dict("records")
+
+
+def get_prev_quarter_ctr_follows_means(account_id: int, date_start: str) -> dict:
+    """
+    사분면 십자선 기준값 산출.
+    date_start 기준 3개월 전 기간(이전 분기)의 CTR 중앙값과 팔로우 평균값을 반환합니다.
+
+    Returns:
+        {"ctr_mean": float, "follows_mean": float}
+        데이터 부족 시 각 값은 None
+    """
+    from dateutil.relativedelta import relativedelta  # 표준 라이브러리 dateutil
+
+    end_dt   = datetime.strptime(date_start, "%Y-%m-%d") - timedelta(days=1)
+    start_dt = end_dt - relativedelta(months=3) + timedelta(days=1)
+
+    prev_start = start_dt.strftime("%Y-%m-%d")
+    prev_end   = end_dt.strftime("%Y-%m-%d")
+
+    rows = get_ctr_follows_scatter_data(account_id, prev_start, prev_end)
+
+    if not rows:
+        return {"ctr_mean": None, "follows_mean": None}
+
+    df = pd.DataFrame(rows)
+    return {
+        # 중앙값(median) → 평균(mean)으로 교체
+        "ctr_mean":     float(df["ctr"].mean()),
+        "follows_mean": float(df["follows"].mean()),
+    }

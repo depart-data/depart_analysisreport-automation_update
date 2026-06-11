@@ -1,4 +1,5 @@
 import json
+import os
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -8,7 +9,7 @@ from scripts.processor import (
     get_account_name, get_active_ad_count, get_total_content_count,
     get_ad_period, get_content_period, get_total_keyword_count,
     get_instagram_followers, get_ctr_data, get_ctr_monthly_data, get_organic_data, get_organic_monthly_data, get_imp_threshold,
-    get_content_ctr_data, get_a_content_target_ctr_data, get_profile_visits_monthly,
+    get_content_ctr_data, get_a_content_target_ctr_data, get_profile_visits_monthly, get_content_reaction_data, get_reaction_metric_avg,
     get_target_avg_imp_ctr, get_target_avg_imp_ctr_threshold,
     get_raw_keyword_performance, filter_keywords_by_pos, get_overall_ctr,
     get_strategic_performance,get_essence_target_performance,get_variable_target_performance,
@@ -16,8 +17,45 @@ from scripts.processor import (
     get_purchase_count_weekly, get_purchase_count_monthly,
     has_purchase_content_data, get_purchase_contents_pages_data, get_a_content_target_purchase_data, get_purchase_age_gender_heatmap,get_purchase_age_gender_heatmap_page_data,  # 구매 컨텐츠 추가
     has_revenue_data, get_spend_and_revenue_weekly, get_spend_and_revenue_monthly,  # 광고/매출금액 추가
-    has_follower_demographics_data, get_follower_demographics_latest_date, get_demographics_ratio, get_follower_age_gender_known_only, get_age_known_unknown_by_age, get_follower_age_gender_distribution  # 팔로워 인구통계 추가
+    has_follower_demographics_data, get_follower_demographics_latest_date, get_demographics_ratio, get_follower_age_gender_known_only, get_age_known_unknown_by_age, get_follower_age_gender_distribution,  # 팔로워 인구통계 추가
+    get_target_spend_distribution, 
+    get_ctr_follows_scatter_data, get_prev_quarter_ctr_follows_means,
+    get_prev_quarter_organic_avg, get_prev_quarter_profile_visits_avg, get_prev_quarter_ctr_avg, get_quarter_info,
 )
+
+import re
+
+def _parse_korean_caption(caption: str, max_chars: int = 7) -> str:
+    """
+    캡션 문자열에서 한글이 처음 등장하는 위치를 찾아,
+    그 위치부터 max_chars(기본 7)글자를 추출하여 반환한다.
+
+    - 한글이 없으면 원문 앞 max_chars 글자를 그대로 사용한다.
+    - 추출 결과가 max_chars를 초과하면 '...'을 붙인다.
+    - 추출 결과가 max_chars 이하면 말줄임 없이 반환한다.
+    - caption이 None 또는 빈 문자열이면 빈 문자열을 반환한다.
+    """
+    if not caption or not caption.strip():
+        return ""
+
+    caption = caption.strip()
+    
+    # 한글 유니코드 범위: 가-힣 (완성형 한글)
+    match = re.search(r'[가-힣]', caption)
+
+    if match:
+        # 한글이 처음 등장하는 인덱스부터 슬라이싱
+        start_idx = match.start()
+        text = caption[start_idx:]
+    else:
+        # 한글이 없으면 처음부터 사용
+        text = caption
+
+    if len(text) > max_chars:
+        return text[:max_chars] + "..."
+    return text
+
+
 
 def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", avoid_age="", avoid_gender="", currency=""):
     # 1. 기본 설정 및 파라미터
@@ -25,6 +63,10 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     # 실제 집계 마지막 날: date_end가 속한 주의 직전 일요일
     end_dt = datetime.strptime(end, "%Y-%m-%d")
     actual_end = (end_dt - timedelta(days=end_dt.weekday())).strftime("%Y-%m-%d")
+
+    # 평균선 라벨 통일용: 현재 기간(end 기준)이 속한 분기 정보
+    cur_q_year, cur_q_quarter = get_quarter_info(end)
+    current_quarter_info = {"year": cur_q_year, "quarter": cur_q_quarter}
 
     acc_name = get_account_name(target_id)
     ad_start, ad_end = get_ad_period(target_id, start, end)
@@ -109,9 +151,15 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     # 'date' -> 'updated_at'으로 수정
     add_ds("insta_followers", "line", "팔로워 추이", insta_df, "명", "updated_at", ["follower_count"])
     
-    # 'profile_visit_count' -> 'profile_views'로 수정
-    # (주별) 추가
-    add_ds("insta_profile_visits", "line", "프로필 방문 수(주별)", insta_df, "회", "updated_at", ["profile_views"])
+    # 주별
+    prev_q_profile_visits = get_prev_quarter_profile_visits_avg(fb_ad_account_id, end)
+    profile_visits_meta = {"current_quarter": current_quarter_info}
+    if prev_q_profile_visits:
+        profile_visits_meta["prev_quarter_avg"] = prev_q_profile_visits
+    add_ds(
+        "insta_profile_visits", "line", "프로필 방문 수(주별)", insta_df, "회", "updated_at", ["profile_views"],
+        extra_meta=profile_visits_meta
+    )
 
     # 월별 프로필 방문수 데이터 로드
     profile_monthly_df = get_profile_visits_monthly(fb_ad_account_id, start, end)
@@ -127,7 +175,14 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     )
     
     organic_df = get_organic_data(target_id, start, end)  # (주별) 추가
-    add_ds("organic_trend", "line", "오가닉 조회수 추이 (주별)", organic_df, "회", "date_start", ["organic_impressions"])
+    prev_q_organic = get_prev_quarter_organic_avg(target_id, end)
+    organic_meta = {"current_quarter": current_quarter_info}
+    if prev_q_organic:
+        organic_meta["prev_quarter_avg"] = prev_q_organic
+    add_ds(
+        "organic_trend", "line", "오가닉 조회수 추이 (주별)", organic_df, "회", "date_start", ["organic_impressions"],
+        extra_meta=organic_meta
+    )
 
     # 4주 단위 월별 데이터 바로 가져오기
     organic_monthly_df = get_organic_monthly_data(target_id, start, end)
@@ -255,7 +310,14 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     # 2. CTR 추이
     print("CTR 추이 생성 중...")
     ctr_weekly_df = get_ctr_data(target_id, start, end)
-    add_ds("ctr_trend_weekly", "line", "주별 CTR 추이", ctr_weekly_df, "%", "week_start", ["ctr"])
+    prev_q_ctr = get_prev_quarter_ctr_avg(target_id, end)
+    ctr_meta = {"current_quarter": current_quarter_info}
+    if prev_q_ctr:
+        ctr_meta["prev_quarter_avg"] = prev_q_ctr
+    add_ds(
+        "ctr_trend_weekly", "line", "주별 CTR 추이", ctr_weekly_df, "%", "week_start", ["ctr"],
+        extra_meta=ctr_meta
+    )
     ctr_monthly_df = get_ctr_monthly_data(target_id, start, end)
     add_ds("ctr_trend_monthly", "line", "월별 CTR 추이", ctr_monthly_df, "%", "month_start", ["ctr"])
 
@@ -559,7 +621,101 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
             "items": content_results
         }
 
-    # --- [추가] 6. 별첨 자료용 키워드 상세 분석 (4페이지 분량) ---
+    # 6. 반응 기반 콘텐츠 성과 (지표별 TOP/BOTTOM 3, 6페이지)
+    print("반응 기반 콘텐츠 성과 생성 중...")
+    for metric in ['likes', 'saves', 'shares']:
+        overall_avg = get_reaction_metric_avg(target_id, start, end, metric=metric)
+
+    # metric 컬럼 이름 매핑: DB 반환 키와 일치시킴
+        metric_key_map = {
+            'likes':  'total_likes',
+            'saves':  'total_saves',
+            'shares': 'total_shares',
+        }
+        metric_col = metric_key_map[metric]
+
+        # ── x_scale_max 산출 (상위 데이터를 기준으로 1회만 계산) ──────────
+        # x_scale_max는 상위/하위 차트가 공유하는 x축 최대 기준값이다.
+        # 상위 5개 콘텐츠 수치의 최대값과 overall_avg 중 더 큰 값을 사용한다.
+        # 이렇게 하면 하위 차트에서 막대가 과장되어 늘어나는 현상을 방지한다.
+        top_contents_for_scale = get_content_reaction_data(
+            target_id, start, end, is_top=True, metric=metric
+        )
+        top_values_for_scale = [
+            float(item.get(metric_col, 0) or 0)
+            for item in (top_contents_for_scale or [])
+        ]
+        # overall_avg와 상위 콘텐츠 최대값 중 더 큰 쪽을 기준으로 삼는다.
+        # 모두 0이면 x_scale_max는 0 (visualizer.py에서 예외 처리)
+        x_scale_max = max(
+            max(top_values_for_scale) if top_values_for_scale else 0,
+            float(overall_avg or 0)
+        )
+        # ────────────────────────────────────────────────────────────────────
+
+        for is_top in [True, False]:
+            suffix = "top" if is_top else "bottom"
+            reaction_contents = get_content_reaction_data(
+                target_id, start, end, is_top=is_top, metric=metric
+            )
+
+            for item in (reaction_contents or []):
+                raw_caption = str(item.get("caption") or "").strip()
+                item["caption_label"] = _parse_korean_caption(raw_caption)
+
+                raw_ctr = item.get("ctr")
+                if raw_ctr is None or (isinstance(raw_ctr, float) and raw_ctr != raw_ctr):
+                    # float NaN 대응: NaN != NaN 이 True이므로 이 조건으로 검출
+                    item["ctr"] = None
+                else:
+                    item["ctr"] = float(raw_ctr)
+
+            final_report["datasets"][f"reaction_{metric}_{suffix}"] = {
+                "kind":         "reaction_bar",
+                "title":        f"반응 {suffix} 콘텐츠 ({metric})",
+                "metric":       metric,
+                "metric_col":   metric_col,
+                "overall_avg":  overall_avg,
+                "metric_avg":   overall_avg,       # 하위 호환 키 유지
+                "is_top":       is_top,
+                # 상위/하위 차트 양쪽 모두 이 값을 x축 최대 기준으로 사용한다.
+                # 하위 차트가 이 키를 읽어 x축을 상위 차트와 동일하게 맞춘다.
+                "x_scale_max":  x_scale_max,
+                "items":        reaction_contents
+            }
+
+
+    # 7. CPPR 콘텐츠 효율 + 타겟별 광고비 분포
+    print("타겟별 광고비 분포 생성 중...")
+    target_spend_df = get_target_spend_distribution(target_id, start, end)
+    if target_spend_df is not None:
+        final_report["datasets"]["target_spend_bubble"] = {
+            "kind":         "target_bubble",
+            "title":        "타겟별 광고비 분포",
+            "rows":         target_spend_df.replace({pd.NA: None, np.nan: None}).to_dict(orient="records"),
+            "main_age":     main_age,
+            "main_gender":  main_gender,
+            "avoid_age":    avoid_age,
+            "avoid_gender": avoid_gender,
+        }
+
+
+    # ── CTR × 팔로우 산점도 데이터 ───────────────────────────
+    scatter_rows = get_ctr_follows_scatter_data(target_id, start, end)
+    prev_means = get_prev_quarter_ctr_follows_means(target_id, start)
+
+    if scatter_rows:
+        final_report["ctr_follows_scatter"] = {
+            "rows":        scatter_rows,
+            "ctr_mean":    prev_means.get("ctr_mean"),      # median → mean
+            "follows_mean": prev_means.get("follows_mean"), # median → mean
+        }
+    else:
+        final_report["ctr_follows_scatter"] = {
+            "rows": [], "ctr_mean": None, "follows_mean": None
+        }
+
+    # --- [추가] 별첨 자료용 키워드 상세 분석 (4페이지 분량) ---
     
     # 데이터 불러오기
     print("별첨 자료용 키워드 상세 분석 생성 중...")
@@ -664,6 +820,9 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
     # 6. 최종 JSON 저장
     output_path = "json_reports/integrated_report.json"
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(final_report, f, ensure_ascii=False, indent=4, default=str)
     

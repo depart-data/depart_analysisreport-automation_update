@@ -526,6 +526,7 @@ body {
   transform: translateY(-9mm);
 }
 
+
 .heatmap-center {
   width: 100%;
   flex: 0 0 auto;
@@ -597,8 +598,8 @@ body {
   border: 0;
   border-radius: 0;
   background: transparent;
-  aspect-ratio: 1 / 1;
-  min-height: 0;
+  aspect-ratio: 4 / 5;
+  height: 80mm;
   overflow: hidden;
   display: grid;
   place-items: center;
@@ -1285,3 +1286,260 @@ body {
 .line-chart-row--single .figure {
   margin-top: 50mm !important;
 }
+
+
+/* 4사분면 차트 — 컨테이너를 꽉 채워 선명하게 출력 (BUG-03) */
+.quadrant-chart-container {
+  width: 100%;
+  display: block;
+}
+.quadrant-chart-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 썸네일 — 4:5 비율 강제 고정 (찌그러짐 없이 크롭) */
+.content-card__thumb--ig-ratio {
+  aspect-ratio: 4 / 5;
+  height: auto;
+  overflow: hidden;
+  display: block;
+}
+.content-card__thumb--ig-ratio img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* 반응 지표 배지 — 가로 배치 */
+.reaction-metrics-row {
+  grid-column: span 12;
+  grid-row: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 2mm;
+}
+
+/* ──────────────────────────────────────────────────
+   반응 기반 콘텐츠 페이지: 레이아웃 래퍼
+   ────────────────────────────────────────────────── */
+
+.reaction-page-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3mm;
+  /* 래퍼가 페이지 전체 폭을 차지하도록 */
+  width: 100%;
+}
+
+/*
+  reaction-content-wrapper:
+  썸네일 그리드와 막대그래프를 묶는 최상위 래퍼.
+  max-width: 80% + margin: auto 로 중앙 정렬 및 폭 제한을 동시에 적용한다.
+  두 자식 영역은 모두 이 래퍼의 width: 100%를 상속하므로
+  좌우 기준점이 항상 동일하게 정렬된다.
+*/
+.reaction-content-wrapper {
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;         /* 래퍼 폭 내에서 100% 확장 */
+  display: flex;
+  flex-direction: column;
+  gap: 3mm;
+  overflow: visible;
+}
+
+/* ──────────────────────────────────────────────────
+   상단: 썸네일 5칸 가로 그리드
+   ────────────────────────────────────────────────── */
+
+.reaction-thumb-row {
+  /*
+    CSS Grid: 5열 균등 분할.
+    gap 12px 고정 — 카드 폭 = (wrapper폭 - 12px × 4) ÷ 5
+    래퍼 폭이 변해도 1fr 단위로 자동 산출되므로 별도 계산 불필요.
+  */
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  width: 100%;         /* reaction-content-wrapper 폭과 동일 */
+}
+
+.reaction-thumb-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0;              /* 헤더와 이미지 사이 간격은 헤더 padding으로 제어 */
+  position: relative;  /* 헤더 뱃지 absolute 배치 기준점 */
+  padding-top: 2px;
+  box-sizing: border-box;
+}
+
+/* ──────────────────────────────────────────────────
+   썸네일 상단 헤더: 순위 뱃지 + 업로드 날짜
+   ────────────────────────────────────────────────── */
+
+.reaction-thumb-cell__header {
+  display: flex;
+  align-items: center;
+  /* 좌측(순위+날짜) 그룹과 우측(CTR) 그룹을 양단 정렬한다 */
+  justify-content: space-between;
+  align-items: center;
+  /* 헤더 텍스트가 두 줄이 되어도 썸네일 이미지를 침범하지 않도록
+     최소 높이를 확보한다 */
+  min-height: 32px;
+  /* 상단 여백: 페이지 제목과의 간격 확보 */
+  padding: 4px 4px 4px 4px;
+  background: transparent;
+  /* 헤더 영역은 이미지 위쪽에만 위치해야 한다.
+     position: relative는 부모(.reaction-thumb-cell)에 이미 설정되어 있다 */
+  box-sizing: border-box;
+}
+
+/* 헤더 좌측 그룹: 순위 뱃지와 업로드 날짜를 가로로 묶는 컨테이너 */
+.reaction-thumb-cell__header-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  /* 우측 CTR에 공간을 양보하기 위해 최대 폭을 제한한다 */
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+/* 순위 뱃지: 짙은 회색 사각형 배경, 흰색 텍스트, 좌측 정렬 */
+.reaction-thumb-cell__rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background-color: #555555;
+  color: #ffffff;
+  font-size: 9pt;
+  font-weight: 700;
+  border-radius: 2px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* 업로드 날짜: 뱃지 우측 작은 회색 텍스트 */
+.reaction-thumb-cell__upload-date {
+  font-size: 13pt;
+  color: #888888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+/* CTR 수치: 헤더 우측 고정, 업로드 날짜와 동일한 크기 및 색상 계열 */
+.reaction-thumb-cell__ctr {
+  font-size: 13pt;        /* 업로드 날짜와 동일한 크기 */
+  color: #888888;        /* 동일한 회색 계열 */
+  white-space: nowrap;   /* 줄바꿈 없이 한 줄로 표시 */
+  flex-shrink: 0;        /* 좌측 그룹이 좁아질 때 CTR이 우선 유지되도록 */
+}
+
+/* ──────────────────────────────────────────────────
+   썸네일 이미지 영역 — 인스타그램 피드 4:5 비율 고정
+   ────────────────────────────────────────────────── */
+
+.reaction-thumb-cell__img-wrap {
+  width: 100%;
+  aspect-ratio: 4 / 5;    /* 4:5 비율 엄격 유지 */
+  overflow: hidden;
+  border-radius: 6px;
+  background-color: #D0D0D0;  /* 플레이스홀더 배경: 밝은 회색 */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reaction-thumb-cell__img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/*
+  플레이스홀더 텍스트:
+  - URL 없음: 처음부터 표시 (.reaction-thumb-cell__img-wrap 안에 div만 있는 경우)
+  - 로딩 실패: onerror로 img를 숨기고 부모에 .no-img 클래스가 붙으면 표시
+  평소에는 img 뒤에 가려 보이지 않으므로 z-index 음수값을 주지 않아도 된다.
+  img가 display:none이 되면 자동으로 플레이스홀더가 보임.
+*/
+.thumb-placeholder-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10pt;
+  color: #888888;
+  pointer-events: none;
+}
+
+/* img가 있을 때는 플레이스홀더를 뒤로 숨긴다 (z-index로 제어) */
+.reaction-thumb-cell__img-wrap img ~ .thumb-placeholder-text {
+  z-index: -1;
+}
+
+/* ──────────────────────────────────────────────────
+   하단: 가로형 차트 SVG 래퍼
+   폭이 reaction-content-wrapper의 100%이므로
+   썸네일 그리드와 좌우 기준점이 자동으로 일치한다.
+   ────────────────────────────────────────────────── */
+
+.reaction-chart-wrap {
+  width: 100%;           /* reaction-content-wrapper 폭과 동일 */
+  overflow: hidden;
+}
+
+.reaction-chart-svg {
+  width: 100%;
+}
+
+.reaction-chart-svg svg {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
+.reaction-chart-empty {
+  text-align: center;
+  color: #aaaaaa;
+  font-size: 14pt;
+  padding: 10mm 0;
+}
+
+
+.reaction-metric {
+  font-size: 16pt;
+  font-weight: 600;
+  color: #444;
+}
+
+.reaction-metric--highlight {
+  font-size: 20pt;
+  color: #ff0000;
+}
+
+.reaction-metric--total {
+  font-size: 16pt;
+  color: #222;
+}
+
+.reaction-metric--ctr {
+  font-size: 16pt;
+  color: #888;
+}
+

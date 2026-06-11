@@ -18,6 +18,19 @@
     }
   </style>
   {% endif %}
+  <style>
+    .quadrant-chart-container {
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+    .quadrant-chart-container img {
+      width: 100% !important;
+      height: auto !important;
+      display: block;
+      max-width: 100%;
+    }
+  </style>
 </head>
 
 <body>
@@ -57,7 +70,7 @@
       {% if _img.startswith('<svg') %}
         <div class="figure__svg">{{ img_src | safe }}</div>
       {% else %}
-        <img class="figure__img" src="{{ img_src }}" alt="{{ alt }}">
+        <img class="figure__img" src="{{ img_src | safe }}" alt="{{ alt }}">
       {% endif %}
     {% else %}
       <div class="figure__placeholder">CHART / IMAGE</div>
@@ -569,7 +582,139 @@
   </section>
 
 
+  {# ── 반응 기반 콘텐츠 매크로 ── #}
+  {% macro reaction_page(section_label, data, highlight_metric) %}
+  <section class="page">
+    {{ page_header('콘텐츠 성과') }}
+    {{ big_title(section_label) }}
 
+    <div class="page-body reaction-page-body">
+
+      {#
+        reaction-content-wrapper:
+        - 썸네일 그리드와 막대그래프 컨테이너를 하나의 래퍼로 묶어 폭을 동기화한다.
+        - max-width: 80% + margin: auto 로 중앙 정렬 및 폭 제한을 동시에 적용한다.
+        - 두 영역 모두 이 래퍼의 100% 폭을 사용하므로 좌우 기준점이 항상 일치한다.
+      #}
+      <div class="reaction-content-wrapper">
+
+        {# 상단 영역: 썸네일 5개 가로 그리드 #}
+        <div class="reaction-thumb-row">
+          {% for item in data.cards %}
+            <div class="reaction-thumb-cell">
+
+              {#
+                썸네일 상단 오버레이: 순위 뱃지(좌) + 업로드 날짜(우)
+                순위는 loop.index (1~5), 날짜는 "YYYY-MM-DD 업로드" 형식
+              #}
+              <div class="reaction-thumb-cell__header">
+                {# 좌측 그룹: 순위 뱃지 + 업로드 날짜 #}
+                <div class="reaction-thumb-cell__header-left">
+                  <span class="reaction-thumb-cell__rank">{{ loop.index }}</span>
+                  <span class="reaction-thumb-cell__upload-date">
+                    {{ item.uploaded_at }} 업로드
+                  </span>
+                </div>
+
+                {# 우측 그룹: CTR 수치
+                   item.ctr가 None이면 "CTR -", 숫자면 소수점 둘째 자리까지 표시
+                #}
+                <div class="reaction-thumb-cell__ctr">
+                  {% if item.ctr is not none and item.ctr is not undefined %}
+                    CTR {{ "%.2f" | format(item.ctr) }}%
+                  {% else %}
+                    CTR -
+                  {% endif %}
+                </div>
+
+              </div>
+
+              {#
+                썸네일 이미지 영역 (4:5 비율 고정).
+                이미지 URL이 없거나 로딩 실패 시 플레이스홀더를 표시한다.
+                onerror 핸들러로 JS 없이 로딩 실패 대응: 이미지를 숨기고 부모에
+                'no-img' 클래스를 추가하여 CSS placeholder를 활성화한다.
+              #}
+              <div class="reaction-thumb-cell__img-wrap">
+                {% if item.thumbnail %}
+                  <img
+                    src="{{ item.thumbnail }}"
+                    alt="콘텐츠 {{ loop.index }} 썸네일"
+                    onerror="this.style.display='none'; this.parentNode.classList.add('no-img');"
+                  >
+                  {# onerror 시 표시될 플레이스홀더 (평소에는 CSS로 숨김) #}
+                  <div class="thumb-placeholder-text">썸네일</div>
+                {% else %}
+                  {# URL 자체가 없는 경우: no-img 클래스를 처음부터 부여 #}
+                  <div class="thumb-placeholder-text">썸네일</div>
+                {% endif %}
+              </div>
+
+            </div>
+          {% endfor %}
+        </div>
+
+        {# 하단 영역: 단일 가로형 막대그래프 SVG #}
+        <div class="reaction-chart-wrap">
+          {% if data.chart_svg %}
+            <div class="reaction-chart-svg">{{ data.chart_svg | safe }}</div>
+          {% else %}
+            <div class="reaction-chart-empty">데이터 없음</div>
+          {% endif %}
+        </div>
+
+      </div>{# /reaction-content-wrapper #}
+
+    </div>
+  </section>
+  {% endmacro %}
+
+  {# 6페이지 출력 — data 인자가 딕셔너리로 변경됨 #}
+  {{ reaction_page('좋아요 상위 콘텐츠',  content.reaction_likes_top,     'likes')  }}
+  {{ reaction_page('좋아요 하위 콘텐츠',  content.reaction_likes_bottom,  'likes')  }}
+  {{ reaction_page('저장 상위 콘텐츠',    content.reaction_saves_top,     'saves')  }}
+  {{ reaction_page('저장 하위 콘텐츠',    content.reaction_saves_bottom,  'saves')  }}
+  {{ reaction_page('공유 상위 콘텐츠',    content.reaction_shares_top,    'shares') }}
+  {{ reaction_page('공유 하위 콘텐츠',    content.reaction_shares_bottom, 'shares') }}
+
+
+
+{# =========================================================
+   타겟별 광고비 분포 버블 그리드
+   ========================================================= #}
+  <section class="page">
+    {{ page_header('타겟 분석') }}
+    {{ big_title('타겟별 광고비 분포') }}
+    <div class="page-body" style="align-content: start; padding-top: 20mm;">
+
+      <div class="span-12">
+        {% if target_bubble.chart %}
+          <div class="figure__svg">{{ target_bubble.chart | safe }}</div>
+        {% else %}
+          <div class="figure__placeholder">데이터 없음</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </section>
+
+
+  {% if quadrant_chart.image %}
+  <section class="page quadrant-page">
+    {{ page_header('콘텐츠 성과') }}
+    {{ big_title('CTR × 팔로우 4사분면') }}
+    
+    <div class="page-body">
+      <div class="span-12 quadrant-chart-container" style="display: flex; justify-content: center; padding-top: 4mm;">
+        <img
+          src="{{ quadrant_chart.image | safe }}"
+          alt="CTR × 팔로우 4사분면"
+          style="width: 100%; max-width: 2000px; height: auto; display: block; margin: 0 auto;"
+        />
+      </div>
+    </div>
+  </section>
+  {% endif %}
 
 
 
