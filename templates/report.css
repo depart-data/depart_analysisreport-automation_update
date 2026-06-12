@@ -485,6 +485,7 @@ body {
 .figure--heatmap .figure__svg,
 .figure--heatmap .figure__img {
   max-height: 170mm;
+  overflow: hidden;
 }
 
 /* Primary line charts (followers / ctr): keep room for notes/chips */
@@ -1139,6 +1140,13 @@ body {
 .purchase-content-card__chart img {
   width: 100%;
   height: 100%;
+}
+.purchase-chart-svg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;  
 }
 
 .purchase-chart-placeholder {

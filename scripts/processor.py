@@ -1624,20 +1624,35 @@ def get_purchase_roas_weekly(account_id, date_start, date_end):
     engine = get_engine()
 
     query = f"""
+        WITH weeks AS (
+            SELECT generate_series(
+                (DATE_TRUNC('week', '{date_start}'::date) + INTERVAL '6 days')::date,
+                (DATE_TRUNC('week', '{date_end}'::date) + INTERVAL '6 days')::date,
+                INTERVAL '7 days'
+            )::date AS week_start
+        ),
+        agg AS(
+            SELECT
+                (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date AS week_start,
+                ROUND(AVG(apd.purchase_roas)::numeric, 0) AS avg_roas
+            FROM ad_performance_daily apd
+            JOIN ads a ON apd.ad_id = a.id
+            JOIN ad_sets ads ON a.ad_set_id = ads.id
+            JOIN campaigns c ON ads.campaign_id = c.id
+            WHERE a.account_id = {account_id}
+                AND apd.as_of_date >= '{date_start}'::date
+                AND apd.as_of_date <= '{date_end}'::date
+                AND apd.purchase_roas IS NOT NULL
+                AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+            GROUP BY (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date
+            ORDER BY week_start
+        )
         SELECT
-            (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date AS week_start,
-            ROUND(AVG(apd.purchase_roas)::numeric, 0) AS avg_roas
-        FROM ad_performance_daily apd
-        JOIN ads a ON apd.ad_id = a.id
-        JOIN ad_sets ads ON a.ad_set_id = ads.id
-        JOIN campaigns c ON ads.campaign_id = c.id
-        WHERE a.account_id = {account_id}
-          AND apd.as_of_date >= '{date_start}'::date
-          AND apd.as_of_date <= '{date_end}'::date
-          AND apd.purchase_roas IS NOT NULL
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
-        GROUP BY (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date
-        ORDER BY week_start
+            w.week_start,
+            COALESCE(a.avg_roas, 0) AS avg_roas
+        FROM weeks w
+        LEFT JOIN agg a ON a.week_start = w.week_start
+        ORDER BY w.week_start
     """
 
     df = pd.read_sql(query, engine)
@@ -1648,20 +1663,35 @@ def get_purchase_roas_monthly(account_id, date_start, date_end):
     engine = get_engine()
 
     query = f"""
+        WITH months AS (
+            SELECT generate_series(
+                DATE_TRUNC('month', '{date_start}'::date)::date,
+                DATE_TRUNC('month', '{date_end}'::date)::date,
+                INTERVAL '1 month'
+            )::date AS month_start
+        ),
+        agg AS (
+            SELECT
+                DATE_TRUNC('month', apd.as_of_date)::date AS month_start,
+                ROUND(AVG(apd.purchase_roas)::numeric, 0) AS avg_roas
+            FROM ad_performance_daily apd
+            JOIN ads a ON apd.ad_id = a.id
+            JOIN ad_sets ads ON a.ad_set_id = ads.id
+            JOIN campaigns c ON ads.campaign_id = c.id
+            WHERE a.account_id = {account_id}
+            AND apd.as_of_date >= '{date_start}'::date
+            AND apd.as_of_date <= '{date_end}'::date
+            AND apd.purchase_roas IS NOT NULL
+            AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+            GROUP BY DATE_TRUNC('month', apd.as_of_date)::date
+            ORDER BY month_start
+        )
         SELECT
-            DATE_TRUNC('month', apd.as_of_date)::date AS month_start,
-            ROUND(AVG(apd.purchase_roas)::numeric, 0) AS avg_roas
-        FROM ad_performance_daily apd
-        JOIN ads a ON apd.ad_id = a.id
-        JOIN ad_sets ads ON a.ad_set_id = ads.id
-        JOIN campaigns c ON ads.campaign_id = c.id
-        WHERE a.account_id = {account_id}
-          AND apd.as_of_date >= '{date_start}'::date
-          AND apd.as_of_date <= '{date_end}'::date
-          AND apd.purchase_roas IS NOT NULL
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
-        GROUP BY DATE_TRUNC('month', apd.as_of_date)::date
-        ORDER BY month_start
+            m.month_start,
+            COALESCE(a.avg_roas, 0) AS avg_roas
+        FROM months m
+        LEFT JOIN agg a ON a.month_start = m.month_start
+        ORDER BY m.month_start
     """
 
     df = pd.read_sql(query, engine)
@@ -1672,23 +1702,38 @@ def get_purchase_count_weekly(account_id, date_start, date_end):
     engine = get_engine()
 
     query = f"""
+        WITH weeks AS (
+            SELECT generate_series(
+                (DATE_TRUNC('week', '{date_start}'::date) + INTERVAL '6 days')::date,
+                (DATE_TRUNC('week', '{date_end}'::date) + INTERVAL '6 days')::date,
+                INTERVAL '7 days'
+            )::date AS week_start
+        ),
+        agg AS (
+            SELECT
+                (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date AS week_start,
+                COALESCE(SUM(apd.purchase_count), 0) AS purchases
+
+            FROM ad_performance_daily apd
+            JOIN ads a ON apd.ad_id = a.id
+            JOIN ad_sets ads ON a.ad_set_id = ads.id
+            JOIN campaigns c ON ads.campaign_id = c.id
+
+            WHERE a.account_id = {account_id}
+                AND apd.as_of_date >= '{date_start}'::date
+                AND apd.as_of_date <= '{date_end}'::date
+                AND apd.purchase_count IS NOT NULL
+                AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+
+            GROUP BY (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date
+            ORDER BY week_start
+        )
         SELECT
-            (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date AS week_start,
-            COALESCE(SUM(apd.purchase_count), 0) AS purchases
-
-        FROM ad_performance_daily apd
-        JOIN ads a ON apd.ad_id = a.id
-        JOIN ad_sets ads ON a.ad_set_id = ads.id
-        JOIN campaigns c ON ads.campaign_id = c.id
-
-        WHERE a.account_id = {account_id}
-            AND apd.as_of_date >= '{date_start}'::date
-            AND apd.as_of_date <= '{date_end}'::date
-            AND apd.purchase_count IS NOT NULL
-            AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
-
-        GROUP BY (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date
-        ORDER BY week_start
+            w.week_start,
+            COALESCE(a.purchases, 0) AS purchases
+        FROM weeks w
+        LEFT JOIN agg a ON a.week_start = w.week_start
+        ORDER BY w.week_start
     """
 
     df = pd.read_sql(query, engine)
@@ -1699,23 +1744,38 @@ def get_purchase_count_monthly(account_id, date_start, date_end):
     engine = get_engine()
 
     query = f"""
+        WITH months AS (
+            SELECT generate_series(
+                DATE_TRUNC('month', '{date_start}'::date)::date,
+                DATE_TRUNC('month', '{date_end}'::date)::date,
+                INTERVAL '1 month'
+            )::date AS month_start
+        ),
+        agg AS (
+            SELECT
+                DATE_TRUNC('month', apd.as_of_date)::date AS month_start,
+                COALESCE(SUM(apd.purchase_count), 0) AS purchases
+
+            FROM ad_performance_daily apd
+            JOIN ads a ON apd.ad_id = a.id
+            JOIN ad_sets ads ON a.ad_set_id = ads.id
+            JOIN campaigns c ON ads.campaign_id = c.id
+
+            WHERE a.account_id = {account_id}
+                AND apd.as_of_date >= '{date_start}'::date
+                AND apd.as_of_date <= '{date_end}'::date
+                AND apd.purchase_count IS NOT NULL
+                AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+
+            GROUP BY DATE_TRUNC('month', apd.as_of_date)::date
+            ORDER BY month_start
+        )
         SELECT
-            DATE_TRUNC('month', apd.as_of_date)::date AS month_start,
-            COALESCE(SUM(apd.purchase_count), 0) AS purchases
-
-        FROM ad_performance_daily apd
-        JOIN ads a ON apd.ad_id = a.id
-        JOIN ad_sets ads ON a.ad_set_id = ads.id
-        JOIN campaigns c ON ads.campaign_id = c.id
-
-        WHERE a.account_id = {account_id}
-            AND apd.as_of_date >= '{date_start}'::date
-            AND apd.as_of_date <= '{date_end}'::date
-            AND apd.purchase_count IS NOT NULL
-            AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
-
-        GROUP BY DATE_TRUNC('month', apd.as_of_date)::date
-        ORDER BY month_start
+            m.month_start,
+            COALESCE(a.purchases, 0) AS purchases
+        FROM months m
+        LEFT JOIN agg a ON a.month_start = m.month_start
+        ORDER BY m.month_start
     """
 
     df = pd.read_sql(query, engine)
@@ -1812,25 +1872,41 @@ def get_spend_and_revenue_weekly(account_id, date_start, date_end):
     engine = get_engine()
 
     query = f"""
+        WITH weeks AS (
+            SELECT generate_series(
+                DATE_TRUNC('week', '{date_start}'::date)::date,
+                DATE_TRUNC('week', '{date_end}'::date)::date,
+                INTERVAL '7 days'
+            )::date AS week_start
+        ),
+        agg AS (
+            SELECT
+                DATE_TRUNC('week', apd.as_of_date)::date AS week_start,
+                ROUND(COALESCE(SUM(apd.spend), 0)::numeric, 0) AS spend,
+                ROUND(COALESCE(SUM(apd.spend * apd.purchase_roas), 0)::numeric, 0) AS revenue
+
+            FROM ad_performance_daily apd
+            JOIN ads a ON apd.ad_id = a.id
+            JOIN ad_sets ads ON a.ad_set_id = ads.id
+            JOIN campaigns c ON ads.campaign_id = c.id
+
+            WHERE a.account_id = {account_id}
+            AND apd.as_of_date >= '{date_start}'::date
+            AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
+            AND apd.spend IS NOT NULL
+            AND apd.purchase_roas IS NOT NULL
+            AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+
+            GROUP BY DATE_TRUNC('week', apd.as_of_date)::date
+            ORDER BY week_start
+        )
         SELECT
-            DATE_TRUNC('week', apd.as_of_date)::date AS week_start,
-            ROUND(COALESCE(SUM(apd.spend), 0)::numeric, 0) AS spend,
-            ROUND(COALESCE(SUM(apd.spend * apd.purchase_roas), 0)::numeric, 0) AS revenue
-
-        FROM ad_performance_daily apd
-        JOIN ads a ON apd.ad_id = a.id
-        JOIN ad_sets ads ON a.ad_set_id = ads.id
-        JOIN campaigns c ON ads.campaign_id = c.id
-
-        WHERE a.account_id = {account_id}
-          AND apd.as_of_date >= '{date_start}'::date
-          AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-          AND apd.spend IS NOT NULL
-          AND apd.purchase_roas IS NOT NULL
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
-
-        GROUP BY DATE_TRUNC('week', apd.as_of_date)::date
-        ORDER BY week_start
+            w.week_start,
+            ROUND(COALESCE(a.spend, 0)::numeric, 0) AS spend,
+            ROUND(COALESCE(a.revenue, 0)::numeric, 0) AS revenue
+        FROM weeks w
+        LEFT JOIN agg a ON a.week_start = w.week_start
+        ORDER BY w.week_start
     """
 
     df = pd.read_sql(query, engine)
@@ -1841,25 +1917,41 @@ def get_spend_and_revenue_monthly(account_id, date_start, date_end):
     engine = get_engine()
 
     query = f"""
+        WITH months AS (
+            SELECT generate_series(
+                DATE_TRUNC('month', '{date_start}'::date)::date,
+                DATE_TRUNC('month', '{date_end}'::date)::date,
+                INTERVAL '1 month'
+            )::date AS month_start
+        ),
+        agg AS (
+            SELECT
+                DATE_TRUNC('month', apd.as_of_date)::date AS month_start,
+                ROUND(COALESCE(SUM(apd.spend), 0)::numeric, 0) AS spend,
+                ROUND(COALESCE(SUM(apd.spend * apd.purchase_roas), 0)::numeric, 0) AS revenue
+
+            FROM ad_performance_daily apd
+            JOIN ads a ON apd.ad_id = a.id
+            JOIN ad_sets ads ON a.ad_set_id = ads.id
+            JOIN campaigns c ON ads.campaign_id = c.id
+
+            WHERE a.account_id = {account_id}
+            AND apd.as_of_date >= '{date_start}'::date
+            AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
+            AND apd.spend IS NOT NULL
+            AND apd.purchase_roas IS NOT NULL
+            AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+
+            GROUP BY DATE_TRUNC('month', apd.as_of_date)::date
+            ORDER BY month_start
+        )
         SELECT
-            DATE_TRUNC('month', apd.as_of_date)::date AS month_start,
-            ROUND(COALESCE(SUM(apd.spend), 0)::numeric, 0) AS spend,
-            ROUND(COALESCE(SUM(apd.spend * apd.purchase_roas), 0)::numeric, 0) AS revenue
-
-        FROM ad_performance_daily apd
-        JOIN ads a ON apd.ad_id = a.id
-        JOIN ad_sets ads ON a.ad_set_id = ads.id
-        JOIN campaigns c ON ads.campaign_id = c.id
-
-        WHERE a.account_id = {account_id}
-          AND apd.as_of_date >= '{date_start}'::date
-          AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-          AND apd.spend IS NOT NULL
-          AND apd.purchase_roas IS NOT NULL
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
-
-        GROUP BY DATE_TRUNC('month', apd.as_of_date)::date
-        ORDER BY month_start
+            m.month_start,
+            ROUND(COALESCE(a.spend, 0)::numeric, 0) AS spend,
+            ROUND(COALESCE(a.revenue, 0)::numeric, 0) AS revenue
+        FROM months m
+        LEFT JOIN agg a ON a.month_start = m.month_start
+        ORDER BY m.month_start
     """
 
     df = pd.read_sql(query, engine)

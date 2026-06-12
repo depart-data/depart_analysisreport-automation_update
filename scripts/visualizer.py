@@ -273,11 +273,9 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
     labels = dataset.get("labels") or []
     series = dataset.get("series") or []
 
-    if not labels or not series or len(labels) <= 1:
+    if not labels or not series:
         return ""
 
-    # =========================================================
-    # 💡 [핵심 해결책] main.py에서 전달이 안 되는 스위치를 여기서 강제로 켭니다!
     title_text = str(dataset.get("title") or "").strip()
     show_average = dataset.get("show_average", False)
     
@@ -1848,11 +1846,12 @@ def _render_purchase_conversion_heatmap(
         [color_map["lighter"], color_map["light"], color_map["base"], color_map["dark"]],
     )
 
+    pivot = pivot.fillna(0)
     heat_values = pivot.values.astype(float)
     vmin = float(np.nanmin(heat_values))
     vmax = float(np.nanmax(heat_values))
 
-    im = ax.imshow(heat_values, cmap=cmap)
+    im = ax.imshow(heat_values, cmap=cmap, aspect="auto")
     cbar = fig.colorbar(im, ax=ax, fraction=0.04, pad=0.035)
     cbar.outline.set_visible(False)
     cbar.ax.tick_params(labelsize=10, colors="#666666")
@@ -1884,6 +1883,7 @@ def _render_purchase_conversion_heatmap(
     ax.set_yticks(range(len(pivot.index)))
     ax.set_yticklabels([str(c) for c in pivot.index], fontsize=11)
     ax.tick_params(axis="x", bottom=True, top=False)
+    ax.set_ylim(pivot.shape[0] - 0.5 + 0.35, -0.5 - 0.35)
 
     for spine in ax.spines.values():
         spine.set_visible(False)
