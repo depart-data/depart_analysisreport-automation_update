@@ -80,7 +80,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         "meta": {
             "account_name": acc_name,
             "period": f"{start} ~ {actual_end}",
-            "period_ads": f"{ad_start} ~ {ad_end}",
+            "period_ads": f"{pd.Timestamp(ad_start).strftime('%Y-%m-%d') if ad_start else '-'} ~ {pd.Timestamp(ad_end).strftime('%Y-%m-%d') if ad_end else '-'}",
             "period_contents": f"{content_start} ~ {content_end}",
             "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         },
