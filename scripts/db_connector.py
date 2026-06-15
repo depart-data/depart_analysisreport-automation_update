@@ -1,4 +1,3 @@
-# scripts/db_connector.py 예시
 from sqlalchemy import create_engine
 import os
 from pathlib import Path
