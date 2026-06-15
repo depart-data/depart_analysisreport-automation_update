@@ -484,7 +484,7 @@ body {
 
 .figure--heatmap .figure__svg,
 .figure--heatmap .figure__img {
-  max-height: 170mm;
+  max-height: 150mm;
   overflow: hidden;
 }
 

@@ -280,7 +280,7 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
     show_average = dataset.get("show_average", False)
     
     # 평균선 표시 대상 차트
-    if title_text in ["주별 CTR 추이", "오가닉 조회수 추이 (주별)", "프로필 방문 수(주별)"] :
+    if title_text in [ "오가닉 조회수 추이 (주별)", "프로필 방문 수(주별)"] :
         show_average = True
     # =========================================================
 
@@ -516,8 +516,8 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
         if all_vals:
             avg_val = sum(all_vals) / len(all_vals)
             
-            # 1. 점선 그리기 (얌전한 회색)
-            ax.axhline(y=avg_val, color="#8c8c89", linestyle="--", linewidth=1.5, zorder=999)
+            # 1. 점선 그리기 (빨간색 - 이번분기)
+            ax.axhline(y=avg_val, color="#e53935", linestyle="--", linewidth=1.5, zorder=999)
             
             # 현재 기간 평균 라벨: "{연도}년 {분기}분기 평균" 형식으로 통일
             current_quarter = dataset.get("current_quarter")
@@ -531,12 +531,12 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                     period_text = "분석 기간 전체"
                 cur_label = f"{period_text} 평균"
 
-            # 2. 텍스트 라벨 (왼쪽 고정, 회색 글씨)
+            # 2. 텍스트 라벨 (왼쪽 고정, 빨간 글씨)
             ax.text(
                 x=0.02,
                 y=avg_val,
                 s=f"{cur_label}: {avg_val:,.1f}{unit}",
-                color="#5d5d5b",
+                color="#e53935",
                 fontsize=10,
                 fontweight="bold",
                 ha="left", va="bottom",
@@ -552,24 +552,24 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                 transform=ax.transAxes,
                 ha='left', va='top',
                 fontsize=10,
-                color="#5d5d5b",
+                color="#e53935",
                 clip_on=False,
             )
             
-            # 4. 이전 분기 평균선 (빨간색 계열)
+            # 4. 이전 분기 평균선 (회색)
             if prev_quarter_avg and prev_quarter_avg.get("avg") is not None:
                 prev_year = prev_quarter_avg.get("year")
                 prev_quarter = prev_quarter_avg.get("quarter")
 
-                # 4-1. 점선 그리기 (빨간색 계열)
-                ax.axhline(y=prev_avg_val, color="#e53935", linestyle="--", linewidth=1.5, zorder=998)
+                # 4-1. 점선 그리기
+                ax.axhline(y=prev_avg_val, color="#858585", linestyle="--", linewidth=1.5, zorder=998)
 
-                # 4-2. 텍스트 라벨 (왼쪽 고정, 빨간색 글씨)
+                # 4-2. 텍스트 라벨
                 ax.text(
                     x=0.02,
                     y=prev_avg_val,
                     s=f"{prev_year}년 {prev_quarter}분기 평균: {prev_avg_val:,.1f}{unit}",
-                    color="#e53935",
+                    color="#858585",
                     fontsize=10,
                     fontweight="bold",
                     ha="left", va="bottom",
@@ -578,14 +578,14 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                     transform=ax.get_yaxis_transform()
                 )
 
-                # 4-3. 차트 하단 설명 (2번째 줄: 이전 분기 평균, 빨간색 계열)
+                # 4-3. 차트 하단 설명 
                 ax.text(
                     0.01, -0.24,
                     f"----- : {prev_year}년 {prev_quarter}분기 평균",
                     transform=ax.transAxes,
                     ha='left', va='top',
                     fontsize=10,
-                    color="#e53935",
+                    color="#858585",
                     clip_on=False,
                 )
     # =======================================================
@@ -1833,8 +1833,9 @@ def _render_purchase_conversion_heatmap(
     age_order = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
     gender_order = ["female", "male"]
     pivot = pivot.reindex(
-        index=[g for g in gender_order if g in pivot.index],
-        columns=[a for a in age_order if a in pivot.columns],
+        index=gender_order,    
+        columns=age_order,    
+        fill_value=0,
     )
 
     if pivot.empty:
@@ -1851,7 +1852,7 @@ def _render_purchase_conversion_heatmap(
     vmin = float(np.nanmin(heat_values))
     vmax = float(np.nanmax(heat_values))
 
-    im = ax.imshow(heat_values, cmap=cmap, aspect="auto")
+    im = ax.imshow(heat_values, cmap=cmap)
     cbar = fig.colorbar(im, ax=ax, fraction=0.04, pad=0.035)
     cbar.outline.set_visible(False)
     cbar.ax.tick_params(labelsize=10, colors="#666666")
@@ -1870,7 +1871,7 @@ def _render_purchase_conversion_heatmap(
             ax.text(
                 j,
                 i,
-                f"{int(round(float(val))):,}\n ",
+                f"{int(round(float(val))):,}",
                 ha="center",
                 va="center",
                 fontsize=11,
@@ -1883,7 +1884,6 @@ def _render_purchase_conversion_heatmap(
     ax.set_yticks(range(len(pivot.index)))
     ax.set_yticklabels([str(c) for c in pivot.index], fontsize=11)
     ax.tick_params(axis="x", bottom=True, top=False)
-    ax.set_ylim(pivot.shape[0] - 0.5 + 0.35, -0.5 - 0.35)
 
     for spine in ax.spines.values():
         spine.set_visible(False)
