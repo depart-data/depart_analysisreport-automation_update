@@ -55,6 +55,34 @@ def _parse_korean_caption(caption: str, max_chars: int = 7) -> str:
         return text[:max_chars] + "..."
     return text
 
+def _assign_reaction_ranks(items, metric_col):
+    """
+    items 리스트에 동순위를 반영한 'rank' 필드를 추가하고,
+    13개를 초과하는 경우 업로드일 최신순으로 잘라냅니다.
+    """
+    if not items:
+        return items
+
+    # rank 계산: 같은 지표값이면 같은 순위 번호
+    prev_val = None
+    prev_rank = 0
+    count = 0
+    for item in items:
+        val = float(item.get(metric_col, 0) or 0)
+        count += 1
+        if val != prev_val:
+            prev_rank = count
+            prev_val = val
+        item["rank"] = prev_rank
+
+    # 13개 초과 시: 11위 이상(rank >= 11)인 항목 중 업로드일 최신순 3개만 남김
+    if len(items) > 13:
+        top10 = [x for x in items if x["rank"] <= 10]
+        rest  = [x for x in items if x["rank"] > 10]
+        rest_sorted = sorted(rest, key=lambda x: x.get("uploaded_at") or "", reverse=True)
+        items = top10 + rest_sorted[:3]
+
+    return items
 
 
 def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", avoid_age="", avoid_gender="", currency=""):
@@ -661,7 +689,11 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
             for item in (reaction_contents or []):
                 raw_caption = str(item.get("caption") or "").strip()
-                item["caption_label"] = _parse_korean_caption(raw_caption)
+                caption_label = _parse_korean_caption(raw_caption)
+                if not caption_label:
+                    uploaded = item.get("uploaded_at")
+                    caption_label = f"{uploaded:%Y-%m-%d} 업로드" if uploaded else ""
+                item["caption_label"] = caption_label
 
                 raw_ctr = item.get("ctr")
                 if raw_ctr is None or (isinstance(raw_ctr, float) and raw_ctr != raw_ctr):
@@ -669,6 +701,8 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
                     item["ctr"] = None
                 else:
                     item["ctr"] = float(raw_ctr)
+
+            reaction_contents = _assign_reaction_ranks(reaction_contents, metric_col)
 
             final_report["datasets"][f"reaction_{metric}_{suffix}"] = {
                 "kind":         "reaction_bar",

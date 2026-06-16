@@ -598,27 +598,16 @@
       #}
       <div class="reaction-content-wrapper">
 
-        {# 상단 영역: 썸네일 5개 가로 그리드 #}
+        {# 좌측: 썸네일 상단 2개 하단 3개 #}
         <div class="reaction-thumb-row">
-          {% for item in data.cards %}
-            <div class="reaction-thumb-cell">
-
-              {#
-                썸네일 상단 오버레이: 순위 뱃지(좌) + 업로드 날짜(우)
-                순위는 loop.index (1~5), 날짜는 "YYYY-MM-DD 업로드" 형식
-              #}
+          {# 대형 썸네일: 1~2위 (최대 2개) #}
+          {% for item in data.cards[:2] %}
+            <div class="reaction-thumb-cell reaction-thumb-cell--large">
               <div class="reaction-thumb-cell__header">
-                {# 좌측 그룹: 순위 뱃지 + 업로드 날짜 #}
                 <div class="reaction-thumb-cell__header-left">
-                  <span class="reaction-thumb-cell__rank">{{ loop.index }}</span>
-                  <span class="reaction-thumb-cell__upload-date">
-                    {{ item.uploaded_at }} 업로드
-                  </span>
+                  <span class="reaction-thumb-cell__rank">{{ item.rank if item.rank is not none else loop.index }}</span>
+                  <span class="reaction-thumb-cell__upload-date">{{ item.uploaded_at }} 업로드</span>
                 </div>
-
-                {# 우측 그룹: CTR 수치
-                   item.ctr가 None이면 "CTR -", 숫자면 소수점 둘째 자리까지 표시
-                #}
                 <div class="reaction-thumb-cell__ctr">
                   {% if item.ctr is not none and item.ctr is not undefined %}
                     CTR {{ "%.2f" | format(item.ctr) }}%
@@ -626,30 +615,44 @@
                     CTR -
                   {% endif %}
                 </div>
-
               </div>
-
-              {#
-                썸네일 이미지 영역 (4:5 비율 고정).
-                이미지 URL이 없거나 로딩 실패 시 플레이스홀더를 표시한다.
-                onerror 핸들러로 JS 없이 로딩 실패 대응: 이미지를 숨기고 부모에
-                'no-img' 클래스를 추가하여 CSS placeholder를 활성화한다.
-              #}
               <div class="reaction-thumb-cell__img-wrap">
                 {% if item.thumbnail %}
-                  <img
-                    src="{{ item.thumbnail }}"
-                    alt="콘텐츠 {{ loop.index }} 썸네일"
-                    onerror="this.style.display='none'; this.parentNode.classList.add('no-img');"
-                  >
-                  {# onerror 시 표시될 플레이스홀더 (평소에는 CSS로 숨김) #}
+                  <img src="{{ item.thumbnail }}" alt="콘텐츠 {{ loop.index }} 썸네일"
+                       onerror="this.style.display='none'; this.parentNode.classList.add('no-img');">
                   <div class="thumb-placeholder-text">썸네일</div>
                 {% else %}
-                  {# URL 자체가 없는 경우: no-img 클래스를 처음부터 부여 #}
                   <div class="thumb-placeholder-text">썸네일</div>
                 {% endif %}
               </div>
+            </div>
+          {% endfor %}
 
+          {# 소형 썸네일: 3~5위 (최대 3개) #}
+          {% for item in data.cards[2:5] %}
+            <div class="reaction-thumb-cell reaction-thumb-cell--small">
+              <div class="reaction-thumb-cell__header">
+                <div class="reaction-thumb-cell__header-left">
+                  <span class="reaction-thumb-cell__rank">{{ item.rank if item.rank is not none else (loop.index + 2) }}</span>
+                  <span class="reaction-thumb-cell__upload-date">{{ item.uploaded_at }} 업로드</span>
+                </div>
+                <div class="reaction-thumb-cell__ctr">
+                  {% if item.ctr is not none and item.ctr is not undefined %}
+                    CTR {{ "%.2f" | format(item.ctr) }}%
+                  {% else %}
+                    CTR -
+                  {% endif %}
+                </div>
+              </div>
+              <div class="reaction-thumb-cell__img-wrap">
+                {% if item.thumbnail %}
+                  <img src="{{ item.thumbnail }}" alt="콘텐츠 {{ loop.index + 2 }} 썸네일"
+                       onerror="this.style.display='none'; this.parentNode.classList.add('no-img');">
+                  <div class="thumb-placeholder-text">썸네일</div>
+                {% else %}
+                  <div class="thumb-placeholder-text">썸네일</div>
+                {% endif %}
+              </div>
             </div>
           {% endfor %}
         </div>

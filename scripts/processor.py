@@ -624,7 +624,8 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
         total_saves,
         total_comments,
         total_reaction,
-        ctr
+        ctr,
+        content_id
     FROM (
         -- 내부 쿼리: fb_ig_media_id 기준으로 중복을 제거한다.
         -- DISTINCT ON (ig.fb_ig_media_id) 는 각 Instagram 콘텐츠에 대해
@@ -637,6 +638,7 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
             ig.caption                                      AS caption,
             NULLIF(ad.thumb_link, '')                       AS thumbnail,
             ig.ig_media_type,
+            ig.id                                           AS content_id,
             ici.likes                                       AS total_likes,
             ici.shares                                      AS total_shares,
             ici.saved                                       AS total_saves,
@@ -679,8 +681,10 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
         ORDER BY ig.fb_ig_media_id, {order_expr} {order_direction}
     ) deduped
     -- 중복 제거 후 원하는 지표 기준으로 재정렬하여 상위/하위 5개를 선택한다.
-    ORDER BY {outer_order_expr} {order_direction}
-    LIMIT 5;
+    ORDER BY 
+        {outer_order_expr} {order_direction}, 
+        uploaded_at DESC, ctr DESC, content_id ASC
+    LIMIT 13;
     """
 
     ads_df = pd.read_sql(query, engine)
@@ -708,6 +712,7 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
             'total_comments': int(row['total_comments'] or 0),
             'total_reaction': int(row['total_reaction'] or 0),
             'ctr': float(row['ctr'] or 0),
+            'content_id': int(row['content_id']),
         })
 
     return results

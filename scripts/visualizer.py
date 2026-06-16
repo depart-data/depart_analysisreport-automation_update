@@ -944,94 +944,58 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
     }
     metric_label = metric_label_map.get(metric, metric)
 
-    # 상단 그리드용 아이템 리스트 (썸네일·업로드일만 전달)
+    # 상단 그리드용 아이템 리스트 (썸네일·업로드일·동순위 rank 전달)
     thumb_items = [
         {
-            "thumbnail":    item.get("thumbnail"),
-            "uploaded_at":  item.get("uploaded_at"),
+            "thumbnail":     item.get("thumbnail"),
+            "uploaded_at":   item.get("uploaded_at"),
             "ig_media_type": item.get("ig_media_type"),
             "ctr":           item.get("ctr"),
+            "rank":          item.get("rank"),
+            "caption_label": item.get("caption_label"),
         }
-        for item in items
+        for item in items[:5]
     ]
 
     if not items:
         return {"cards": [], "chart_svg": ""}
 
-    # 차트 데이터 구성: 콘텐츠 5개 + 전체 평균 1개
-    labels = []
-    values = []
-
+    labels, values, ranks, thumbnails = [], [], [], []
     for idx, item in enumerate(items, 1):
         caption_label = str(item.get("caption_label") or "").strip()
-
-        if caption_label:
-            label = caption_label
-        else:
-            # caption_label이 없는 경우 (구버전 데이터 호환): 업로드 날짜로 대체
-            label = str(item.get("uploaded_at") or f"콘텐츠 {idx}")
-        
+        label = caption_label or str(item.get("uploaded_at") or f"콘텐츠 {idx}")
         labels.append(label)
         values.append(float(item.get(metric_col, 0) or 0))
+        ranks.append(item.get("rank", idx))
+        thumbnails.append(item.get("thumbnail"))
 
     n = len(labels)
+    GAP_AFTER_5 = 0.5  # 5위/6위 사이 여백 (2-3 구분선용)
+    y_pos = []
+    for i in range(n):
+        base = (n - 1 - i)
+        y_pos.append(base + GAP_AFTER_5 if i >= 5 else base)
 
-    is_top = dataset.get("is_top", True)
 
-    base_hex = color_map.get("base", "#4B3B8C")
-    
-    def _hex_to_rgba(hex_color: str, alpha: float):
-        """HEX 색상 문자열을 matplotlib용 RGBA 튜플로 변환한다."""
-        hex_color = hex_color.lstrip("#")
-        r = int(hex_color[0:2], 16) / 255.0
-        g = int(hex_color[2:4], 16) / 255.0
-        b = int(hex_color[4:6], 16) / 255.0
-        return (r, g, b, alpha)
-    
-    content_values = values
+    # ── 막대 색상 결정 (평균 이상 = 진하게, 평균 이하 = 연하게) ──
+    base_hex = color_map.get("base", "#999999")
+    is_top   = dataset.get("is_top", True)
 
-    if not content_values:
+    if not values:
         highlight_val = None
     elif is_top:
-        # 상위 차트: 수치가 max_value와 동일한 막대 전부를 강조
-        # index() 방식은 동점 첫 번째만 반환하므로 값 자체를 저장하여
-        # 루프에서 모든 동점 막대에 동일하게 적용한다.
-        highlight_val = max(content_values)
+        highlight_val = max(values)
     else:
-        # 하위 차트: 수치가 min_value와 동일한 막대 전부를 강조
-        highlight_val = min(content_values)
+        highlight_val = min(values)
 
     bar_colors = []
-    for v in content_values:
+    for v in values:
+        r, g, b = _hex_to_rgb01(base_hex)
         if highlight_val is not None and v == highlight_val:
-            # 강조 막대: 브랜드 컬러 불투명도 100%
-            bar_colors.append(_hex_to_rgba(base_hex, 1.0))
+            bar_colors.append((r, g, b, 1.0))
         else:
-            # 비강조 막대: 브랜드 컬러 불투명도 40%
-            bar_colors.append(_hex_to_rgba(base_hex, 0.4))
+            bar_colors.append((r, g, b, 0.4))
 
-    plt.rcParams["svg.fonttype"] = "none"
-
-    fig_h = min(2.4, max(1.6, n * 0.40))
-    fig, ax = plt.subplots(figsize=(7, fig_h))
-    fig.patch.set_alpha(0)
-    ax.patch.set_alpha(0)
-    fig.subplots_adjust(left=0.1, right=1.1, top=0.95, bottom=0.12)
-
-    y_pos = list(range(n - 1, -1, -1))   # 위→아래: 콘텐츠1 ~ 콘텐츠5 ~ 평균
-
-    bars = ax.barh(
-        y_pos, values,
-        color=bar_colors,
-        height=0.55,
-        edgecolor="none",
-    )
-   
-
-    # ── x축 기준값 결정 ────────────────────────────────────────────────────
-    # x_scale_max: JSON에서 전달된 공유 기준값 (상위/하위 차트 공통 사용).
-    # 이 값이 없거나 0이면 현재 데이터의 최대값을 폴백으로 사용한다.
-    # 단, 폴백도 0인 경우 division by zero를 막기 위해 최소값 1을 보장한다.
     x_scale_max_from_json = float(dataset.get("x_scale_max") or 0)
     x_data_max = max(values) if values else 0
     if x_scale_max_from_json > 0:
@@ -1043,6 +1007,25 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
     else:
         # 모든 값이 0인 경우: 최소값 1 보장 (division by zero 방지)
         x_scale_ref = 1
+
+    # ── 그래프 캔버스 생성 ──
+    all_zero = all(v == 0 for v in values) if values else True
+    fig_h = min(4.8, max(1.6, n * 0.40))
+    fig, ax = plt.subplots(figsize=(7, fig_h))
+    fig.patch.set_alpha(0)
+    ax.patch.set_alpha(0)
+    fig.subplots_adjust(left=0.25, right=0.88, top=0.95, bottom=0.10)
+
+    # 전부 0이면 막대를 최소 폭으로 표시
+    plot_values = [x_scale_ref * 0.006 if all_zero else v for v in values]
+
+    bars = ax.barh(
+        y_pos, plot_values,
+        color=bar_colors,
+        height=0.55,
+        edgecolor="none",
+    )
+   
 
     # 지표별 유니코드 아이콘 매핑
     metric_icon_map = {
@@ -1070,8 +1053,25 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
             ),
         )
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(labels, fontsize=7, color="#333333")
+    # 1~5위는 제목이 막대 안으로 들어가므로 y축 라벨은 비움
+    # 6~10위는 기존처럼 바깥쪽에 표시
+    yticklabels = ["" if i < 5 else lbl for i, lbl in enumerate(labels)]
+    ax.set_yticklabels(yticklabels, fontsize=7, color="#333333")
     ax.yaxis.set_tick_params(length=0)
+
+    # 1~5위: 막대 안쪽 왼쪽에 흰색으로 제목 표시
+    for i, (bar, lbl) in enumerate(zip(bars, labels)):
+        if i >= 5:
+            break
+        ax.text(
+            x_scale_ref * 0.012,
+            bar.get_y() + bar.get_height() / 2,
+            lbl,
+            va="center", ha="left",
+            fontsize=7,
+            color="#FFFFFF",
+            zorder=11,
+        )
 
     ax.set_xlabel(metric_label, fontsize=8, color="#555555", labelpad=4)
     # x축 상한을 x_scale_ref 기준으로 설정한다.
@@ -1082,6 +1082,27 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
 
     for spine in ax.spines.values():
         spine.set_visible(False)
+    
+    # 5위/6위 사이 구분선
+    if n > 5:
+        divider_y = (y_pos[4] + y_pos[5]) / 2
+        ax.axhline(
+            y=divider_y,
+            xmin=0, xmax=1,
+            color="#CCCCCC",
+            linewidth=1,
+            zorder=4,
+        )
+
+    # 전부 0일 때 안내 문구
+    if all_zero:
+        ax.text(
+            0.5, -0.08,
+            "해당 기간 집계된 데이터가 없습니다",
+            transform=ax.transAxes,
+            ha="center", va="top",
+            fontsize=7, color="#aaaaaa",
+        )
 
 
 
@@ -1123,16 +1144,16 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
         )
     # else 분기 제거: 평균이 0이거나 scale이 없으면 선을 그리지 않음
 
-        buf = io.StringIO()
-        fig.savefig(buf, format="svg")
-        plt.close(fig)
-        plt.rcParams["svg.fonttype"] = "path"
+    buf = io.StringIO()
+    fig.savefig(buf, format="svg")
+    plt.close(fig)
+    plt.rcParams["svg.fonttype"] = "path"
 
-        svg = buf.getvalue()
-        idx = svg.find("<svg")
-        chart_svg = svg[idx:] if idx != -1 else svg
+    svg = buf.getvalue()
+    idx = svg.find("<svg")
+    chart_svg = svg[idx:] if idx != -1 else svg
 
-        return {"cards": thumb_items, "chart_svg": chart_svg}
+    return {"cards": thumb_items, "chart_svg": chart_svg}
 
 
 
