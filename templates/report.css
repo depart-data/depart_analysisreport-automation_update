@@ -1343,58 +1343,68 @@ body {
   gap: 3mm;
   /* 래퍼가 페이지 전체 폭을 차지하도록 */
   width: 100%;
+  /* 본문 자체의 넘침 차단 (다음 페이지로 흘러내리는 버그 방지) */
+  overflow: hidden;
 }
 
 /*
   reaction-content-wrapper:
   썸네일 그리드와 막대그래프를 묶는 최상위 래퍼.
-  max-width: 80% + margin: auto 로 중앙 정렬 및 폭 제한을 동시에 적용한다.
-  두 자식 영역은 모두 이 래퍼의 width: 100%를 상속하므로
-  좌우 기준점이 항상 동일하게 정렬된다.
+  좌측 썸네일 블록(40%) : 우측 차트 블록(60%) 의 2단 가로 레이아웃.
+  - max-width: 100% 로 본문 폭을 거의 다 사용한다.
+  - height: 100% 로 본문 높이를 꽉 채워 자식이 높이 기준으로 줄어들 수 있게 한다.
+  - overflow: hidden 으로 어떤 경우에도 슬라이드 밖으로 흘러넘치지 않게 강제한다.
 */
 .reaction-content-wrapper {
-  max-width: 80%;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;         /* 래퍼 폭 내에서 100% 확장 */
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  gap: 3mm;
-  overflow: visible;
+  gap: 10mm;
+  overflow: hidden;
 }
 
 /* ──────────────────────────────────────────────────
    상단: 썸네일 5칸 가로 그리드
    ────────────────────────────────────────────────── */
 
+/*
+  좌측 썸네일 블록: 6컬럼 × 2행 그리드.
+  - 상단 행(58%): 대형 썸네일 2개가 각각 3칸씩 → 가로로 절반씩.
+  - 하단 행(42%): 소형 썸네일 3개가 각각 2칸씩 → 가로로 1/3씩.
+  셀 위치는 템플릿에서 부여한 위치 인덱스 클래스(--pos1..--pos5)로 결정한다
+  (nth-of-type 대신 명시적 클래스로 순서 의존성을 제거).
+*/
 .reaction-thumb-row {
-  flex: 0 0 42%;             /* wrapper 대비 좌측 영역 폭 (수치는 실제 렌더 확인 후 조정) */
+  flex: 0 0 40%;
   display: grid;
-  /* 좌: 대형 썸네일(55%) / 우: 소형 썸네일 3개(45%) */
-  grid-template-columns: 55% 45%;
-  grid-template-rows: repeat(2, 1fr);  /* 대형 2개와 행 높이를 맞추기 위한 기준 */
-  gap: 8px;                  /* 대형 썸네일 세로 간격 8px (요청 1-1) */
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 58% 42%;   /* 상단 대형 행이 하단 소형 행보다 큼 */
+  gap: 8px;
+  height: 100%;
+  align-content: stretch;
 }
 
-/* 대형 썸네일 1~2위: 1열에 세로로 2개 */
-.reaction-thumb-cell--large {
-  grid-column: 1;
-}
-.reaction-thumb-cell--large:nth-of-type(1) { grid-row: 1; }
-.reaction-thumb-cell--large:nth-of-type(2) { grid-row: 2; }
+/* 대형 2개: 상단 행(row 1), 각각 3칸씩 */
+.reaction-thumb-cell--large { grid-row: 1; }
+.reaction-thumb-cell--pos1 { grid-column: 1 / span 3; }
+.reaction-thumb-cell--pos2 { grid-column: 4 / span 3; }
 
-/* 소형 썸네일 3~5위: 2열에 3개를 세로로 쌓음 */
-.reaction-thumb-cell--small {
-  grid-column: 2;
-}
+/* 소형 3개: 하단 행(row 2), 각각 2칸씩 */
+.reaction-thumb-cell--small { grid-row: 2; }
+.reaction-thumb-cell--pos3 { grid-column: 1 / span 2; }
+.reaction-thumb-cell--pos4 { grid-column: 3 / span 2; }
+.reaction-thumb-cell--pos5 { grid-column: 5 / span 2; }
 
 .reaction-thumb-cell {
   display: flex;
   flex-direction: column;
   gap: 0;              /* 헤더와 이미지 사이 간격은 헤더 padding으로 제어 */
   position: relative;  /* 헤더 뱃지 absolute 배치 기준점 */
-  padding-top: 2px;
+  min-height: 0;       /* grid 안에서 셀이 행 높이 기준으로 줄어들 수 있도록 필수 */
   box-sizing: border-box;
 }
 
@@ -1408,11 +1418,10 @@ body {
   /* 좌측(순위+날짜) 그룹과 우측(CTR) 그룹을 양단 정렬한다 */
   justify-content: space-between;
   align-items: center;
-  /* 헤더 텍스트가 두 줄이 되어도 썸네일 이미지를 침범하지 않도록
-     최소 높이를 확보한다 */
-  min-height: 32px;
+  /* 한 줄 유지: 썸네일 이미지를 침범하지 않도록 최소 높이를 낮춘다 */
+  min-height: 24px;
   /* 상단 여백: 페이지 제목과의 간격 확보 */
-  padding: 4px 4px 4px 4px;
+  padding: 2px 4px 2px 4px;
   background: transparent;
   /* 헤더 영역은 이미지 위쪽에만 위치해야 한다.
      position: relative는 부모(.reaction-thumb-cell)에 이미 설정되어 있다 */
@@ -1447,9 +1456,9 @@ body {
   flex-shrink: 0;
 }
 
-/* 업로드 날짜: 뱃지 우측 작은 회색 텍스트 */
+/* 업로드 날짜: 뱃지 우측 작은 회색 텍스트 (목업의 작은 캡션 톤, 두 줄 방지) */
 .reaction-thumb-cell__upload-date {
-  font-size: 13pt;
+  font-size: 9pt;
   color: #888888;
   white-space: nowrap;
   overflow: hidden;
@@ -1459,19 +1468,22 @@ body {
 
 /* CTR 수치: 헤더 우측 고정, 업로드 날짜와 동일한 크기 및 색상 계열 */
 .reaction-thumb-cell__ctr {
-  font-size: 13pt;        /* 업로드 날짜와 동일한 크기 */
+  font-size: 9pt;         /* 업로드 날짜와 동일한 크기 */
   color: #888888;        /* 동일한 회색 계열 */
   white-space: nowrap;   /* 줄바꿈 없이 한 줄로 표시 */
   flex-shrink: 0;        /* 좌측 그룹이 좁아질 때 CTR이 우선 유지되도록 */
 }
 
 /* ──────────────────────────────────────────────────
-   썸네일 이미지 영역 — 인스타그램 피드 4:5 비율 고정
+   썸네일 이미지 영역 — 그리드 행 높이에 맞춰 채움
+   (aspect-ratio 제거: 헤더를 뺀 셀의 남은 높이를 모두 차지하므로
+    썸네일이 그리드 행 높이를 절대 넘치지 않는다 → 핵심 버그 수정)
    ────────────────────────────────────────────────── */
 
 .reaction-thumb-cell__img-wrap {
+  flex: 1 1 auto;         /* 헤더를 뺀 셀의 남은 높이를 모두 차지 */
+  min-height: 0;
   width: 100%;
-  aspect-ratio: 4 / 5;    /* 4:5 비율 엄격 유지 */
   overflow: hidden;
   border-radius: 6px;
   background-color: #D0D0D0;  /* 플레이스홀더 배경: 밝은 회색 */
@@ -1518,9 +1530,12 @@ body {
    ────────────────────────────────────────────────── */
 
 .reaction-chart-wrap {
-  flex: 1 1 auto;         /* 좌측 썸네일 영역(42%) 외 나머지 전부 */
-  overflow: hidden;
+  flex: 1 1 60%;          /* 좌측 썸네일 영역(40%) 외 우측 60% */
   min-width: 0;           /* flex item이 내용으로 인해 넘치는 것 방지 */
+  height: 100%;
+  display: flex;
+  align-items: center;    /* 차트를 세로 중앙 정렬해 좌측 썸네일과 무게중심 맞춤 */
+  overflow: hidden;
 }
 
 .reaction-chart-svg {

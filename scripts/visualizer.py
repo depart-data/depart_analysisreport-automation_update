@@ -1010,11 +1010,12 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
 
     # ── 그래프 캔버스 생성 ──
     all_zero = all(v == 0 for v in values) if values else True
-    fig_h = min(4.8, max(1.6, n * 0.40))
+    fig_h = min(5.2, max(2.0, n * 0.42))
     fig, ax = plt.subplots(figsize=(7, fig_h))
     fig.patch.set_alpha(0)
     ax.patch.set_alpha(0)
-    fig.subplots_adjust(left=0.25, right=0.88, top=0.95, bottom=0.10)
+    # 하위 썸네일을 막대 영역 안쪽 좌측에 배치하므로 left 여백을 줄인다.
+    fig.subplots_adjust(left=0.06, right=0.97, top=0.97, bottom=0.08)
 
     # 전부 0이면 막대를 최소 폭으로 표시
     plot_values = [x_scale_ref * 0.006 if all_zero else v for v in values]
@@ -1053,13 +1054,12 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
             ),
         )
     ax.set_yticks(y_pos)
-    # 1~5위는 제목이 막대 안으로 들어가므로 y축 라벨은 비움
-    # 6~10위는 기존처럼 바깥쪽에 표시
-    yticklabels = ["" if i < 5 else lbl for i, lbl in enumerate(labels)]
-    ax.set_yticklabels(yticklabels, fontsize=7, color="#333333")
+    # 상·하위 모두 제목을 막대 안쪽 흰색 라벨로 통일하므로 y축 바깥 라벨은 전부 비운다.
+    ax.set_yticklabels(["" for _ in labels], fontsize=7, color="#333333")
     ax.yaxis.set_tick_params(length=0)
 
-    # 1~5위: 막대 안쪽 왼쪽에 흰색으로 제목 표시
+    # 1~5위(상위): 막대 안쪽 왼쪽에 흰색으로 제목 표시
+    # (하위 6위~ 라벨/썸네일은 x축 범위 확정 후 아래 별도 블록에서 처리)
     for i, (bar, lbl) in enumerate(zip(bars, labels)):
         if i >= 5:
             break
@@ -1082,7 +1082,63 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
 
     for spine in ax.spines.values():
         spine.set_visible(False)
-    
+
+    # ── 하위(6위~) 막대: 막대 영역 안쪽 좌측 인라인 썸네일 + 막대 안쪽 흰색 라벨 ──
+    # 상위 5개는 좌측 그리드에 이미 노출되므로 썸네일을 추가하지 않는다.
+    if n > 5:
+        from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+
+        # 데이터↔픽셀 변환을 확정하기 위해 한 번 렌더한다(xlim/ylim 확정 후).
+        fig.canvas.draw()
+        _p0 = ax.transData.transform((0.0, 0.0))
+        _p1y = ax.transData.transform((0.0, 1.0))
+        _p1x = ax.transData.transform((1.0, 0.0))
+        px_per_unit_y = abs(_p1y[1] - _p0[1]) or 1.0
+        px_per_unit_x = abs(_p1x[0] - _p0[0]) or 1.0
+
+        # 썸네일 표시 높이를 막대 높이(0.55 데이터 단위)와 비슷하게 맞춘다. // 검증후조정
+        thumb_data_h = 0.55
+        target_px_h  = thumb_data_h * px_per_unit_y
+        # OffsetImage(zoom)은 dpi 보정이 적용되므로 72/dpi 로 환산해 픽셀 높이를 맞춘다.
+        _dpi = fig.get_dpi() or 100.0
+
+        for i in range(5, n):
+            thumb = thumbnails[i] if i < len(thumbnails) else None
+            arr = _load_thumbnail_array(thumb) if thumb else None
+            if arr is None:
+                # URL 없음/로드 실패 → 회색(#D0D0D0) placeholder (4:5 = 240×300)
+                arr = np.full((300, 240, 3), 0xD0, dtype=np.uint8)
+
+            img_h_px = arr.shape[0]
+            img_w_px = arr.shape[1]
+            zoom = (target_px_h / img_h_px) * (72.0 / _dpi)   # // 검증후조정
+
+            oimg = OffsetImage(arr, zoom=zoom)
+            ab = AnnotationBbox(
+                oimg,
+                (0.0, y_pos[i]),                       # 축 좌측 안쪽(x=0), 막대 중심 y
+                xycoords=("axes fraction", "data"),
+                box_alignment=(0.0, 0.5),
+                frameon=False,
+                pad=0.0,
+                zorder=12,
+            )
+            ax.add_artist(ab)
+
+            # 라벨 x 시작점을 썸네일 표시 폭 뒤로 두어 겹치지 않게 한다.
+            thumb_w_px   = img_w_px * zoom * (_dpi / 72.0)
+            thumb_w_data = thumb_w_px / px_per_unit_x
+            label_x = thumb_w_data + x_scale_ref * 0.012
+            ax.text(
+                label_x,
+                y_pos[i],
+                labels[i],
+                va="center", ha="left",
+                fontsize=7,
+                color="#FFFFFF",
+                zorder=13,
+            )
+
     # 5위/6위 사이 구분선
     if n > 5:
         divider_y = (y_pos[4] + y_pos[5]) / 2

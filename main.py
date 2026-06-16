@@ -795,11 +795,17 @@ def run():
                 reaction_datasets[key] = {"cards": [], "chart_svg": ""}
                 continue
 
+            # 차트 하위 막대 옆 인라인 썸네일은 items[5:] 를 사용하므로,
+            # 렌더링 이전에 dataset 의 전체 items 썸네일을 로컬로 내려받아
+            # render_reaction_bar 내부의 _load_thumbnail_array 가 로컬 경로를 읽도록 한다.
+            _materialize_content_thumbnails(ds.get("items", []))
+
             rendered = render_dataset(ds, color_map)
 
             if isinstance(rendered, dict):
-                # render_reaction_bar 반환값: {"items": [...], "chart_svg": "..."}
-                # 썸네일 S3 다운로드는 cards 리스트에 대해 수행한다.
+                # render_reaction_bar 반환값: {"cards": [...], "chart_svg": "..."}
+                # cards(상위 5개)는 위에서 이미 로컬화되었으나, 동일 src 캐시로
+                # 한 번 더 호출해도 재다운로드 없이 안전하게 통과한다.
                 _materialize_content_thumbnails(rendered.get("cards", []))
                 reaction_datasets[key] = rendered
             else:

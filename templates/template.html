@@ -600,9 +600,9 @@
 
         {# 좌측: 썸네일 상단 2개 하단 3개 #}
         <div class="reaction-thumb-row">
-          {# 대형 썸네일: 1~2위 (최대 2개) #}
+          {# 대형 썸네일: 1~2위 (최대 2개) — 위치 인덱스 클래스(--pos1/--pos2) 부여 #}
           {% for item in data.cards[:2] %}
-            <div class="reaction-thumb-cell reaction-thumb-cell--large">
+            <div class="reaction-thumb-cell reaction-thumb-cell--large reaction-thumb-cell--pos{{ loop.index }}">
               <div class="reaction-thumb-cell__header">
                 <div class="reaction-thumb-cell__header-left">
                   <span class="reaction-thumb-cell__rank">{{ item.rank if item.rank is not none else loop.index }}</span>
@@ -628,9 +628,9 @@
             </div>
           {% endfor %}
 
-          {# 소형 썸네일: 3~5위 (최대 3개) #}
+          {# 소형 썸네일: 3~5위 (최대 3개) — 위치 인덱스 클래스(--pos3/--pos4/--pos5) 부여 #}
           {% for item in data.cards[2:5] %}
-            <div class="reaction-thumb-cell reaction-thumb-cell--small">
+            <div class="reaction-thumb-cell reaction-thumb-cell--small reaction-thumb-cell--pos{{ loop.index + 2 }}">
               <div class="reaction-thumb-cell__header">
                 <div class="reaction-thumb-cell__header-left">
                   <span class="reaction-thumb-cell__rank">{{ item.rank if item.rank is not none else (loop.index + 2) }}</span>

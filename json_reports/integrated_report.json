@@ -2,9 +2,9 @@
     "meta": {
         "account_name": "kkugit",
         "period": "2026-03-30 ~ 2026-06-08",
-        "period_ads": "2026-03-30 ~ 2026-05-10",
+        "period_ads": "2026-03-30 ~ 2026-05-11",
         "period_contents": "2026-02-23 ~ 2026-05-08",
-        "generated_at": "2026-06-16 23:18:20"
+        "generated_at": "2026-06-17 08:55:05"
     },
     "currency": "",
     "currency_symbol": "원",
@@ -1447,12 +1447,12 @@
                             "ctr": 3.15
                         },
                         {
-                            "age": "35-44",
+                            "age": "65+",
                             "gender": "male",
                             "ctr": 0.0
                         },
                         {
-                            "age": "65+",
+                            "age": "35-44",
                             "gender": "male",
                             "ctr": 0.0
                         },
@@ -1517,7 +1517,12 @@
                             "ctr": 0.82
                         },
                         {
-                            "age": "25-34",
+                            "age": "45-54",
+                            "gender": "male",
+                            "ctr": 0.0
+                        },
+                        {
+                            "age": "18-24",
                             "gender": "female",
                             "ctr": 0.0
                         },
@@ -1527,12 +1532,7 @@
                             "ctr": 0.0
                         },
                         {
-                            "age": "45-54",
-                            "gender": "male",
-                            "ctr": 0.0
-                        },
-                        {
-                            "age": "18-24",
+                            "age": "25-34",
                             "gender": "female",
                             "ctr": 0.0
                         }
@@ -1586,22 +1586,22 @@
                             "ctr": 0.46
                         },
                         {
-                            "age": "45-54",
-                            "gender": "male",
-                            "ctr": 0.0
-                        },
-                        {
                             "age": "18-24",
                             "gender": "male",
                             "ctr": 0.0
                         },
                         {
-                            "age": "65+",
+                            "age": "45-54",
                             "gender": "female",
                             "ctr": 0.0
                         },
                         {
                             "age": "45-54",
+                            "gender": "male",
+                            "ctr": 0.0
+                        },
+                        {
+                            "age": "65+",
                             "gender": "female",
                             "ctr": 0.0
                         }
@@ -1740,18 +1740,18 @@
                     "rank": 3
                 },
                 {
-                    "ad_id": 8383,
-                    "fb_ad_id": "120244822829490789",
+                    "ad_id": 8377,
+                    "fb_ad_id": "120244833683490789",
                     "uploaded_at": "2026-05-07",
                     "caption": "개린이들을 위해 꾸깃이 준비한 \n“산책의 달 5월” 이벤트🎉\n\n혼자보다 같이하면 훨씬 더 재밌는 산책! 🐶\n같이 산책하고 싶은 동네 친구나 이웃, 지인에 선물하세요! 💞🎁\n\n5월 딱 한 달 동안만 \n핸즈프리 리드줄 [런그립] 한 개 가격에 두 개를 드릴게요!\n\n✅ 런그립이 궁금하다면?\n상단의 링크를 통해 장점을 모두 확인하세요!\n\n진짜 편한 산책을 만듭니다, 꾸깃🐾\n\n#이벤트 #강아지산책 #강아지산책용품",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244822829490789.jpg",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244833683490789.jpg",
                     "ig_media_type": "IMAGE",
                     "total_likes": 16,
                     "total_shares": 0,
                     "total_saves": 6,
                     "total_comments": 0,
                     "total_reaction": 22,
-                    "ctr": 1.55,
+                    "ctr": 4.07,
                     "content_id": 6147,
                     "caption_label": "개린이들을 위...",
                     "rank": 4
@@ -1990,18 +1990,18 @@
                     "rank": 2
                 },
                 {
-                    "ad_id": 8384,
-                    "fb_ad_id": "120244822866690789",
+                    "ad_id": 8376,
+                    "fb_ad_id": "120244833683470789",
                     "uploaded_at": "2026-05-07",
                     "caption": "강아지는 우리 삶의 전부는 아니지만, \n우리 삶을 완전하게 만든다\n\n강아지를 키운다는 건 \n참 신기한 일입니다.\n\n삶의 전부는 아니지만, \n어느 순간 우리의 하루를 바꿔놓습니다.\n\n퇴근 후 산책을 나가게 되고,\n혼자이던 집에 온기가 생기고,\n별것 아닌 순간에도 웃게 됩니다.\n\nRoger Caras는 말했습니다.\n\n“Dogs are not our whole life, \nbut they make our lives whole.”\n\n“강아지는 \n우리 삶의 전부는 아니지만, \n그들은 우리 삶을 완전하게 만든다.”\n\n강아지들은 \n거창한 무언가를 해주진 않지만,\n삶 속 작은 빈자리들을 \n조용히 채워줍니다.\n\n그래서 많은 반려인들이 말합니다.\n\n“내가 돌봐주는 줄 알았는데, \n사실은 내가 더 위로받고 있었다”고.\n\n서로를 돌보고 서로를 위로합니다.\n\n#꾸깃 #반려견 #산책 #댕댕이 #리드줄 #강쥐",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244822866690789.jpg",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244833683470789.jpg",
                     "ig_media_type": "CAROUSEL_ALBUM",
                     "total_likes": 9,
                     "total_shares": 0,
                     "total_saves": 5,
                     "total_comments": 0,
                     "total_reaction": 14,
-                    "ctr": 2.42,
+                    "ctr": 2.51,
                     "content_id": 6148,
                     "caption_label": "강아지는 우리...",
                     "rank": 5
@@ -2024,18 +2024,18 @@
                     "rank": 5
                 },
                 {
-                    "ad_id": 8388,
-                    "fb_ad_id": "120244822378520789",
+                    "ad_id": 8373,
+                    "fb_ad_id": "120244833683420789",
                     "uploaded_at": "2026-05-05",
                     "caption": "그냥 산책이 즐거웠으면 좋겠습니다.\n\n울집 강아지가 유난히 예뻐 보이는 순간들이 있습니다.\n가만히 바라보고 있으면 그 자체로 힐링이 됩니다.\n그래서 더 함께하고 싶어집니다.\n\n그런데 이상하게도\n산책 앞에서는 마음이 조금 달라집니다.\n산책이 필요하다는 건 알지만 준비를 하고,\n나가서 신경 쓰고, 돌아와서 정리하는 이 모든 과정이\n생각보다 쉽지 않습니다.\n\n산책을 하는 동안에도 계속 손이 바쁩니다.\n배변을 치우고, 리드줄을 잡고,\n주변 상황을 확인하고 ‘같이 걷는 시간’이라기보다\n‘처리하는 시간’처럼 느껴질 때도 있습니다.\n\n그래서 가끔은\n이 시간이 정말 우리가 원했던\n행복한 순간이 맞는지 생각하게 됩니다.\n우리는 강아지에게 산책은 필요하다는 걸 알고 있습니다.\n하지만 동시에 반려인에게도 편한 산책이 필요합니다.\n\n우리가 만나는 많은 반려인들이\n산책이 부담이 아니라 자유로운 시간이 되고\n해야 하는 일이 아니라 함께 보내는 행복한 시간이 되길 바랍니다.\n\n반려견과의 모든 시간을 고민합니다.",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244822378520789.jpg",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244833683420789.jpg",
                     "ig_media_type": "CAROUSEL_ALBUM",
                     "total_likes": 9,
                     "total_shares": 0,
                     "total_saves": 4,
                     "total_comments": 0,
                     "total_reaction": 13,
-                    "ctr": 3.0,
+                    "ctr": 3.56,
                     "content_id": 6152,
                     "caption_label": "그냥 산책이 ...",
                     "rank": 5
@@ -2342,18 +2342,18 @@
                     "rank": 8
                 },
                 {
-                    "ad_id": 8383,
-                    "fb_ad_id": "120244822829490789",
+                    "ad_id": 8377,
+                    "fb_ad_id": "120244833683490789",
                     "uploaded_at": "2026-05-07",
                     "caption": "개린이들을 위해 꾸깃이 준비한 \n“산책의 달 5월” 이벤트🎉\n\n혼자보다 같이하면 훨씬 더 재밌는 산책! 🐶\n같이 산책하고 싶은 동네 친구나 이웃, 지인에 선물하세요! 💞🎁\n\n5월 딱 한 달 동안만 \n핸즈프리 리드줄 [런그립] 한 개 가격에 두 개를 드릴게요!\n\n✅ 런그립이 궁금하다면?\n상단의 링크를 통해 장점을 모두 확인하세요!\n\n진짜 편한 산책을 만듭니다, 꾸깃🐾\n\n#이벤트 #강아지산책 #강아지산책용품",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244822829490789.jpg",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244833683490789.jpg",
                     "ig_media_type": "IMAGE",
                     "total_likes": 16,
                     "total_shares": 0,
                     "total_saves": 6,
                     "total_comments": 0,
                     "total_reaction": 22,
-                    "ctr": 1.55,
+                    "ctr": 4.07,
                     "content_id": 6147,
                     "caption_label": "개린이들을 위...",
                     "rank": 12
@@ -2388,18 +2388,18 @@
             "x_scale_max": 10.0,
             "items": [
                 {
-                    "ad_id": 8388,
-                    "fb_ad_id": "120244822378520789",
+                    "ad_id": 8373,
+                    "fb_ad_id": "120244833683420789",
                     "uploaded_at": "2026-05-05",
                     "caption": "그냥 산책이 즐거웠으면 좋겠습니다.\n\n울집 강아지가 유난히 예뻐 보이는 순간들이 있습니다.\n가만히 바라보고 있으면 그 자체로 힐링이 됩니다.\n그래서 더 함께하고 싶어집니다.\n\n그런데 이상하게도\n산책 앞에서는 마음이 조금 달라집니다.\n산책이 필요하다는 건 알지만 준비를 하고,\n나가서 신경 쓰고, 돌아와서 정리하는 이 모든 과정이\n생각보다 쉽지 않습니다.\n\n산책을 하는 동안에도 계속 손이 바쁩니다.\n배변을 치우고, 리드줄을 잡고,\n주변 상황을 확인하고 ‘같이 걷는 시간’이라기보다\n‘처리하는 시간’처럼 느껴질 때도 있습니다.\n\n그래서 가끔은\n이 시간이 정말 우리가 원했던\n행복한 순간이 맞는지 생각하게 됩니다.\n우리는 강아지에게 산책은 필요하다는 걸 알고 있습니다.\n하지만 동시에 반려인에게도 편한 산책이 필요합니다.\n\n우리가 만나는 많은 반려인들이\n산책이 부담이 아니라 자유로운 시간이 되고\n해야 하는 일이 아니라 함께 보내는 행복한 시간이 되길 바랍니다.\n\n반려견과의 모든 시간을 고민합니다.",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244822378520789.jpg",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244833683420789.jpg",
                     "ig_media_type": "CAROUSEL_ALBUM",
                     "total_likes": 9,
                     "total_shares": 0,
                     "total_saves": 4,
                     "total_comments": 0,
                     "total_reaction": 13,
-                    "ctr": 3.0,
+                    "ctr": 3.56,
                     "content_id": 6152,
                     "caption_label": "그냥 산책이 ...",
                     "rank": 1
@@ -2524,18 +2524,18 @@
                     "rank": 1
                 },
                 {
-                    "ad_id": 8384,
-                    "fb_ad_id": "120244822866690789",
+                    "ad_id": 8376,
+                    "fb_ad_id": "120244833683470789",
                     "uploaded_at": "2026-05-07",
                     "caption": "강아지는 우리 삶의 전부는 아니지만, \n우리 삶을 완전하게 만든다\n\n강아지를 키운다는 건 \n참 신기한 일입니다.\n\n삶의 전부는 아니지만, \n어느 순간 우리의 하루를 바꿔놓습니다.\n\n퇴근 후 산책을 나가게 되고,\n혼자이던 집에 온기가 생기고,\n별것 아닌 순간에도 웃게 됩니다.\n\nRoger Caras는 말했습니다.\n\n“Dogs are not our whole life, \nbut they make our lives whole.”\n\n“강아지는 \n우리 삶의 전부는 아니지만, \n그들은 우리 삶을 완전하게 만든다.”\n\n강아지들은 \n거창한 무언가를 해주진 않지만,\n삶 속 작은 빈자리들을 \n조용히 채워줍니다.\n\n그래서 많은 반려인들이 말합니다.\n\n“내가 돌봐주는 줄 알았는데, \n사실은 내가 더 위로받고 있었다”고.\n\n서로를 돌보고 서로를 위로합니다.\n\n#꾸깃 #반려견 #산책 #댕댕이 #리드줄 #강쥐",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244822866690789.jpg",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244833683470789.jpg",
                     "ig_media_type": "CAROUSEL_ALBUM",
                     "total_likes": 9,
                     "total_shares": 0,
                     "total_saves": 5,
                     "total_comments": 0,
                     "total_reaction": 14,
-                    "ctr": 2.42,
+                    "ctr": 2.51,
                     "content_id": 6148,
                     "caption_label": "강아지는 우리...",
                     "rank": 9
@@ -2871,35 +2871,35 @@
                     "rank": 1
                 },
                 {
-                    "ad_id": 8383,
-                    "fb_ad_id": "120244822829490789",
+                    "ad_id": 8377,
+                    "fb_ad_id": "120244833683490789",
                     "uploaded_at": "2026-05-07",
                     "caption": "개린이들을 위해 꾸깃이 준비한 \n“산책의 달 5월” 이벤트🎉\n\n혼자보다 같이하면 훨씬 더 재밌는 산책! 🐶\n같이 산책하고 싶은 동네 친구나 이웃, 지인에 선물하세요! 💞🎁\n\n5월 딱 한 달 동안만 \n핸즈프리 리드줄 [런그립] 한 개 가격에 두 개를 드릴게요!\n\n✅ 런그립이 궁금하다면?\n상단의 링크를 통해 장점을 모두 확인하세요!\n\n진짜 편한 산책을 만듭니다, 꾸깃🐾\n\n#이벤트 #강아지산책 #강아지산책용품",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244822829490789.jpg",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244833683490789.jpg",
                     "ig_media_type": "IMAGE",
                     "total_likes": 16,
                     "total_shares": 0,
                     "total_saves": 6,
                     "total_comments": 0,
                     "total_reaction": 22,
-                    "ctr": 1.55,
+                    "ctr": 4.07,
                     "content_id": 6147,
                     "caption_label": "개린이들을 위...",
                     "rank": 1
                 },
                 {
-                    "ad_id": 8384,
-                    "fb_ad_id": "120244822866690789",
+                    "ad_id": 8376,
+                    "fb_ad_id": "120244833683470789",
                     "uploaded_at": "2026-05-07",
                     "caption": "강아지는 우리 삶의 전부는 아니지만, \n우리 삶을 완전하게 만든다\n\n강아지를 키운다는 건 \n참 신기한 일입니다.\n\n삶의 전부는 아니지만, \n어느 순간 우리의 하루를 바꿔놓습니다.\n\n퇴근 후 산책을 나가게 되고,\n혼자이던 집에 온기가 생기고,\n별것 아닌 순간에도 웃게 됩니다.\n\nRoger Caras는 말했습니다.\n\n“Dogs are not our whole life, \nbut they make our lives whole.”\n\n“강아지는 \n우리 삶의 전부는 아니지만, \n그들은 우리 삶을 완전하게 만든다.”\n\n강아지들은 \n거창한 무언가를 해주진 않지만,\n삶 속 작은 빈자리들을 \n조용히 채워줍니다.\n\n그래서 많은 반려인들이 말합니다.\n\n“내가 돌봐주는 줄 알았는데, \n사실은 내가 더 위로받고 있었다”고.\n\n서로를 돌보고 서로를 위로합니다.\n\n#꾸깃 #반려견 #산책 #댕댕이 #리드줄 #강쥐",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244822866690789.jpg",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244833683470789.jpg",
                     "ig_media_type": "CAROUSEL_ALBUM",
                     "total_likes": 9,
                     "total_shares": 0,
                     "total_saves": 5,
                     "total_comments": 0,
                     "total_reaction": 14,
-                    "ctr": 2.42,
+                    "ctr": 2.51,
                     "content_id": 6148,
                     "caption_label": "강아지는 우리...",
                     "rank": 1
@@ -2922,18 +2922,18 @@
                     "rank": 1
                 },
                 {
-                    "ad_id": 8388,
-                    "fb_ad_id": "120244822378520789",
+                    "ad_id": 8373,
+                    "fb_ad_id": "120244833683420789",
                     "uploaded_at": "2026-05-05",
                     "caption": "그냥 산책이 즐거웠으면 좋겠습니다.\n\n울집 강아지가 유난히 예뻐 보이는 순간들이 있습니다.\n가만히 바라보고 있으면 그 자체로 힐링이 됩니다.\n그래서 더 함께하고 싶어집니다.\n\n그런데 이상하게도\n산책 앞에서는 마음이 조금 달라집니다.\n산책이 필요하다는 건 알지만 준비를 하고,\n나가서 신경 쓰고, 돌아와서 정리하는 이 모든 과정이\n생각보다 쉽지 않습니다.\n\n산책을 하는 동안에도 계속 손이 바쁩니다.\n배변을 치우고, 리드줄을 잡고,\n주변 상황을 확인하고 ‘같이 걷는 시간’이라기보다\n‘처리하는 시간’처럼 느껴질 때도 있습니다.\n\n그래서 가끔은\n이 시간이 정말 우리가 원했던\n행복한 순간이 맞는지 생각하게 됩니다.\n우리는 강아지에게 산책은 필요하다는 걸 알고 있습니다.\n하지만 동시에 반려인에게도 편한 산책이 필요합니다.\n\n우리가 만나는 많은 반려인들이\n산책이 부담이 아니라 자유로운 시간이 되고\n해야 하는 일이 아니라 함께 보내는 행복한 시간이 되길 바랍니다.\n\n반려견과의 모든 시간을 고민합니다.",
-                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244822378520789.jpg",
+                    "thumbnail": "https://depart-ad-thumbnails.s3.ap-northeast-2.amazonaws.com/ad_thumbnails/120244833683420789.jpg",
                     "ig_media_type": "CAROUSEL_ALBUM",
                     "total_likes": 9,
                     "total_shares": 0,
                     "total_saves": 4,
                     "total_comments": 0,
                     "total_reaction": 13,
-                    "ctr": 3.0,
+                    "ctr": 3.56,
                     "content_id": 6152,
                     "caption_label": "그냥 산책이 ...",
                     "rank": 1
@@ -4387,7 +4387,7 @@
                         ],
                         [
                             19,
-                            "아웃도어",
+                            "브랜드",
                             6,
                             "25-34 female",
                             38061,
@@ -4396,7 +4396,7 @@
                         ],
                         [
                             20,
-                            "브랜드",
+                            "아웃도어",
                             6,
                             "25-34 female",
                             38061,
@@ -4869,7 +4869,7 @@
                         ],
                         [
                             19,
-                            "아웃도어",
+                            "브랜드",
                             6,
                             "35-44 female",
                             1400,
@@ -4878,7 +4878,7 @@
                         ],
                         [
                             20,
-                            "브랜드",
+                            "아웃도어",
                             6,
                             "35-44 female",
                             1400,
