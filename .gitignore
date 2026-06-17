@@ -14,3 +14,6 @@ __pycache__/
 
 outputs/*
 json_reports/*
+
+# Claude Code
+CLAUDE.md
