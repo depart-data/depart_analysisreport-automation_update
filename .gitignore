@@ -16,3 +16,7 @@ __pycache__/
 json_reports/*outputs-1/
 output2/
 outputs-1
+outputs
+
+# claude
+.claude
