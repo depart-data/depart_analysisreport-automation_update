@@ -1300,61 +1300,40 @@ def render_target_spend_bubble(dataset: Dict[str, Any], color_map: Dict[str, Any
 
 
 def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> str:
-    """전체(좌) + 남성(우상) + 여성(우하) 연령별 광고비 비율 파이차트."""
-    from matplotlib.patches import Patch
+    """성별(좌) + 남성 연령(우상) + 여성 연령(우하) 광고비 파이차트 — 히트맵 컬러맵 적용."""
     import matplotlib.font_manager as fm
-    from matplotlib.gridspec import GridSpec
+    from matplotlib.colors import LinearSegmentedColormap, Normalize
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.patches import Wedge as MplWedge, Rectangle as MplRect
 
     rows = dataset.get("rows") or []
     if not rows:
         return ""
 
-    main_age     = dataset.get("main_age")
-    main_gender  = dataset.get("main_gender")
-    avoid_age    = dataset.get("avoid_age")
-    avoid_gender = dataset.get("avoid_gender")
-
     df = pd.DataFrame(rows)
     df["spend"] = pd.to_numeric(df["spend"], errors="coerce").fillna(0)
 
-    def _canon_age(s):
-        return str(s).strip().lower().replace("_", "-").replace("–", "-").replace(" ", "")
-
-    def _norm(val):
-        if val is None: return []
-        if isinstance(val, (list, tuple)):
-            return [_canon_age(v) for v in val if v]
-        s = _canon_age(val)
-        return [s] if s else []
-
-    def _map_g(g):
-        g = g.lower()
-        return "female" if g in ("f", "여성", "female") else \
-               "male"   if g in ("m", "남성", "male")   else g
-
-    main_ages_n    = _norm(main_age)
-    main_genders_n = [_map_g(g) for g in _norm(main_gender)]
-    avoid_ages_n   = _norm(avoid_age)
-    avoid_genders_n = [_map_g(g) for g in _norm(avoid_gender)]
-
-    COLOR_MAIN  = "#5B8A38"
-    COLOR_AVOID = "#E05C5C"
-    COLOR_MID   = "#B0B0B0"
-    COLOR_OTHER = "#D8D8D8"
-    TEXT_COLORS = {COLOR_MAIN: "white", COLOR_AVOID: "white", COLOR_MID: "#333333", COLOR_OTHER: "#333333"}
-
-    def slice_color(age, gender):
-        a, g = _canon_age(age), _map_g(gender)
-        is_main  = (not main_ages_n  or a in main_ages_n)  and \
-                   (not main_genders_n or g in main_genders_n)
-        is_avoid = bool(avoid_ages_n) and a in avoid_ages_n and \
-                   (not avoid_genders_n or g in avoid_genders_n)
-        if is_avoid: return COLOR_AVOID
-        if is_main:  return COLOR_MAIN
-        return COLOR_MID
-
-    age_order = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
     gender_kr = {"female": "여성", "male": "남성"}
+
+    # 히트맵과 동일한 컬러맵
+    pie_cmap = LinearSegmentedColormap.from_list(
+        "theme",
+        [color_map["lighter"], color_map["light"], color_map["base"], color_map["dark"]],
+    )
+
+    def cmap_colors(spends):
+        """지출 큰 순서대로 진한 색 적용 (차트 내 정규화)."""
+        if not spends:
+            return []
+        vmin, vmax = min(spends), max(spends)
+        if abs(vmax - vmin) < 1e-9:
+            return [pie_cmap(0.65)] * len(spends)
+        return [pie_cmap((s - vmin) / (vmax - vmin)) for s in spends]
+
+    def tc_for(rgba):
+        """배경 RGBA → 텍스트 색상 (명도 기준)."""
+        lum = 0.2126 * rgba[0] + 0.7152 * rgba[1] + 0.0722 * rgba[2]
+        return "white" if lum < 0.55 else "#333333"
 
     candidates = ["Apple SD Gothic Neo", "Nanum Gothic", "Pretendard", "Noto Sans KR", "Malgun Gothic"]
     available  = {f.name for f in fm.fontManager.ttflist}
@@ -1367,59 +1346,43 @@ def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str,
     fig = plt.figure(figsize=(10.0, 5.8))
     fig.patch.set_facecolor("white")
 
-    # add_axes로 위치 직접 지정: [left, bottom, width, height] (figure 비율)
-    ax_all    = fig.add_axes([0.03, 0.10, 0.52, 0.85])
-    ax_male   = fig.add_axes([0.60, 0.52, 0.38, 0.44])
-    ax_female = fig.add_axes([0.60, 0.08, 0.38, 0.44])
+    ax_all = fig.add_axes([0.03, 0.10, 0.45, 0.85])
+    ax_age = fig.add_axes([0.53, 0.10, 0.45, 0.85])
 
-    # ── 전체 파이차트 (좌) - 지출 내림차순, 5% 미만은 기타로 묶음 ──
-    df_all = df[df["spend"] > 0].copy()
-    grand_total = df_all["spend"].sum()
-    df_all["_pct"] = df_all["spend"] / grand_total * 100 if grand_total > 0 else 0
-
-    df_big   = df_all[df_all["_pct"] >= 5.0].sort_values("spend", ascending=False)
-    df_small = df_all[df_all["_pct"] < 5.0]
-
-    rows_final = [
-        {"age_range": row["age_range"], "gender": row["gender"], "spend": row["spend"]}
-        for _, row in df_big.iterrows()
-    ]
-    if not df_small.empty:
-        rows_final.append({"age_range": "기타", "gender": "_other", "spend": df_small["spend"].sum()})
-        rows_final.sort(key=lambda x: x["spend"], reverse=True)
-
-    all_ages    = [r["age_range"] for r in rows_final]
-    all_genders = [r["gender"]    for r in rows_final]
-    all_spends  = [r["spend"]     for r in rows_final]
-    all_total   = sum(all_spends)
-    all_pcts    = [s / all_total * 100 for s in all_spends] if all_total > 0 else []
-    all_colors  = [
-        COLOR_OTHER if a == "기타" else slice_color(a, g)
-        for a, g in zip(all_ages, all_genders)
-    ]
+    # ── 성별 파이차트 (좌) ──
+    gender_totals = (
+        df[df["spend"] > 0]
+        .groupby("gender")["spend"].sum()
+        .reset_index()
+        .sort_values("spend", ascending=False)
+    )
+    gen_genders = gender_totals["gender"].tolist()
+    gen_labels  = [gender_kr.get(g, g) for g in gen_genders]
+    gen_spends  = gender_totals["spend"].tolist()
+    gen_total   = sum(gen_spends)
+    gen_pcts    = [s / gen_total * 100 for s in gen_spends] if gen_total > 0 else []
+    gen_rgba    = cmap_colors(gen_spends)
 
     ax_all.set_facecolor("white")
-    ax_all.set_title("전체", fontsize=13, fontweight="bold", pad=16)
+    ax_all.set_title("성별", fontsize=13, fontweight="bold", pad=16)
 
-    if not rows_final:
+    if not gen_spends:
         ax_all.text(0.5, 0.5, "데이터 없음", ha="center", va="center",
                     transform=ax_all.transAxes, fontsize=12, color="#aaa")
         ax_all.axis("off")
     else:
-        from matplotlib.patches import Wedge as MplWedge, Rectangle as MplRect
-        # CSS #patch_2 규칙이 첫 번째 패치를 투명화하므로 더미 패치를 먼저 추가
-        ax_all.add_patch(MplRect((-1.3, -1.3), 2.6, 2.6, facecolor='none', edgecolor='none', linewidth=0))
-        # ax.pie() SVG 백엔드 white wedge 버그를 우회하기 위해 Wedge 직접 사용
-        theta = 90.0  # 12시 방향에서 시작, 시계방향
+        # CSS #patch_2 규칙 우회용 더미 패치
+        ax_all.add_patch(MplRect((-1.3, -1.3), 2.6, 2.6, facecolor="none", edgecolor="none", linewidth=0))
+        theta = 90.0
         wedge_mids = []
-        for spend, color in zip(all_spends, all_colors):
-            delta  = spend / all_total * 360.0
+        for spend, rgba in zip(gen_spends, gen_rgba):
+            delta  = spend / gen_total * 360.0
             theta1 = theta - delta
             theta2 = theta
             wedge_mids.append((theta1 + theta2) / 2.0)
             ax_all.add_patch(MplWedge(
                 (0, 0), 1.0, theta1, theta2,
-                facecolor=color, edgecolor="#EEEEEE", linewidth=0.1,
+                facecolor=rgba, edgecolor="white", linewidth=0.8,
             ))
             theta = theta1
 
@@ -1428,98 +1391,72 @@ def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str,
         ax_all.set_aspect("equal")
 
         for i, angle in enumerate(wedge_mids):
-            pct      = all_pcts[i]
-            rad      = np.deg2rad(angle)
-            tc       = TEXT_COLORS.get(all_colors[i], "#333333")
-            is_other = (all_ages[i] == "기타")
-            glabel   = "" if is_other else gender_kr.get(all_genders[i], all_genders[i])
-            fs       = 7.5 if pct > 15 else (7.0 if pct > 9 else 6.5)
-            r        = 0.65
-
-            x, y = r * np.cos(rad), r * np.sin(rad)
-            if is_other:
-                ax_all.text(x, y + 0.04, "기타", ha="center", va="center",
-                            fontsize=fs, fontweight="bold", color="#333333", clip_on=False)
-                ax_all.text(x, y - 0.05, f"{pct:.1f}%", ha="center", va="center",
-                            fontsize=fs, color="#555555", clip_on=False)
-            else:
-                ax_all.text(x, y + 0.07, all_ages[i], ha="center", va="center",
-                            fontsize=fs, fontweight="bold", color=tc, clip_on=False)
-                ax_all.text(x, y, glabel, ha="center", va="center",
-                            fontsize=fs - 0.5, color=tc, clip_on=False)
-                ax_all.text(x, y - 0.08, f"{pct:.1f}%", ha="center", va="center",
-                            fontsize=fs, color=tc, clip_on=False)
-
+            pct  = gen_pcts[i]
+            rad  = np.deg2rad(angle)
+            tc   = tc_for(gen_rgba[i])
+            x, y = 0.55 * np.cos(rad), 0.55 * np.sin(rad)
+            ax_all.text(x, y + 0.08, gen_labels[i], ha="center", va="center",
+                        fontsize=13, fontweight="bold", color=tc, clip_on=False)
+            ax_all.text(x, y - 0.08, f"{pct:.1f}%", ha="center", va="center",
+                        fontsize=12, color=tc, clip_on=False)
         ax_all.axis("off")
 
-    # ── 개별 파이차트 (우: 남성 상단, 여성 하단) ──
-    for ax, gender, gender_label in zip(
-        [ax_male, ax_female], ["male", "female"], ["남성", "여성"]
-    ):
-        ax.set_facecolor("white")
+    # ── 연령 파이차트 (우: 성별 합산) ──
+    age_totals = (
+        df[df["spend"] > 0]
+        .groupby("age_range")["spend"].sum()
+        .reset_index()
+        .sort_values("spend", ascending=False)
+    )
+    ages      = age_totals["age_range"].tolist()
+    spends    = age_totals["spend"].tolist()
+    age_total = sum(spends)
+    pcts      = [s / age_total * 100 for s in spends] if age_total > 0 else []
+    rgba_list = cmap_colors(spends)
 
-        sub = df[df["gender"] == gender].copy()
-        sub = sub[sub["spend"] > 0].sort_values("spend", ascending=False)
+    ax_age.set_facecolor("white")
+    ax_age.set_title("연령", fontsize=13, fontweight="bold", pad=16)
 
-        ax.set_title(gender_label, fontsize=11, fontweight="bold", pad=8)
-
-        if sub.empty:
-            ax.text(0.5, 0.5, "데이터 없음", ha="center", va="center",
-                    transform=ax.transAxes, fontsize=10, color="#aaa")
-            ax.axis("off")
-            continue
-
-        ages   = sub["age_range"].tolist()
-        spends = sub["spend"].tolist()
-        total  = sum(spends)
-        pcts   = [s / total * 100 for s in spends]
-        colors = [slice_color(a, gender) for a in ages]
-
-        wedges, _ = ax.pie(
+    if not spends:
+        ax_age.text(0.5, 0.5, "데이터 없음", ha="center", va="center",
+                    transform=ax_age.transAxes, fontsize=12, color="#aaa")
+        ax_age.axis("off")
+    else:
+        wedges, _ = ax_age.pie(
             spends,
             startangle=90,
             counterclock=False,
-            wedgeprops=dict(edgecolor="#EEEEEE", linewidth=0.1),
+            wedgeprops=dict(edgecolor="white", linewidth=0.8),
         )
-        for w, c in zip(wedges, colors):
-            w.set_facecolor(c)
+        for w, rgba in zip(wedges, rgba_list):
+            w.set_facecolor(rgba)
 
         for i, w in enumerate(wedges):
             pct   = pcts[i]
+            if pct < 2.5:
+                continue
             angle = (w.theta2 + w.theta1) / 2.0
             rad   = np.deg2rad(angle)
-            tc    = TEXT_COLORS[colors[i]]
-            fs    = 7.5 if pct > 20 else (7.0 if pct > 10 else (6.0 if pct > 4 else 5.5))
-            r     = 0.63
+            tc    = tc_for(rgba_list[i])
+            fs    = 9.0 if pct > 20 else (8.5 if pct > 10 else (7.5 if pct > 4 else 6.5))
+            x, y  = 0.63 * np.cos(rad), 0.63 * np.sin(rad)
+            ax_age.text(x, y + 0.06, ages[i], ha="center", va="center",
+                        fontsize=fs, fontweight="bold", color=tc)
+            ax_age.text(x, y - 0.07, f"{pct:.1f}%", ha="center", va="center",
+                        fontsize=fs, color=tc)
 
-            if pct < 2.5:
-                continue  # 너무 작은 슬라이스는 라벨 생략
-            x, y = r * np.cos(rad), r * np.sin(rad)
-            ax.text(x, y + 0.04, ages[i], ha="center", va="center",
-                    fontsize=fs, fontweight="bold", color=tc)
-            ax.text(x, y - 0.05, f"{pct:.1f}%", ha="center", va="center",
-                    fontsize=fs, color=tc)
+        ax_age.set_aspect("equal")
+        ax_age.axis("off")
 
-        ax.set_aspect("equal")
-        ax.axis("off")
-
-    legend_handles = [
-        Patch(facecolor=COLOR_MAIN,  label="메인타겟",    linewidth=0),
-        Patch(facecolor=COLOR_MID,   label="중립타겟",    linewidth=0),
-        Patch(facecolor=COLOR_AVOID, label="기피타겟",    linewidth=0),
-        Patch(facecolor=COLOR_OTHER, label="5% 미만 타겟", linewidth=0),
-    ]
-    fig.legend(
-        handles=legend_handles,
-        loc="lower center",
-        bbox_to_anchor=(0.5, 0.0),
-        ncol=4,
-        frameon=False,
-        fontsize=10.5,
-        handlelength=1.6,
-        handleheight=1.6,
-        labelspacing=0.8,
-    )
+    # 컬러바 범례 (히트맵과 동일한 그라디언트)
+    sm = ScalarMappable(cmap=pie_cmap, norm=Normalize(0, 1))
+    sm.set_array([])
+    ax_cb = fig.add_axes([0.28, 0.04, 0.44, 0.03])
+    cbar  = fig.colorbar(sm, cax=ax_cb, orientation="horizontal")
+    cbar.set_ticks([0, 1])
+    cbar.set_ticklabels(["광고비 낮음", "광고비 높음"])
+    cbar.outline.set_visible(False)
+    cbar.ax.tick_params(labelsize=9, colors="#666666", length=0)
 
 
     buf = io.StringIO()
