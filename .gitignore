@@ -14,6 +14,7 @@ __pycache__/
 
 
 json_reports/*
+*.pdf
 output2/
 outputs-1
 outputs/
