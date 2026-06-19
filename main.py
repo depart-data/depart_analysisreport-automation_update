@@ -10,7 +10,7 @@ import pandas as pd
 from scripts.processor import _normalize_keyword_by_pos, _best_adverb_score, kiwi, VERB_ADJ_TAGS
 from scripts.visualizer import (build_color_map, complementary_hex, render_dataset, is_dark_color, 
                                 render_bubble_chart, render_purchase_pie_chart, render_follower_gender_doughnut_chart, render_follower_age_gender_stacked_barh_chart,
-                                render_target_spend_bubble, render_ctr_follows_quadrant_chart,)
+                                render_target_spend_pie_charts, render_ctr_follows_quadrant_chart,)
 from scripts.reporter import generate_html
 from to_json import run as generate_json
 import time
@@ -511,8 +511,8 @@ def run():
         "end": "2026-06-10",
         "main_age": ["35-44", "25-34"],
         "main_gender": "", # male, female
-        "avoid_age": "",
-        "avoid_gender": "",
+        "avoid_age": "55-64",
+        "avoid_gender": "male",
         "currency": ""  # ""=원화, "dollar"=달러
     }
 
@@ -807,8 +807,8 @@ def run():
                 reaction_datasets[key] = {"cards": [], "chart_svg": ""}
 
 
-    # 타겟별 광고비 버블
-    target_bubble_svg = render_target_spend_bubble(
+    # 타겟별 광고비 파이차트 (여성·남성)
+    target_bubble_svg = render_target_spend_pie_charts(
         datasets.get("target_spend_bubble") or {}, color_map
     )
 

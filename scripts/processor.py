@@ -528,34 +528,37 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
     # 2. 개별 광고 데이터 가져오기 (uploaded_at, ig_permalink 포함)
     
     ads_query = f"""
-    SELECT 
-        ad.id, 
+    SELECT
+        ad.id,
         ad.ad_name,
         ad.fb_ad_id,
-        ig.ig_timestamp as uploaded_at, -- 업로드일로 사용
-        NULLIF(ad.thumb_link, '') as thumbnail, -- S3 썸네일 링크
+        ig.ig_timestamp as uploaded_at,
+        COALESCE(NULLIF(ig.thumbnail_url, ''), NULLIF(ig.media_url, ''), NULLIF(ad.thumb_link, '')) AS thumbnail,
         ROUND((SUM(apd.clicks)::numeric / NULLIF(SUM(apd.impressions), 0)::numeric) * 100, 2) as ctr
     FROM ads ad
         JOIN ad_sets ads ON ad.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
     LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
-    JOIN ig_contents ig
+    LEFT JOIN ig_contents ig
         ON ad.source_ig_media_id = ig.fb_ig_media_id
     WHERE ad.account_id = {account_id}
-        AND ig.ig_timestamp IS NOT NULL
-        AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
-        AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+        AND (ig.ig_timestamp IS NULL OR (
+            (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
+            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+        ))
         AND apd.as_of_date >= '{date_start}'
         AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-        AND ({account_id} = 3 
-            OR c.name ILIKE '%%depart%%' 
-            OR c.name LIKE '%%디파트%%' 
+        AND ({account_id} = 3
+            OR c.name ILIKE '%%depart%%'
+            OR c.name LIKE '%%디파트%%'
             OR c.name ILIKE '%%de;part%%')
-    GROUP BY 
-        ad.id, 
+    GROUP BY
+        ad.id,
         ad.ad_name,
         ad.fb_ad_id,
         ig.ig_timestamp,
+        ig.thumbnail_url,
+        ig.media_url,
         ad.thumb_link
     HAVING SUM(apd.impressions) >= {threshold}
     ORDER BY ctr {order_direction}
@@ -634,7 +637,7 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
             ad.fb_ad_id,
             ig.ig_timestamp                                 AS uploaded_at,
             ig.caption                                      AS caption,
-            NULLIF(ad.thumb_link, '')                       AS thumbnail,
+            COALESCE(NULLIF(ig.thumbnail_url, ''), NULLIF(ig.media_url, '')) AS thumbnail,
             ig.ig_media_type,
             ici.likes                                       AS total_likes,
             ici.shares                                      AS total_shares,
@@ -1911,7 +1914,11 @@ def get_purchase_contents_data(account_id, date_start, date_end):
         SELECT
             a.source_ig_media_id AS content_key,
             MIN(ig.ig_timestamp) AS uploaded_at,
-            MAX(NULLIF(a.thumb_link, '')) AS thumbnail,
+            COALESCE(
+                MAX(NULLIF(ig.thumbnail_url, '')),
+                MAX(NULLIF(ig.media_url, '')),
+                MAX(NULLIF(a.thumb_link, ''))
+            ) AS thumbnail,
             STRING_AGG(DISTINCT a.ad_name, ' / ') AS ad_names,
             ARRAY_AGG(DISTINCT a.id) AS ad_ids,
             ARRAY_AGG(DISTINCT a.fb_ad_id) FILTER (WHERE a.fb_ad_id IS NOT NULL) AS fb_ad_ids,
@@ -1920,17 +1927,18 @@ def get_purchase_contents_data(account_id, date_start, date_end):
         JOIN ads a ON apd.ad_id = a.id
         JOIN ad_sets ads ON a.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
-        JOIN ig_contents ig ON a.source_ig_media_id = ig.fb_ig_media_id
+        LEFT JOIN ig_contents ig ON a.source_ig_media_id = ig.fb_ig_media_id
         WHERE a.account_id = {account_id}
-          AND ig.ig_timestamp IS NOT NULL
           AND a.source_ig_media_id IS NOT NULL
-          AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
-          AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+          AND (ig.ig_timestamp IS NULL OR (
+              (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
+              AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+          ))
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-          AND ({account_id} = 3 
-            OR c.name ILIKE '%%depart%%' 
-            OR c.name LIKE '%%디파트%%' 
+          AND ({account_id} = 3
+            OR c.name ILIKE '%%depart%%'
+            OR c.name LIKE '%%디파트%%'
             OR c.name ILIKE '%%de;part%%')
         GROUP BY a.source_ig_media_id
         HAVING COALESCE(SUM(apd.purchase_count), 0) >= 1
