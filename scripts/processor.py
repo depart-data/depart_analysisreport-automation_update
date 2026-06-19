@@ -530,12 +530,15 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
     
     ads_query = f"""
     SELECT 
-        ad.id, 
-        ad.ad_name,
-        ad.fb_ad_id,
-        ig.ig_timestamp as uploaded_at, -- 업로드일로 사용
-        NULLIF(ad.thumb_link, '') as thumbnail, -- S3 썸네일 링크
-        ROUND((SUM(apd.clicks)::numeric / NULLIF(SUM(apd.impressions), 0)::numeric) * 100, 2) as ctr
+        ig.fb_ig_media_id,                       -- 콘텐츠(원본 게시물) 식별자 = 묶는 기준
+        MIN(ad.id)                AS id,         -- 대표 광고 id (썸네일/표시용 아무거나 1개)
+        MIN(ad.ad_name)           AS ad_name,    -- 대표 광고 이름
+        MIN(ad.fb_ad_id)          AS fb_ad_id,
+        ig.ig_timestamp           AS uploaded_at,
+        MAX(NULLIF(ad.thumb_link, '')) AS thumbnail,   -- 대표 썸네일
+        ROUND(
+            (SUM(apd.clicks)::numeric / NULLIF(SUM(apd.impressions), 0)::numeric) * 100, 2
+        ) AS ctr                                 -- 합산 클릭/합산 노출 → 콘텐츠당 CTR 1개
     FROM ads ad
         JOIN ad_sets ads ON ad.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
@@ -553,11 +556,8 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
             OR c.name LIKE '%%디파트%%' 
             OR c.name ILIKE '%%de;part%%')
     GROUP BY 
-        ad.id, 
-        ad.ad_name,
-        ad.fb_ad_id,
-        ig.ig_timestamp,
-        ad.thumb_link
+        ig.fb_ig_media_id,
+        ig.ig_timestamp
     HAVING SUM(apd.impressions) >= {threshold}
     ORDER BY ctr {order_direction}
     LIMIT 3;
