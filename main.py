@@ -507,7 +507,7 @@ def run():
     config = {
         "target_id": "14", # account_id
         "fb_ad_account_id":"act_799496024940107",
-        "start":"2026-03-30", #YYYY-MM-DD
+        "start":"2026-01-26", #YYYY-MM-DD
         "end": "2026-06-10",
         "main_age": ["35-44", "25-34"],
         "main_gender": "", # male, female
@@ -835,6 +835,13 @@ def run():
     cards_main = _combo_cards(datasets.get("main_keyword_combo_detail"), palette=THEME_CMAP) if has_main_target else []
     cards_avoid = _combo_cards(datasets.get("avoid_keyword_combo_detail"), palette=COMP_CMAP) if has_avoid_target else []
 
+    # 구매 요약 페이지 — 썸네일 처리
+    purchase_summary_page = report_json.get("purchase_summary_page", {"is_visible": False})
+    if purchase_summary_page.get("is_visible"):
+        top_content = purchase_summary_page.get("top_content")
+        if top_content and top_content.get("thumbnail"):
+            _materialize_content_thumbnails([top_content])
+
     # 구매 페이지 - 조건부 생성
     purchase_contents_pages = report_json.get("purchase_contents_pages", {"is_visible": False})
 
@@ -948,6 +955,10 @@ def run():
         #     }
         # ]
         "appendix": [],
+        "purchase_summary_page": report_json.get(
+            "purchase_summary_page",
+            {"is_visible": False}
+        ),
         "purchase_analysis_pages": report_json.get(    # ROAS, 구매건수 추가
             "purchase_analysis_pages",
             {"is_visible": False}

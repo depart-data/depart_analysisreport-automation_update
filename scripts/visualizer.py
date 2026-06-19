@@ -1315,11 +1315,8 @@ def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str,
 
     gender_kr = {"female": "여성", "male": "남성"}
 
-    # 히트맵과 동일한 컬러맵
-    pie_cmap = LinearSegmentedColormap.from_list(
-        "theme",
-        [color_map["lighter"], color_map["light"], color_map["base"], color_map["dark"]],
-    )
+    # 연령 파이 전용 컬러맵
+    pie_cmap = plt.cm.viridis_r
 
     def cmap_colors(spends):
         """지출 큰 순서대로 진한 색 적용 (차트 내 정규화)."""
@@ -1331,8 +1328,13 @@ def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str,
         return [pie_cmap((s - vmin) / (vmax - vmin)) for s in spends]
 
     def tc_for(rgba):
-        """배경 RGBA → 텍스트 색상 (명도 기준)."""
-        lum = 0.2126 * rgba[0] + 0.7152 * rgba[1] + 0.0722 * rgba[2]
+        """배경 RGBA 또는 hex → 텍스트 색상 (명도 기준)."""
+        if isinstance(rgba, str):
+            h = rgba.lstrip("#")
+            r, g, b = int(h[0:2], 16) / 255, int(h[2:4], 16) / 255, int(h[4:6], 16) / 255
+        else:
+            r, g, b = rgba[0], rgba[1], rgba[2]
+        lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
         return "white" if lum < 0.55 else "#333333"
 
     candidates = ["Apple SD Gothic Neo", "Nanum Gothic", "Pretendard", "Noto Sans KR", "Malgun Gothic"]
@@ -1347,7 +1349,7 @@ def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str,
     fig.patch.set_facecolor("white")
 
     ax_all = fig.add_axes([0.03, 0.10, 0.45, 0.85])
-    ax_age = fig.add_axes([0.53, 0.10, 0.45, 0.85])
+    ax_age = fig.add_axes([0.53, 0.10, 0.40, 0.85])
 
     # ── 성별 파이차트 (좌) ──
     gender_totals = (
@@ -1356,12 +1358,17 @@ def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str,
         .reset_index()
         .sort_values("spend", ascending=False)
     )
+    COLOR_MALE    = "#5BB8E0"
+    COLOR_FEMALE  = "#E87DA8"
+    GENDER_FIXED  = {"male": COLOR_MALE, "female": COLOR_FEMALE}
+
     gen_genders = gender_totals["gender"].tolist()
     gen_labels  = [gender_kr.get(g, g) for g in gen_genders]
     gen_spends  = gender_totals["spend"].tolist()
     gen_total   = sum(gen_spends)
     gen_pcts    = [s / gen_total * 100 for s in gen_spends] if gen_total > 0 else []
-    gen_rgba    = cmap_colors(gen_spends)
+    # 성별은 고정 색상 (남성=하늘색, 여성=분홍색)
+    gen_rgba    = [GENDER_FIXED.get(g, "#B0B0B0") for g in gen_genders]
 
     ax_all.set_facecolor("white")
     ax_all.set_title("성별", fontsize=13, fontweight="bold", pad=16)
@@ -1448,15 +1455,15 @@ def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str,
         ax_age.set_aspect("equal")
         ax_age.axis("off")
 
-    # 컬러바 범례 (히트맵과 동일한 그라디언트)
+    # 컬러바 — 연령 파이 우측에 세로 배치
     sm = ScalarMappable(cmap=pie_cmap, norm=Normalize(0, 1))
     sm.set_array([])
-    ax_cb = fig.add_axes([0.28, 0.04, 0.44, 0.03])
-    cbar  = fig.colorbar(sm, cax=ax_cb, orientation="horizontal")
+    ax_cb = fig.add_axes([0.945, 0.18, 0.018, 0.64])
+    cbar  = fig.colorbar(sm, cax=ax_cb, orientation="vertical")
     cbar.set_ticks([0, 1])
-    cbar.set_ticklabels(["광고비 낮음", "광고비 높음"])
+    cbar.set_ticklabels(["낮음", "높음"])
     cbar.outline.set_visible(False)
-    cbar.ax.tick_params(labelsize=9, colors="#666666", length=0)
+    cbar.ax.tick_params(labelsize=8, colors="#666666", length=0)
 
 
     buf = io.StringIO()
@@ -1638,7 +1645,7 @@ def render_purchase_pie_chart(rows: List[Dict[str, Any]], color_map: Dict[str, A
 
     df = df.copy()
     df["purchases"] = pd.to_numeric(df["purchases"], errors="coerce").fillna(0)
-    df = df[df["purchases"] > 0]
+    df = df[df["purchases"] > 0].sort_values("purchases", ascending=False)
     if df.empty:
         return ""
 
@@ -1803,6 +1810,11 @@ def render_follower_age_gender_stacked_barh_chart(chart_data, color_map):
     if not labels or not series:
         return ""
 
+    COLOR_MALE    = "#5BB8E0"   # 하늘색
+    COLOR_FEMALE  = "#E87DA8"   # 분홍색
+    COLOR_KNOWN   = "#5B8A38"   # 초록색
+    COLOR_UNKNOWN = "#B0B0B0"   # 회색
+
     # 시리즈 이름/데이터 정리
     parsed = []
     for s in series:
@@ -1810,13 +1822,13 @@ def render_follower_age_gender_stacked_barh_chart(chart_data, color_map):
         data = pd.to_numeric(pd.Series(s.get("data", [])), errors="coerce").fillna(0).tolist()
 
         if name in ["male", "남성"]:
-            parsed.append(("남성", data, color_map["base"], "white"))
+            parsed.append(("남성", data, COLOR_MALE, "white"))
         elif name in ["female", "여성"]:
-            parsed.append(("여성", data, color_map["lighter"], "#252525"))
+            parsed.append(("여성", data, COLOR_FEMALE, "white"))
         elif name in ["unknown", "알 수 없음"]:
-            parsed.append(("알 수 없음", data, color_map["dark"], "white"))
+            parsed.append(("알 수 없음", data, COLOR_UNKNOWN, "#252525"))
         elif name in ["known", "남/여 전체"]:
-            parsed.append(("남/여 전체", data, color_map["lighter"], "#252525"))
+            parsed.append(("남/여 전체", data, COLOR_KNOWN, "white"))
 
     if not parsed:
         return ""
@@ -1901,17 +1913,22 @@ def render_follower_gender_doughnut_chart(chart_data, color_map):
 
     values = [float(v) for v in values]
 
+    COLOR_MALE    = "#5BB8E0"
+    COLOR_FEMALE  = "#E87DA8"
+    COLOR_KNOWN   = "#5B8A38"
+    COLOR_UNKNOWN = "#B0B0B0"
+
     def _pick_color(label: str) -> str:
         label = str(label).strip()
-        if label == "여성":
-            return color_map["lighter"]
-        elif label == "남성":
-            return color_map["base"]
-        elif label in ["남/여 전체", "연령 확인 가능", "확인 가능", "Known"]:
-            return color_map["lighter"]
+        if label in ["여성", "Female", "female"]:
+            return COLOR_FEMALE
+        elif label in ["남성", "Male", "male"]:
+            return COLOR_MALE
+        elif label in ["남/여 전체", "연령 확인 가능", "확인 가능", "Known", "known"]:
+            return COLOR_KNOWN
         elif label in ["알 수 없음", "Unknown", "unknown"]:
-            return color_map["dark"]
-        return color_map["dark"]
+            return COLOR_UNKNOWN
+        return COLOR_UNKNOWN
 
     colors = [_pick_color(label) for label in labels]
 
@@ -1939,10 +1956,8 @@ def render_follower_gender_doughnut_chart(chart_data, color_map):
     )
 
     for i, t in enumerate(autotexts):
-        if colors[i] == color_map["lighter"]:
-            t.set_color("#252525")
-        else:
-            t.set_color("white")
+        # 회색(알 수 없음)만 어두운 텍스트, 나머지는 흰색
+        t.set_color("#252525" if colors[i] == COLOR_UNKNOWN else "white")
 
         t.set_fontsize(14)
         t.set_fontweight("bold")

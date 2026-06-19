@@ -15,6 +15,7 @@ from scripts.processor import (
     get_strategic_performance,get_essence_target_performance,get_variable_target_performance,
     has_purchase_data, get_purchase_roas_weekly, get_purchase_roas_monthly,  # ROAS,구매건수 데이터 추가
     get_purchase_count_weekly, get_purchase_count_monthly,
+    get_purchase_total_count, get_purchase_summary_page_data,  # 구매전환 요약 페이지 추가
     has_purchase_content_data, get_purchase_contents_pages_data, get_a_content_target_purchase_data, get_purchase_age_gender_heatmap,get_purchase_age_gender_heatmap_page_data,  # 구매 컨텐츠 추가
     has_revenue_data, get_spend_and_revenue_weekly, get_spend_and_revenue_monthly,  # 광고/매출금액 추가
     has_follower_demographics_data, get_follower_demographics_latest_date, get_demographics_ratio, get_follower_age_gender_known_only, get_age_known_unknown_by_age, get_follower_age_gender_distribution,  # 팔로워 인구통계 추가
@@ -322,8 +323,9 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     add_ds("ctr_trend_monthly", "line", "월별 CTR 추이", ctr_monthly_df, "%", "month_start", ["ctr"])
 
     #  --- [추가] ROAS, 구매건수 (2페이지 분량) ---
+    total_purchases = get_purchase_total_count(target_id, start, end)
 
-    if has_purchase_data(target_id, start, end):
+    if total_purchases >= 10:
         print("ROAS, 구매건수 생성 중...")
         roas_weekly_df = get_purchase_roas_weekly(target_id, start, end)
         roas_monthly_df = get_purchase_roas_monthly(target_id, start, end)
@@ -343,6 +345,28 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
                 "page_2_title": "구매전환 건수"
             }
         }
+        final_report["purchase_summary_page"] = {"is_visible": False}
+
+    elif total_purchases > 0:
+        print(f"구매전환 {total_purchases}건 (10건 미만) — 요약 페이지 생성 중...")
+        summary_data = get_purchase_summary_page_data(target_id, start, end)
+        final_report["purchase_analysis_pages"] = {
+            "is_visible": False,
+            "titles": {
+                "section_title": "전체 매출 데이터 분석",
+                "page_1_title": "평균 ROAS",
+                "page_2_title": "구매전환 건수"
+            }
+        }
+        final_report["purchase_summary_page"] = {
+            "is_visible": True,
+            "total_purchases": summary_data["total_purchases"],
+            "avg_roas": summary_data["avg_roas"],
+            "top_content": summary_data["top_content"],
+        }
+        # 요약 페이지가 표시되면 광고비&매출발생 페이지는 숨김
+        final_report["spend_revenue_pages"] = {"is_visible": False}
+
     else:
         print("ROAS, 구매건수 없음...")
         final_report["purchase_analysis_pages"] = {
@@ -353,9 +377,13 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
                 "page_2_title": "구매전환 건수"
             }
         }
+        final_report["purchase_summary_page"] = {"is_visible": False}
 
     # --- [추가] 광고비 & 매출발생 페이지 ---
-    if has_revenue_data(target_id, start, end):
+    # purchase_summary_page가 이미 is_visible=True면 이 페이지는 건너뜀
+    if final_report.get("purchase_summary_page", {}).get("is_visible"):
+        print("광고비/매출발생 데이터 없음 (요약 페이지 표시 중)...")
+    elif has_revenue_data(target_id, start, end):
         print("광고비/매출발생 데이터 생성 중...")
         spend_revenue_weekly_df = get_spend_and_revenue_weekly(target_id, start, end)
         spend_revenue_monthly_df = get_spend_and_revenue_monthly(target_id, start, end)

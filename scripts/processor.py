@@ -1628,7 +1628,9 @@ def get_purchase_roas_weekly(account_id, date_start, date_end):
     query = f"""
         SELECT
             (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date AS week_start,
-            ROUND(AVG(apd.purchase_roas)::numeric, 0) AS avg_roas
+            ROUND(
+                (SUM(apd.spend * apd.purchase_roas) / NULLIF(SUM(apd.spend), 0))::numeric
+            , 0) AS avg_roas
         FROM ad_performance_daily apd
         JOIN ads a ON apd.ad_id = a.id
         JOIN ad_sets ads ON a.ad_set_id = ads.id
@@ -1636,7 +1638,7 @@ def get_purchase_roas_weekly(account_id, date_start, date_end):
         WHERE a.account_id = {account_id}
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= '{date_end}'::date
-          AND apd.purchase_roas IS NOT NULL
+          AND apd.spend IS NOT NULL
           AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
         GROUP BY (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date
         ORDER BY week_start
@@ -1652,7 +1654,9 @@ def get_purchase_roas_monthly(account_id, date_start, date_end):
     query = f"""
         SELECT
             DATE_TRUNC('month', apd.as_of_date)::date AS month_start,
-            ROUND(AVG(apd.purchase_roas)::numeric, 0) AS avg_roas
+            ROUND(
+                (SUM(apd.spend * apd.purchase_roas) / NULLIF(SUM(apd.spend), 0))::numeric
+            , 0) AS avg_roas
         FROM ad_performance_daily apd
         JOIN ads a ON apd.ad_id = a.id
         JOIN ad_sets ads ON a.ad_set_id = ads.id
@@ -1661,6 +1665,7 @@ def get_purchase_roas_monthly(account_id, date_start, date_end):
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.purchase_roas IS NOT NULL
+          AND apd.spend IS NOT NULL
           AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
         GROUP BY DATE_TRUNC('month', apd.as_of_date)::date
         ORDER BY month_start
@@ -2034,6 +2039,99 @@ def get_purchase_contents_pages_data(account_id, date_start, date_end):
         "items": contents,
         "total_count": len(contents)
     }
+
+def get_purchase_total_count(account_id, date_start, date_end):
+    """기간 내 총 구매전환 건수를 반환한다."""
+    engine = get_engine()
+    query = f"""
+        SELECT COALESCE(SUM(apd.purchase_count), 0) AS total_purchases
+        FROM ad_performance_daily apd
+        JOIN ads a ON apd.ad_id = a.id
+        JOIN ad_sets ads ON a.ad_set_id = ads.id
+        JOIN campaigns c ON ads.campaign_id = c.id
+        WHERE a.account_id = {account_id}
+          AND apd.as_of_date >= '{date_start}'::date
+          AND apd.as_of_date <= '{date_end}'::date
+          AND apd.purchase_count IS NOT NULL
+          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+    """
+    df = pd.read_sql(query, engine)
+    return int(df["total_purchases"].iloc[0]) if not df.empty else 0
+
+
+def get_purchase_summary_page_data(account_id, date_start, date_end):
+    """총 구매전환 < 10건일 때 사용하는 요약 페이지 데이터를 반환한다."""
+    engine = get_engine()
+
+    summary_query = f"""
+        SELECT
+            COALESCE(SUM(apd.purchase_count), 0) AS total_purchases,
+            ROUND(
+                (SUM(apd.spend * apd.purchase_roas) / NULLIF(SUM(apd.spend), 0))::numeric
+            , 1) AS avg_roas
+        FROM ad_performance_daily apd
+        JOIN ads a ON apd.ad_id = a.id
+        JOIN ad_sets ads ON a.ad_set_id = ads.id
+        JOIN campaigns c ON ads.campaign_id = c.id
+        WHERE a.account_id = {account_id}
+          AND apd.as_of_date >= '{date_start}'::date
+          AND apd.as_of_date <= '{date_end}'::date
+          AND apd.purchase_count IS NOT NULL
+          AND apd.purchase_count > 0
+          AND apd.spend IS NOT NULL
+          AND apd.purchase_roas IS NOT NULL
+          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+    """
+
+    top_content_query = f"""
+        SELECT
+            a.source_ig_media_id,
+            COALESCE(
+                MAX(NULLIF(ig.thumbnail_url, '')),
+                MAX(NULLIF(ig.media_url, ''))
+            ) AS thumbnail,
+            COALESCE(SUM(apd.purchase_count), 0) AS purchases
+        FROM ad_performance_daily apd
+        JOIN ads a ON apd.ad_id = a.id
+        JOIN ad_sets ads ON a.ad_set_id = ads.id
+        JOIN campaigns c ON ads.campaign_id = c.id
+        LEFT JOIN ig_contents ig ON a.source_ig_media_id = ig.fb_ig_media_id
+        WHERE a.account_id = {account_id}
+          AND a.source_ig_media_id IS NOT NULL
+          AND apd.as_of_date >= '{date_start}'::date
+          AND apd.as_of_date <= '{date_end}'::date
+          AND apd.purchase_count IS NOT NULL
+          AND apd.purchase_count > 0
+          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+        GROUP BY a.source_ig_media_id
+        ORDER BY purchases DESC
+        LIMIT 1
+    """
+
+    summary_df = pd.read_sql(summary_query, engine)
+    top_df = pd.read_sql(top_content_query, engine)
+
+    total_purchases = int(summary_df["total_purchases"].iloc[0]) if not summary_df.empty else 0
+    avg_roas_raw = summary_df["avg_roas"].iloc[0] if not summary_df.empty else None
+    avg_roas = None if (avg_roas_raw is None or pd.isna(avg_roas_raw)) else float(avg_roas_raw)
+
+    top_content = None
+    if not top_df.empty:
+        row = top_df.iloc[0]
+        thumb_val = row.get("thumbnail")
+        thumb_val = None if (thumb_val is None or pd.isna(thumb_val)) else str(thumb_val).strip() or None
+        top_content = {
+            "source_ig_media_id": row["source_ig_media_id"],
+            "thumbnail": thumb_val,
+            "purchases": int(row["purchases"]),
+        }
+
+    return {
+        "total_purchases": total_purchases,
+        "avg_roas": avg_roas,
+        "top_content": top_content,
+    }
+
 
 # ----------------------------------
 # 팔로워 인구통계학 페이지용 함수들

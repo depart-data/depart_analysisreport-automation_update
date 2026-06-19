@@ -285,6 +285,38 @@
 
 
   {# =========================================================
+     (7-A) Purchase Summary Page (총 구매전환 < 10건)
+     ========================================================= #}
+  {% if purchase_summary_page and purchase_summary_page.is_visible %}
+  <section class="page">
+    {{ page_header('전체 매출 데이터 분석') }}
+    {{ big_title('구매전환 성과 요약') }}
+
+    {% set top = purchase_summary_page.top_content %}
+    <div class="page-body page-body--purchase-summary">
+      <div class="span-12 purchase-summary__row">
+        <div class="overview-kpi">
+          <div class="overview-kpi__value">{{ purchase_summary_page.total_purchases }}건</div>
+          <div class="overview-kpi__label">총 구매전환</div>
+        </div>
+        <div class="overview-kpi">
+          <div class="overview-kpi__value">{{ (purchase_summary_page.avg_roas ~ '%') if purchase_summary_page.avg_roas is not none else '-' }}</div>
+          <div class="overview-kpi__label">평균 ROAS</div>
+        </div>
+        {% if top and top.thumbnail %}
+        <div class="purchase-summary__content-item">
+          <div class="purchase-summary__thumb-wrap">
+            <img src="{{ top.thumbnail }}" alt="top purchase content">
+          </div>
+          <div class="purchase-summary__content-label">구매전환 최다 발생 콘텐츠</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  {# =========================================================
      (7) Purchase Analysis - ROAS
      ========================================================= #}
   {% if purchase_analysis_pages and purchase_analysis_pages.is_visible %}
