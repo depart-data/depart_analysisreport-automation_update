@@ -12,8 +12,12 @@ __pycache__/
 *.pyc
 *.pyo
 
-outputs/*
-json_reports/*
 
-# Claude Code
-CLAUDE.md
+json_reports/*
+output2/
+outputs-1
+outputs/
+report.html
+
+# claude
+.claude

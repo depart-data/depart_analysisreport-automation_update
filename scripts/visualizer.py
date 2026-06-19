@@ -273,16 +273,14 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
     labels = dataset.get("labels") or []
     series = dataset.get("series") or []
 
-    if not labels or not series or len(labels) <= 1:
+    if not labels or not series:
         return ""
 
-    # =========================================================
-    # 💡 [핵심 해결책] main.py에서 전달이 안 되는 스위치를 여기서 강제로 켭니다!
     title_text = str(dataset.get("title") or "").strip()
     show_average = dataset.get("show_average", False)
     
     # 평균선 표시 대상 차트
-    if title_text in ["주별 CTR 추이", "오가닉 조회수 추이 (주별)", "프로필 방문 수(주별)"] :
+    if title_text in [ "오가닉 조회수 추이 (주별)", "프로필 방문 수(주별)"] :
         show_average = True
     # =========================================================
 
@@ -518,8 +516,8 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
         if all_vals:
             avg_val = sum(all_vals) / len(all_vals)
             
-            # 1. 점선 그리기 (얌전한 회색)
-            ax.axhline(y=avg_val, color="#8c8c89", linestyle="--", linewidth=1.5, zorder=999)
+            # 1. 점선 그리기 (빨간색 - 이번분기)
+            ax.axhline(y=avg_val, color="#e53935", linestyle="--", linewidth=1.5, zorder=999)
             
             # 현재 기간 평균 라벨: "{연도}년 {분기}분기 평균" 형식으로 통일
             current_quarter = dataset.get("current_quarter")
@@ -533,12 +531,12 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                     period_text = "분석 기간 전체"
                 cur_label = f"{period_text} 평균"
 
-            # 2. 텍스트 라벨 (왼쪽 고정, 회색 글씨)
+            # 2. 텍스트 라벨 (왼쪽 고정, 빨간 글씨)
             ax.text(
                 x=0.02,
                 y=avg_val,
                 s=f"{cur_label}: {avg_val:,.1f}{unit}",
-                color="#5d5d5b",
+                color="#e53935",
                 fontsize=10,
                 fontweight="bold",
                 ha="left", va="bottom",
@@ -554,24 +552,24 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                 transform=ax.transAxes,
                 ha='left', va='top',
                 fontsize=10,
-                color="#5d5d5b",
+                color="#e53935",
                 clip_on=False,
             )
             
-            # 4. 이전 분기 평균선 (빨간색 계열)
+            # 4. 이전 분기 평균선 (회색)
             if prev_quarter_avg and prev_quarter_avg.get("avg") is not None:
                 prev_year = prev_quarter_avg.get("year")
                 prev_quarter = prev_quarter_avg.get("quarter")
 
-                # 4-1. 점선 그리기 (빨간색 계열)
-                ax.axhline(y=prev_avg_val, color="#e53935", linestyle="--", linewidth=1.5, zorder=998)
+                # 4-1. 점선 그리기
+                ax.axhline(y=prev_avg_val, color="#858585", linestyle="--", linewidth=1.5, zorder=998)
 
-                # 4-2. 텍스트 라벨 (왼쪽 고정, 빨간색 글씨)
+                # 4-2. 텍스트 라벨
                 ax.text(
                     x=0.02,
                     y=prev_avg_val,
                     s=f"{prev_year}년 {prev_quarter}분기 평균: {prev_avg_val:,.1f}{unit}",
-                    color="#e53935",
+                    color="#858585",
                     fontsize=10,
                     fontweight="bold",
                     ha="left", va="bottom",
@@ -580,14 +578,14 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                     transform=ax.get_yaxis_transform()
                 )
 
-                # 4-3. 차트 하단 설명 (2번째 줄: 이전 분기 평균, 빨간색 계열)
+                # 4-3. 차트 하단 설명 
                 ax.text(
                     0.01, -0.24,
                     f"----- : {prev_year}년 {prev_quarter}분기 평균",
                     transform=ax.transAxes,
                     ha='left', va='top',
                     fontsize=10,
-                    color="#e53935",
+                    color="#858585",
                     clip_on=False,
                 )
     # =======================================================
@@ -946,94 +944,75 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
     }
     metric_label = metric_label_map.get(metric, metric)
 
-    # 상단 그리드용 아이템 리스트 (썸네일·업로드일만 전달)
+    # 상단 그리드용 아이템 리스트 (썸네일·업로드일·동순위 rank 전달)
     thumb_items = [
         {
-            "thumbnail":    item.get("thumbnail"),
-            "uploaded_at":  item.get("uploaded_at"),
+            "thumbnail":     item.get("thumbnail"),
+            "uploaded_at":   item.get("uploaded_at"),
             "ig_media_type": item.get("ig_media_type"),
             "ctr":           item.get("ctr"),
+            "rank":          item.get("rank"),
+            "caption_label": item.get("caption_label"),
         }
-        for item in items
+        for item in items[:5]
     ]
 
     if not items:
         return {"cards": [], "chart_svg": ""}
 
-    # 차트 데이터 구성: 콘텐츠 5개 + 전체 평균 1개
-    labels = []
-    values = []
-
+    labels, values, ranks, thumbnails = [], [], [], []
     for idx, item in enumerate(items, 1):
-        caption_label = str(item.get("caption_label") or "").strip()
-
-        if caption_label:
-            label = caption_label
-        else:
-            # caption_label이 없는 경우 (구버전 데이터 호환): 업로드 날짜로 대체
-            label = str(item.get("uploaded_at") or f"콘텐츠 {idx}")
-        
+        caption_label = (
+            str(item.get("caption_label") or "")
+            .replace("\n", " ")
+            .replace("\r", " ")
+            .strip()
+        )
+        label = caption_label or str(item.get("uploaded_at") or f"콘텐츠 {idx}")
         labels.append(label)
         values.append(float(item.get(metric_col, 0) or 0))
+        ranks.append(item.get("rank", idx))
+        thumbnails.append(item.get("thumbnail"))
 
     n = len(labels)
-
-    is_top = dataset.get("is_top", True)
-
-    base_hex = color_map.get("base", "#4B3B8C")
-    
-    def _hex_to_rgba(hex_color: str, alpha: float):
-        """HEX 색상 문자열을 matplotlib용 RGBA 튜플로 변환한다."""
-        hex_color = hex_color.lstrip("#")
-        r = int(hex_color[0:2], 16) / 255.0
-        g = int(hex_color[2:4], 16) / 255.0
-        b = int(hex_color[4:6], 16) / 255.0
-        return (r, g, b, alpha)
-    
-    content_values = values
-
-    if not content_values:
-        highlight_val = None
-    elif is_top:
-        # 상위 차트: 수치가 max_value와 동일한 막대 전부를 강조
-        # index() 방식은 동점 첫 번째만 반환하므로 값 자체를 저장하여
-        # 루프에서 모든 동점 막대에 동일하게 적용한다.
-        highlight_val = max(content_values)
-    else:
-        # 하위 차트: 수치가 min_value와 동일한 막대 전부를 강조
-        highlight_val = min(content_values)
-
-    bar_colors = []
-    for v in content_values:
-        if highlight_val is not None and v == highlight_val:
-            # 강조 막대: 브랜드 컬러 불투명도 100%
-            bar_colors.append(_hex_to_rgba(base_hex, 1.0))
-        else:
-            # 비강조 막대: 브랜드 컬러 불투명도 40%
-            bar_colors.append(_hex_to_rgba(base_hex, 0.4))
-
-    plt.rcParams["svg.fonttype"] = "none"
-
-    fig_h = min(2.4, max(1.6, n * 0.40))
-    fig, ax = plt.subplots(figsize=(7, fig_h))
-    fig.patch.set_alpha(0)
-    ax.patch.set_alpha(0)
-    fig.subplots_adjust(left=0.1, right=1.1, top=0.95, bottom=0.12)
-
-    y_pos = list(range(n - 1, -1, -1))   # 위→아래: 콘텐츠1 ~ 콘텐츠5 ~ 평균
-
-    bars = ax.barh(
-        y_pos, values,
-        color=bar_colors,
-        height=0.55,
-        edgecolor="none",
-    )
    
 
-    # ── x축 기준값 결정 ────────────────────────────────────────────────────
-    # x_scale_max: JSON에서 전달된 공유 기준값 (상위/하위 차트 공통 사용).
-    # 이 값이 없거나 0이면 현재 데이터의 최대값을 폴백으로 사용한다.
-    # 단, 폴백도 0인 경우 division by zero를 막기 위해 최소값 1을 보장한다.
+    TOP_STEP    = 1.43   # ★ 상위(1~5위) 막대끼리 간격 (키우면 상위 막대들이 벌어짐)
+    BOTTOM_STEP = 1.43   # ★ 하위(6위~) 막대끼리 간격 (키우면 하위 막대들이 벌어짐)
+    GAP_AFTER_5 = 0.17   # 상위그룹 ↔ 하위그룹 사이 추가 간격
+
+    y_pos = [0.0] * n
+    y = 0.0
+    # 맨 아래(꼴찌)부터 위로 한 칸씩 쌓는다
+    for i in range(n - 1, -1, -1):
+        y_pos[i] = y
+        if i > 5:
+            y += BOTTOM_STEP            # 하위 막대끼리 간격
+        elif i == 5:
+            y += BOTTOM_STEP + GAP_AFTER_5   # 그룹 경계
+        else:
+            y += TOP_STEP
+
+
+    # ── 막대 색상 결정 (평균 이상 = 진하게, 평균 이하 = 연하게) ──
+    base_hex = color_map.get("base", "#999999")
+    is_top   = dataset.get("is_top", True)
+
+    if not values:
+        highlight_val = None
+    elif is_top:
+        highlight_val = max(values)
+    else:
+        highlight_val = min(values)
+
+    bar_colors = []
+    for v in enumerate(values):
+        r, g, b = _hex_to_rgb01(base_hex)
+        if i < 5:
+            bar_colors.append((r, g, b, 1.0))
+        else:
+            bar_colors.append((r, g, b, 0.4))
+
     x_scale_max_from_json = float(dataset.get("x_scale_max") or 0)
     x_data_max = max(values) if values else 0
     if x_scale_max_from_json > 0:
@@ -1045,6 +1024,34 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
     else:
         # 모든 값이 0인 경우: 최소값 1 보장 (division by zero 방지)
         x_scale_ref = 1
+
+    # ── 그래프 캔버스 생성 ──
+    all_zero = all(v == 0 for v in values) if values else True
+    # 검증후조정: 차트가 우측 폭(좌측 33%로 축소되며 넓어짐)에 맞춰 height:auto로 렌더되면
+    # 세로가 과대해져 제목과 한 페이지에 못 들어가 다음 페이지로 넘어갔다.
+    # 막대 겹침은 데이터 단위(GAP/ylim/height)로 제어되므로 fig_h를 낮춰도 안전하다.
+    fig_h = min(5.7, max(2.6, n * 0.50))
+    fig, ax = plt.subplots(figsize=(7, fig_h))
+    fig.patch.set_alpha(0)
+    ax.patch.set_alpha(0)
+    # 하위 썸네일을 막대 영역 안쪽 좌측에 배치하므로 left 여백을 줄인다.
+    fig.subplots_adjust(left=0.22, right=0.99, top=0.97, bottom=0.08)
+
+    # 전부 0이면 막대를 최소 폭으로 표시
+    plot_values = [x_scale_ref * 0.006 if all_zero else v for v in values]
+
+    bars = ax.barh(
+        y_pos, plot_values,
+        color=bar_colors,
+        height=0.85,   # 검증후조정(0.68~0.8) — 막대 굵게
+        edgecolor="none",
+    )
+
+    # y축 위아래 여백 명시 — 막대·라벨이 캔버스 경계와 겹치지 않도록 (검증후조정)
+    # 여백을 줄여 막대가 차트 높이를 더 채우도록(=두꺼워 보이도록) 한다.
+    if y_pos:
+        ax.set_ylim(min(y_pos) - 0.5, max(y_pos) + 0.5)
+
 
     # 지표별 유니코드 아이콘 매핑
     metric_icon_map = {
@@ -1062,7 +1069,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
             bar.get_y() + bar.get_height() / 2,
             f"{metric_icon} {int(val):,}",
             va="center", ha="left",
-            fontsize=7, color="#333333",
+            fontsize=9, color="#333333",   # 검증후조정 — 막대 끝 수치 가독성 확대
             zorder=10,
             bbox=dict(
                 facecolor=(1.0, 1.0, 1.0, 0.5),
@@ -1072,8 +1079,23 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
             ),
         )
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(labels, fontsize=7, color="#333333")
+    ax.set_yticklabels(labels, fontsize=9, color="#333333")   # 막대 왼쪽 바깥에 검정 글자
     ax.yaxis.set_tick_params(length=0)
+
+    # 1~5위(상위): 막대 안쪽 왼쪽에 흰색으로 제목 표시
+    # (하위 6위~ 라벨/썸네일은 x축 범위 확정 후 아래 별도 블록에서 처리)
+    '''for i, (bar, lbl) in enumerate(zip(bars, labels)):
+        if i >= 5:
+            break
+        ax.text(
+            x_scale_ref * 0.012,
+            bar.get_y() + bar.get_height() / 2,
+            lbl,
+            va="center", ha="left",
+            fontsize=9,   # 검증후조정 — 막대 안 제목 가독성 확대
+            color="#FFFFFF",
+            zorder=11,
+        )'''
 
     ax.set_xlabel(metric_label, fontsize=8, color="#555555", labelpad=4)
     # x축 상한을 x_scale_ref 기준으로 설정한다.
@@ -1084,6 +1106,75 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
 
     for spine in ax.spines.values():
         spine.set_visible(False)
+
+    # ── 하위(6위~) 막대: 막대 영역 안쪽 좌측 인라인 썸네일 + 막대 안쪽 흰색 라벨 ──
+    # 상위 5개는 좌측 그리드에 이미 노출되므로 썸네일을 추가하지 않는다.
+    '''if n > 5:
+        from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+
+        # 데이터↔픽셀 변환을 확정하기 위해 한 번 렌더한다(xlim/ylim 확정 후).
+        fig.canvas.draw()
+        _p0 = ax.transData.transform((0.0, 0.0))
+        _p1y = ax.transData.transform((0.0, 1.0))
+        _p1x = ax.transData.transform((1.0, 0.0))
+        px_per_unit_y = abs(_p1y[1] - _p0[1]) or 1.0
+        px_per_unit_x = abs(_p1x[0] - _p0[0]) or 1.0
+
+        # 썸네일 표시 높이를 막대 높이(0.55 데이터 단위)와 비슷하게 맞춘다. // 검증후조정
+        thumb_data_h = 1.5  # 검증후조정 — 하위 썸네일을 막대보다 약간 크게 확대
+        target_px_h  = thumb_data_h * px_per_unit_y
+        # OffsetImage(zoom)은 dpi 보정이 적용되므로 72/dpi 로 환산해 픽셀 높이를 맞춘다.
+        _dpi = fig.get_dpi() or 100.0
+
+        for i in range(5, n):
+            thumb = thumbnails[i] if i < len(thumbnails) else None
+            arr = _load_thumbnail_array(thumb) if thumb else None
+            if arr is None:
+                # URL 없음/로드 실패 → 회색(#D0D0D0) placeholder (4:5 = 240×300)
+                arr = np.full((300, 240, 3), 0xD0, dtype=np.uint8)
+
+            img_h_px = arr.shape[0]
+            img_w_px = arr.shape[1]
+            zoom = (target_px_h / img_h_px) * (72.0 / _dpi)   # // 검증후조정
+
+            oimg = OffsetImage(arr, zoom=zoom)
+            ab = AnnotationBbox(
+                oimg,
+                (0.0, y_pos[i]),                       # 축 좌측 안쪽(x=0), 막대 중심 y
+                xycoords=("axes fraction", "data"),
+                box_alignment=(0.0, 0.5),
+                frameon=False,
+                pad=0.0,
+                zorder=12,
+            )
+            ax.add_artist(ab)
+
+            # 라벨 x 시작점을 썸네일 표시 폭 뒤로 두어 겹치지 않게 한다.
+            thumb_w_px   = img_w_px * zoom * (_dpi / 72.0)
+            thumb_w_data = thumb_w_px / px_per_unit_x
+            label_x = thumb_w_data + x_scale_ref * 0.012
+            ax.text(
+                label_x,
+                y_pos[i],
+                labels[i],
+                va="center", ha="left",
+                fontsize=9,   # 검증후조정 — 하위 막대 안 제목 가독성 확대
+                color="#FFFFFF",
+                zorder=13,
+            )'''
+
+    # 5위/6위 사이 가로 구분선 제거 (목표 디자인에 없음).
+    # 상·하위 간격은 GAP_AFTER_5로 유지하고 선만 삭제한다.
+
+    # 전부 0일 때 안내 문구
+    if all_zero:
+        ax.text(
+            0.5, -0.08,
+            "해당 기간 집계된 데이터가 없습니다",
+            transform=ax.transAxes,
+            ha="center", va="top",
+            fontsize=7, color="#aaaaaa",
+        )
 
 
 
@@ -1108,33 +1199,33 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
         )
         ax.text(
             overall_avg_val,
-            0,
+            -0.06,
             avg_label_text,
             ha="center",
             va="top",
-            fontsize=6,
+            fontsize=8,
             color="#888888",
             zorder=6,
             bbox=dict(
                 facecolor=(1.0, 1.0, 1.0, 0.5),
                 edgecolor="none",
-                pad=1.5,
+                pad=2,
                 boxstyle="round,pad=0.2",
             ),
             transform=ax.get_xaxis_transform(),
         )
     # else 분기 제거: 평균이 0이거나 scale이 없으면 선을 그리지 않음
 
-        buf = io.StringIO()
-        fig.savefig(buf, format="svg")
-        plt.close(fig)
-        plt.rcParams["svg.fonttype"] = "path"
+    buf = io.StringIO()
+    fig.savefig(buf, format="svg")
+    plt.close(fig)
+    plt.rcParams["svg.fonttype"] = "path"
 
-        svg = buf.getvalue()
-        idx = svg.find("<svg")
-        chart_svg = svg[idx:] if idx != -1 else svg
+    svg = buf.getvalue()
+    idx = svg.find("<svg")
+    chart_svg = svg[idx:] if idx != -1 else svg
 
-        return {"cards": thumb_items, "chart_svg": chart_svg}
+    return {"cards": thumb_items, "chart_svg": chart_svg}
 
 
 
@@ -2020,8 +2111,9 @@ def _render_purchase_conversion_heatmap(
     age_order = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
     gender_order = ["female", "male"]
     pivot = pivot.reindex(
-        index=[g for g in gender_order if g in pivot.index],
-        columns=[a for a in age_order if a in pivot.columns],
+        index=gender_order,    
+        columns=age_order,    
+        fill_value=0,
     )
 
     if pivot.empty:
@@ -2033,6 +2125,7 @@ def _render_purchase_conversion_heatmap(
         [color_map["lighter"], color_map["light"], color_map["base"], color_map["dark"]],
     )
 
+    pivot = pivot.fillna(0)
     heat_values = pivot.values.astype(float)
     vmin = float(np.nanmin(heat_values))
     vmax = float(np.nanmax(heat_values))
@@ -2056,7 +2149,7 @@ def _render_purchase_conversion_heatmap(
             ax.text(
                 j,
                 i,
-                f"{int(round(float(val))):,}\n ",
+                f"{int(round(float(val))):,}",
                 ha="center",
                 va="center",
                 fontsize=11,

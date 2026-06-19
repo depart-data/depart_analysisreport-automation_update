@@ -26,10 +26,10 @@ from scripts.processor import (
 
 import re
 
-def _parse_korean_caption(caption: str, max_chars: int = 7) -> str:
+def _parse_korean_caption(caption: str, max_chars: int = 13) -> str:
     """
     캡션 문자열에서 한글이 처음 등장하는 위치를 찾아,
-    그 위치부터 max_chars(기본 7)글자를 추출하여 반환한다.
+    그 위치부터 max_chars(기본 13)글자를 추출하여 반환한다.
 
     - 한글이 없으면 원문 앞 max_chars 글자를 그대로 사용한다.
     - 추출 결과가 max_chars를 초과하면 '...'을 붙인다.
@@ -56,6 +56,31 @@ def _parse_korean_caption(caption: str, max_chars: int = 7) -> str:
         return text[:max_chars] + "..."
     return text
 
+def _assign_reaction_ranks(items, metric_col):
+    """
+    items 리스트에 동순위를 반영한 'rank' 필드를 추가하고,
+    10개를 초과하는 경우 상위 10위까지만 남깁니다.
+    """
+    if not items:
+        return items
+
+    # rank 계산: 같은 지표값이면 같은 순위 번호
+    prev_val = None
+    prev_rank = 0
+    count = 0
+    for item in items:
+        val = float(item.get(metric_col, 0) or 0)
+        count += 1
+        if val != prev_val:
+            prev_rank = count
+            prev_val = val
+        item["rank"] = prev_rank
+
+    # 10개 초과 시: 상위 10위(rank <= 10)까지만 남김 (11위 이상 제거)
+    if len(items) > 10:
+        items = [x for x in items if x["rank"] <= 10]
+
+    return items
 
 
 def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", avoid_age="", avoid_gender="", currency=""):
@@ -689,7 +714,11 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
             for item in (reaction_contents or []):
                 raw_caption = str(item.get("caption") or "").strip()
-                item["caption_label"] = _parse_korean_caption(raw_caption)
+                caption_label = _parse_korean_caption(raw_caption)
+                if not caption_label:
+                    uploaded = item.get("uploaded_at")
+                    caption_label = f"{uploaded:%Y-%m-%d} 업로드" if uploaded else ""
+                item["caption_label"] = caption_label
 
                 raw_ctr = item.get("ctr")
                 if raw_ctr is None or (isinstance(raw_ctr, float) and raw_ctr != raw_ctr):
@@ -697,6 +726,8 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
                     item["ctr"] = None
                 else:
                     item["ctr"] = float(raw_ctr)
+
+            reaction_contents = _assign_reaction_ranks(reaction_contents, metric_col)
 
             final_report["datasets"][f"reaction_{metric}_{suffix}"] = {
                 "kind":         "reaction_bar",
