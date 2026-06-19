@@ -962,7 +962,12 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
 
     labels, values, ranks, thumbnails = [], [], [], []
     for idx, item in enumerate(items, 1):
-        caption_label = str(item.get("caption_label") or "").strip()
+        caption_label = (
+            str(item.get("caption_label") or "")
+            .replace("\n", " ")
+            .replace("\r", " ")
+            .strip()
+        )
         label = caption_label or str(item.get("uploaded_at") or f"콘텐츠 {idx}")
         labels.append(label)
         values.append(float(item.get(metric_col, 0) or 0))
@@ -970,11 +975,23 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
         thumbnails.append(item.get("thumbnail"))
 
     n = len(labels)
-    GAP_AFTER_5 = 0.5  # 5위/6위 사이 여백 (2-3 구분선용)
-    y_pos = []
-    for i in range(n):
-        base = (n - 1 - i)
-        y_pos.append(base + GAP_AFTER_5 if i >= 5 else base)
+   
+
+    TOP_STEP    = 1.43   # ★ 상위(1~5위) 막대끼리 간격 (키우면 상위 막대들이 벌어짐)
+    BOTTOM_STEP = 1.43   # ★ 하위(6위~) 막대끼리 간격 (키우면 하위 막대들이 벌어짐)
+    GAP_AFTER_5 = 0.17   # 상위그룹 ↔ 하위그룹 사이 추가 간격
+
+    y_pos = [0.0] * n
+    y = 0.0
+    # 맨 아래(꼴찌)부터 위로 한 칸씩 쌓는다
+    for i in range(n - 1, -1, -1):
+        y_pos[i] = y
+        if i > 5:
+            y += BOTTOM_STEP            # 하위 막대끼리 간격
+        elif i == 5:
+            y += BOTTOM_STEP + GAP_AFTER_5   # 그룹 경계
+        else:
+            y += TOP_STEP
 
 
     # ── 막대 색상 결정 (평균 이상 = 진하게, 평균 이하 = 연하게) ──
@@ -1010,7 +1027,10 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
 
     # ── 그래프 캔버스 생성 ──
     all_zero = all(v == 0 for v in values) if values else True
-    fig_h = min(5.2, max(2.0, n * 0.42))
+    # 검증후조정: 차트가 우측 폭(좌측 33%로 축소되며 넓어짐)에 맞춰 height:auto로 렌더되면
+    # 세로가 과대해져 제목과 한 페이지에 못 들어가 다음 페이지로 넘어갔다.
+    # 막대 겹침은 데이터 단위(GAP/ylim/height)로 제어되므로 fig_h를 낮춰도 안전하다.
+    fig_h = min(5.7, max(2.6, n * 0.50))
     fig, ax = plt.subplots(figsize=(7, fig_h))
     fig.patch.set_alpha(0)
     ax.patch.set_alpha(0)
@@ -1023,10 +1043,15 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
     bars = ax.barh(
         y_pos, plot_values,
         color=bar_colors,
-        height=0.55,
+        height=0.85,   # 검증후조정(0.68~0.8) — 막대 굵게
         edgecolor="none",
     )
-   
+
+    # y축 위아래 여백 명시 — 막대·라벨이 캔버스 경계와 겹치지 않도록 (검증후조정)
+    # 여백을 줄여 막대가 차트 높이를 더 채우도록(=두꺼워 보이도록) 한다.
+    if y_pos:
+        ax.set_ylim(min(y_pos) - 0.5, max(y_pos) + 0.5)
+
 
     # 지표별 유니코드 아이콘 매핑
     metric_icon_map = {
@@ -1044,7 +1069,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
             bar.get_y() + bar.get_height() / 2,
             f"{metric_icon} {int(val):,}",
             va="center", ha="left",
-            fontsize=7, color="#333333",
+            fontsize=9, color="#333333",   # 검증후조정 — 막대 끝 수치 가독성 확대
             zorder=10,
             bbox=dict(
                 facecolor=(1.0, 1.0, 1.0, 0.5),
@@ -1068,7 +1093,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
             bar.get_y() + bar.get_height() / 2,
             lbl,
             va="center", ha="left",
-            fontsize=7,
+            fontsize=9,   # 검증후조정 — 막대 안 제목 가독성 확대
             color="#FFFFFF",
             zorder=11,
         )
@@ -1097,7 +1122,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
         px_per_unit_x = abs(_p1x[0] - _p0[0]) or 1.0
 
         # 썸네일 표시 높이를 막대 높이(0.55 데이터 단위)와 비슷하게 맞춘다. // 검증후조정
-        thumb_data_h = 0.55
+        thumb_data_h = 1.5  # 검증후조정 — 하위 썸네일을 막대보다 약간 크게 확대
         target_px_h  = thumb_data_h * px_per_unit_y
         # OffsetImage(zoom)은 dpi 보정이 적용되므로 72/dpi 로 환산해 픽셀 높이를 맞춘다.
         _dpi = fig.get_dpi() or 100.0
@@ -1134,21 +1159,13 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
                 y_pos[i],
                 labels[i],
                 va="center", ha="left",
-                fontsize=7,
+                fontsize=9,   # 검증후조정 — 하위 막대 안 제목 가독성 확대
                 color="#FFFFFF",
                 zorder=13,
             )
 
-    # 5위/6위 사이 구분선
-    if n > 5:
-        divider_y = (y_pos[4] + y_pos[5]) / 2
-        ax.axhline(
-            y=divider_y,
-            xmin=0, xmax=1,
-            color="#CCCCCC",
-            linewidth=1,
-            zorder=4,
-        )
+    # 5위/6위 사이 가로 구분선 제거 (목표 디자인에 없음).
+    # 상·하위 간격은 GAP_AFTER_5로 유지하고 선만 삭제한다.
 
     # 전부 0일 때 안내 문구
     if all_zero:
@@ -1183,17 +1200,17 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
         )
         ax.text(
             overall_avg_val,
-            0,
+            -0.06,
             avg_label_text,
             ha="center",
             va="top",
-            fontsize=6,
+            fontsize=8,
             color="#888888",
             zorder=6,
             bbox=dict(
                 facecolor=(1.0, 1.0, 1.0, 0.5),
                 edgecolor="none",
-                pad=1.5,
+                pad=2,
                 boxstyle="round,pad=0.2",
             ),
             transform=ax.get_xaxis_transform(),

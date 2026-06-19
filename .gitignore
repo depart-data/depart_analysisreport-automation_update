@@ -12,6 +12,7 @@ __pycache__/
 *.pyc
 *.pyo
 
-outputs/*
+
 json_reports/*outputs-1/
 output2/
+outputs-1

@@ -684,7 +684,7 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
     ORDER BY 
         {outer_order_expr} {order_direction}, 
         uploaded_at DESC, ctr DESC, content_id ASC
-    LIMIT 13;
+    LIMIT 10;
     """
 
     ads_df = pd.read_sql(query, engine)

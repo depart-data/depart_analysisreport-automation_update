@@ -36,7 +36,8 @@ body {
    ========================= */
 .page {
   width: 100%;
-  min-height: 1080pt;
+  height: 1080pt;
+  overflow: hidden;     /* 1080pt를 넘는 미세한 넘침을 잘라 빈 페이지 방지 */
 
   break-after: auto;
   page-break-after: auto;
@@ -1365,6 +1366,8 @@ body {
   align-items: stretch;
   gap: 10mm;
   overflow: hidden;
+  box-sizing: border-box;
+  padding-left: 140pt;    /*썸네일이랑 차트 우측으로 밀기*/
 }
 
 /* ──────────────────────────────────────────────────
@@ -1379,13 +1382,15 @@ body {
   (nth-of-type 대신 명시적 클래스로 순서 의존성을 제거).
 */
 .reaction-thumb-row {
-  flex: 0 0 40%;
+  flex: 0 0 37%;                  /* 좌측 블록 폭 */
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: 58% 42%;   /* 상단 대형 행이 하단 소형 행보다 큼 */
-  gap: 8px;
-  height: 100%;
-  align-content: stretch;
+  grid-template-rows: auto;
+  gap: 25px;
+  height: auto;                  /* 본문 높이를 꽉 채우지 않음 */
+  align-self: flex-start;        /* 좌측 썸네일 위로 정렬 */
+  margin-top: 10mm;    /* 아래로 미세하게 내림 */
+  align-content: start;
 }
 
 /* 대형 2개: 상단 행(row 1), 각각 3칸씩 */
@@ -1418,8 +1423,8 @@ body {
   /* 좌측(순위+날짜) 그룹과 우측(CTR) 그룹을 양단 정렬한다 */
   justify-content: space-between;
   align-items: center;
-  /* 한 줄 유지: 썸네일 이미지를 침범하지 않도록 최소 높이를 낮춘다 */
-  min-height: 24px;
+  /* 한 줄 유지: 글자 확대에 맞춰 헤더 최소 높이를 키운다 (검증후조정) */
+  min-height: 30px;
   /* 상단 여백: 페이지 제목과의 간격 확보 */
   padding: 2px 4px 2px 4px;
   background: transparent;
@@ -1444,12 +1449,12 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 6px;
   background-color: #555555;
   color: #ffffff;
-  font-size: 9pt;
+  font-size: 18pt;
   font-weight: 700;
   border-radius: 2px;
   line-height: 1;
@@ -1458,7 +1463,7 @@ body {
 
 /* 업로드 날짜: 뱃지 우측 작은 회색 텍스트 (목업의 작은 캡션 톤, 두 줄 방지) */
 .reaction-thumb-cell__upload-date {
-  font-size: 9pt;
+  font-size: 16pt;        /* 검증후조정(12~14pt) — 가독성 확대 */
   color: #888888;
   white-space: nowrap;
   overflow: hidden;
@@ -1468,11 +1473,27 @@ body {
 
 /* CTR 수치: 헤더 우측 고정, 업로드 날짜와 동일한 크기 및 색상 계열 */
 .reaction-thumb-cell__ctr {
-  font-size: 9pt;         /* 업로드 날짜와 동일한 크기 */
+  font-size: 18pt;        /* 업로드 날짜와 동일한 크기 (검증후조정) */
   color: #888888;        /* 동일한 회색 계열 */
   white-space: nowrap;   /* 줄바꿈 없이 한 줄로 표시 */
   flex-shrink: 0;        /* 좌측 그룹이 좁아질 때 CTR이 우선 유지되도록 */
 }
+
+/* ── 상단(큰) 썸네일 2개 — 글자 따로 ── */
+.reaction-thumb-cell--large .reaction-thumb-cell__rank        { 
+  min-width: 40px;   /* 박스 가로 */
+  height: 40px;      /* 박스 세로 */
+  font-size: 18pt; }
+.reaction-thumb-cell--large .reaction-thumb-cell__upload-date { font-size: 16pt; }
+.reaction-thumb-cell--large .reaction-thumb-cell__ctr         { font-size: 16pt; }
+
+/* ── 하단(작은) 썸네일 3개 — 글자 따로 ── */
+.reaction-thumb-cell--small .reaction-thumb-cell__rank        { 
+  min-width: 25px;
+  height: 25px;
+  font-size: 13pt; }
+.reaction-thumb-cell--small .reaction-thumb-cell__upload-date { font-size: 12pt; }
+.reaction-thumb-cell--small .reaction-thumb-cell__ctr         { font-size: 12pt; }
 
 /* ──────────────────────────────────────────────────
    썸네일 이미지 영역 — 그리드 행 높이에 맞춰 채움
@@ -1481,7 +1502,9 @@ body {
    ────────────────────────────────────────────────── */
 
 .reaction-thumb-cell__img-wrap {
-  flex: 1 1 auto;         /* 헤더를 뺀 셀의 남은 높이를 모두 차지 */
+  flex: 0 0 auto;   
+  aspect-ratio: 4 / 5;  /* 썸네일 비율 4:5*/
+  height: auto;
   min-height: 0;
   width: 100%;
   overflow: hidden;
@@ -1530,11 +1553,12 @@ body {
    ────────────────────────────────────────────────── */
 
 .reaction-chart-wrap {
-  flex: 1 1 60%;          /* 좌측 썸네일 영역(40%) 외 우측 60% */
+  flex: 1 1 42%;          /* 좌측 썸네일 영역(40%) 외 우측 60% */
   min-width: 0;           /* flex item이 내용으로 인해 넘치는 것 방지 */
   height: 100%;
   display: flex;
-  align-items: center;    /* 차트를 세로 중앙 정렬해 좌측 썸네일과 무게중심 맞춤 */
+  align-items: flex-start;    /* 차트 상단 정렬 */
+  margin-top: 10mm;    /* 아래로 미세하게 내림 */
   overflow: hidden;
 }
 
@@ -1551,7 +1575,7 @@ body {
 .reaction-chart-empty {
   text-align: center;
   color: #aaaaaa;
-  font-size: 14pt;
+  font-size: 12pt;
   padding: 10mm 0;
 }
 

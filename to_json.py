@@ -25,10 +25,10 @@ from scripts.processor import (
 
 import re
 
-def _parse_korean_caption(caption: str, max_chars: int = 7) -> str:
+def _parse_korean_caption(caption: str, max_chars: int = 15) -> str:
     """
     캡션 문자열에서 한글이 처음 등장하는 위치를 찾아,
-    그 위치부터 max_chars(기본 7)글자를 추출하여 반환한다.
+    그 위치부터 max_chars(기본 11)글자를 추출하여 반환한다.
 
     - 한글이 없으면 원문 앞 max_chars 글자를 그대로 사용한다.
     - 추출 결과가 max_chars를 초과하면 '...'을 붙인다.
@@ -58,7 +58,7 @@ def _parse_korean_caption(caption: str, max_chars: int = 7) -> str:
 def _assign_reaction_ranks(items, metric_col):
     """
     items 리스트에 동순위를 반영한 'rank' 필드를 추가하고,
-    13개를 초과하는 경우 업로드일 최신순으로 잘라냅니다.
+    10개를 초과하는 경우 상위 10위까지만 남깁니다.
     """
     if not items:
         return items
@@ -75,12 +75,9 @@ def _assign_reaction_ranks(items, metric_col):
             prev_val = val
         item["rank"] = prev_rank
 
-    # 13개 초과 시: 11위 이상(rank >= 11)인 항목 중 업로드일 최신순 3개만 남김
-    if len(items) > 13:
-        top10 = [x for x in items if x["rank"] <= 10]
-        rest  = [x for x in items if x["rank"] > 10]
-        rest_sorted = sorted(rest, key=lambda x: x.get("uploaded_at") or "", reverse=True)
-        items = top10 + rest_sorted[:3]
+    # 10개 초과 시: 상위 10위(rank <= 10)까지만 남김 (11위 이상 제거)
+    if len(items) > 10:
+        items = [x for x in items if x["rank"] <= 10]
 
     return items
 
