@@ -508,7 +508,7 @@ def run():
         "target_id": "25", # account_id
         "fb_ad_account_id":"act_4260950964221595",
         "start":"2026-03-30", #YYYY-MM-DD
-        "end": "2026-06-10",
+        "end": "2026-06-14",
         "main_age": ["35-44", "25-34"],
         "main_gender": "", # male, female
         "avoid_age": "",

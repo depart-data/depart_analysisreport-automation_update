@@ -1386,7 +1386,7 @@ body {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: auto;
-  gap: 25px;
+  gap: 50px;
   height: auto;                  /* 본문 높이를 꽉 채우지 않음 */
   align-self: flex-start;        /* 좌측 썸네일 위로 정렬 */
   margin-top: 10mm;    /* 아래로 미세하게 내림 */
@@ -1481,17 +1481,17 @@ body {
 
 /* ── 상단(큰) 썸네일 2개 — 글자 따로 ── */
 .reaction-thumb-cell--large .reaction-thumb-cell__rank        { 
-  min-width: 40px;   /* 박스 가로 */
-  height: 40px;      /* 박스 세로 */
-  font-size: 18pt; }
+  min-width: 30px;   /* 박스 가로 */
+  height: 30px;      /* 박스 세로 */
+  font-size: 20pt; }
 .reaction-thumb-cell--large .reaction-thumb-cell__upload-date { font-size: 16pt; }
 .reaction-thumb-cell--large .reaction-thumb-cell__ctr         { font-size: 16pt; }
 
 /* ── 하단(작은) 썸네일 3개 — 글자 따로 ── */
 .reaction-thumb-cell--small .reaction-thumb-cell__rank        { 
-  min-width: 25px;
-  height: 25px;
-  font-size: 13pt; }
+  min-width: 20px;
+  height: 20px;
+  font-size: 15pt; }
 .reaction-thumb-cell--small .reaction-thumb-cell__upload-date { font-size: 12pt; }
 .reaction-thumb-cell--small .reaction-thumb-cell__ctr         { font-size: 12pt; }
 
