@@ -1367,7 +1367,7 @@ body {
   gap: 10mm;
   overflow: hidden;
   box-sizing: border-box;
-  padding-left: 140pt;    /*썸네일이랑 차트 우측으로 밀기*/
+  padding-left: 110pt;    /*썸네일이랑 차트 우측으로 밀기*/
 }
 
 /* ──────────────────────────────────────────────────

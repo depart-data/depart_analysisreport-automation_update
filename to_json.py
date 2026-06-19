@@ -25,10 +25,10 @@ from scripts.processor import (
 
 import re
 
-def _parse_korean_caption(caption: str, max_chars: int = 15) -> str:
+def _parse_korean_caption(caption: str, max_chars: int = 13) -> str:
     """
     캡션 문자열에서 한글이 처음 등장하는 위치를 찾아,
-    그 위치부터 max_chars(기본 11)글자를 추출하여 반환한다.
+    그 위치부터 max_chars(기본 13)글자를 추출하여 반환한다.
 
     - 한글이 없으면 원문 앞 max_chars 글자를 그대로 사용한다.
     - 추출 결과가 max_chars를 초과하면 '...'을 붙인다.

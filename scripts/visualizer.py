@@ -1006,9 +1006,9 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
         highlight_val = min(values)
 
     bar_colors = []
-    for v in values:
+    for v in enumerate(values):
         r, g, b = _hex_to_rgb01(base_hex)
-        if highlight_val is not None and v == highlight_val:
+        if i < 5:
             bar_colors.append((r, g, b, 1.0))
         else:
             bar_colors.append((r, g, b, 0.4))
@@ -1035,7 +1035,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
     fig.patch.set_alpha(0)
     ax.patch.set_alpha(0)
     # 하위 썸네일을 막대 영역 안쪽 좌측에 배치하므로 left 여백을 줄인다.
-    fig.subplots_adjust(left=0.06, right=0.97, top=0.97, bottom=0.08)
+    fig.subplots_adjust(left=0.22, right=0.99, top=0.97, bottom=0.08)
 
     # 전부 0이면 막대를 최소 폭으로 표시
     plot_values = [x_scale_ref * 0.006 if all_zero else v for v in values]
@@ -1079,13 +1079,12 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
             ),
         )
     ax.set_yticks(y_pos)
-    # 상·하위 모두 제목을 막대 안쪽 흰색 라벨로 통일하므로 y축 바깥 라벨은 전부 비운다.
-    ax.set_yticklabels(["" for _ in labels], fontsize=7, color="#333333")
+    ax.set_yticklabels(labels, fontsize=9, color="#333333")   # 막대 왼쪽 바깥에 검정 글자
     ax.yaxis.set_tick_params(length=0)
 
     # 1~5위(상위): 막대 안쪽 왼쪽에 흰색으로 제목 표시
     # (하위 6위~ 라벨/썸네일은 x축 범위 확정 후 아래 별도 블록에서 처리)
-    for i, (bar, lbl) in enumerate(zip(bars, labels)):
+    '''for i, (bar, lbl) in enumerate(zip(bars, labels)):
         if i >= 5:
             break
         ax.text(
@@ -1096,7 +1095,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
             fontsize=9,   # 검증후조정 — 막대 안 제목 가독성 확대
             color="#FFFFFF",
             zorder=11,
-        )
+        )'''
 
     ax.set_xlabel(metric_label, fontsize=8, color="#555555", labelpad=4)
     # x축 상한을 x_scale_ref 기준으로 설정한다.
@@ -1110,7 +1109,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
 
     # ── 하위(6위~) 막대: 막대 영역 안쪽 좌측 인라인 썸네일 + 막대 안쪽 흰색 라벨 ──
     # 상위 5개는 좌측 그리드에 이미 노출되므로 썸네일을 추가하지 않는다.
-    if n > 5:
+    '''if n > 5:
         from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
         # 데이터↔픽셀 변환을 확정하기 위해 한 번 렌더한다(xlim/ylim 확정 후).
@@ -1162,7 +1161,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
                 fontsize=9,   # 검증후조정 — 하위 막대 안 제목 가독성 확대
                 color="#FFFFFF",
                 zorder=13,
-            )
+            )'''
 
     # 5위/6위 사이 가로 구분선 제거 (목표 디자인에 없음).
     # 상·하위 간격은 GAP_AFTER_5로 유지하고 선만 삭제한다.
