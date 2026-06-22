@@ -534,7 +534,11 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
         MIN(ad.ad_name)           AS ad_name,    -- 대표 광고 이름
         MIN(ad.fb_ad_id)          AS fb_ad_id,
         ig.ig_timestamp           AS uploaded_at,
-        MAX(NULLIF(ad.thumb_link, '')) AS thumbnail,   -- 대표 썸네일
+        COALESCE(
+            MAX(NULLIF(ig.thumbnail_url, '')),
+            MAX(NULLIF(ig.media_url, '')),
+            MAX(NULLIF(ad.thumb_link, ''))
+        ) AS thumbnail,
         ROUND(
             (SUM(apd.clicks)::numeric / NULLIF(SUM(apd.impressions), 0)::numeric) * 100, 2
         ) AS ctr                                 -- 합산 클릭/합산 노출 → 콘텐츠당 CTR 1개

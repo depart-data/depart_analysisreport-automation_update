@@ -795,7 +795,8 @@ def run():
                 reaction_datasets[key] = {"cards": [], "chart_svg": ""}
                 continue
 
-            rendered = render_dataset(ds, color_map)
+            render_kwargs = {"palette": COMP_CMAP} if suffix == "bottom" else {}
+            rendered = render_dataset(ds, color_map, **render_kwargs)
 
             if isinstance(rendered, dict):
                 # render_reaction_bar 반환값: {"items": [...], "chart_svg": "..."}

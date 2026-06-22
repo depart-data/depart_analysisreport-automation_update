@@ -911,7 +911,7 @@ def render_content_card(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> L
     return rendered
 
 
-def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> Dict[str, Any]:
+def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], palette: Optional[List[str]] = None) -> Dict[str, Any]:
     """
     반응 지표(좋아요/저장/공유) 상하위 콘텐츠 통합 렌더링.
 
@@ -1005,13 +1005,16 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any]) -> D
     else:
         highlight_val = min(values)
 
-    bar_colors = []
-    for v in enumerate(values):
-        r, g, b = _hex_to_rgb01(base_hex)
-        if i < 5:
-            bar_colors.append((r, g, b, 1.0))
-        else:
-            bar_colors.append((r, g, b, 0.4))
+    if palette:
+        bar_colors = _value_colors(values, color_map, palette=palette)
+    else:
+        bar_colors = []
+        for i, v in enumerate(values):
+            r, g, b = _hex_to_rgb01(base_hex)
+            if i < 5:
+                bar_colors.append((r, g, b, 1.0))
+            else:
+                bar_colors.append((r, g, b, 0.4))
 
     x_scale_max_from_json = float(dataset.get("x_scale_max") or 0)
     x_data_max = max(values) if values else 0
