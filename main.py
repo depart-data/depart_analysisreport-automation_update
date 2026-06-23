@@ -12,7 +12,7 @@ from scripts.visualizer import (build_color_map, complementary_hex, render_datas
                                 render_bubble_chart, render_purchase_pie_chart, render_follower_gender_doughnut_chart, render_follower_age_gender_stacked_barh_chart,
                                 render_target_spend_pie_charts, render_ctr_follows_quadrant_chart,)
 from scripts.reporter import generate_html
-from to_json import run as generate_json
+from scripts.to_json import run as generate_json
 import time
 
 
@@ -505,15 +505,14 @@ def run():
     start_time = time.time()
 
     config = {
-        "target_id": "14", # account_id
-        "fb_ad_account_id":"act_799496024940107",
-        "start":"2026-01-26", #YYYY-MM-DD
-        "end": "2026-06-10",
-        "main_age": ["35-44", "25-34"],
+        "target_id": "22", # account_id
+        "fb_ad_account_id":"act_1405475181306250",
+        "start":"2025-12-29", #YYYY-MM-DD
+        "end": "2026-06-28",
+        "main_age": ["25-34", "35-44"],
         "main_gender": "", # male, female
-        "avoid_age": "55-64",
-        "avoid_gender": "male",
-        "currency": ""  # ""=원화, "dollar"=달러
+        "avoid_age": "",
+        "avoid_gender": "",
     }
 
     target_id, fb_ad_account_id = config["target_id"], config["fb_ad_account_id"]
@@ -523,17 +522,16 @@ def run():
     has_main_target = _has_selector(main_age) or _has_selector(main_gender)
     has_avoid_target = _has_selector(avoid_age) or _has_selector(avoid_gender)
     main_label = _target_label(main_age, main_gender)
-    avoid_label = _target_label(avoid_age, avoid_gender)  
-    currency=config["currency"]
+    avoid_label = _target_label(avoid_age, avoid_gender)
 
-    # 3. to_json 실행코드 (수정된 파라미터 방식)
+    # 3. to_json 실행코드 (currency는 DB ad_accounts.currency에서 자동 결정)
     generate_json(target_id=target_id, fb_ad_account_id=fb_ad_account_id,\
                   start=start, end=end,\
                    main_age=main_age, main_gender=main_gender,\
-                    avoid_age=avoid_age, avoid_gender=avoid_gender, currency=currency)
+                    avoid_age=avoid_age, avoid_gender=avoid_gender)
     
     report_path = "json_reports/integrated_report.json"
-    theme_color = "#081F2C"
+    theme_color = "#1C57AD"
 
     report_json = _load_report(report_path)
     _apply_display_predicate_suffix(report_json)

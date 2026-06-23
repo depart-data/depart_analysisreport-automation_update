@@ -24,13 +24,15 @@ except Exception:
 
 # 제목 부분 : (기업명) 광고 계정
 
-def get_account_name(account_id):
+def get_account_meta(account_id):
+    """account_name과 currency를 함께 반환. returns (name: str, currency: str)"""
     engine = get_engine()
 
     query = """
         SELECT
             brand_name[1]  AS brand_name,
-            aa.name        AS account_name
+            aa.name        AS account_name,
+            aa.currency    AS currency
         FROM ad_accounts aa
         JOIN business_portfolios bp ON aa.business_portfolio_id = bp.id
         JOIN clients cl ON bp.client_id = cl.id
@@ -42,12 +44,19 @@ def get_account_name(account_id):
     df = pd.read_sql(query, engine, params={"account_id": account_id})
 
     if df.empty:
-        return str(account_id)
+        return str(account_id), "KRW"
 
     brand_name   = df.iloc[0]["brand_name"]
     account_name = df.iloc[0]["account_name"]
+    currency     = str(df.iloc[0]["currency"] or "").upper()
 
-    return brand_name or account_name or str(account_id)
+    name = brand_name or account_name or str(account_id)
+    return name, currency
+
+
+def get_account_name(account_id):
+    name, _ = get_account_meta(account_id)
+    return name
 
 # ----------------------------------
 

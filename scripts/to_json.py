@@ -4,9 +4,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
-# 기존에 사용하시던 스크립트 임포트 (경로에 맞춰 유지)
 from scripts.processor import (
-    get_account_name, get_active_ad_count, get_total_content_count,
+    get_account_meta, get_account_name, get_active_ad_count, get_total_content_count,
     get_ad_period, get_content_period, get_total_keyword_count,
     get_instagram_followers, get_ctr_data, get_ctr_monthly_data, get_organic_data, get_organic_monthly_data, get_imp_threshold,
     get_content_ctr_data, get_a_content_target_ctr_data, get_profile_visits_monthly, get_content_reaction_data, get_reaction_metric_avg,
@@ -94,14 +93,15 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     cur_q_year, cur_q_quarter = get_quarter_info(end)
     current_quarter_info = {"year": cur_q_year, "quarter": cur_q_quarter}
 
-    acc_name = get_account_name(target_id)
+    acc_name, db_currency = get_account_meta(target_id)
     ad_start, ad_end = get_ad_period(target_id, start, end)
     content_start, content_end = get_content_period(target_id, start, end)
 
-    # 통화 설정 추가
-    currency_symbol = "$" if currency == "dollar" else "원"
+    # 통화 설정: DB의 ad_accounts.currency 기준 (USD → $, 그 외 → 원)
+    currency = "dollar" if db_currency == "USD" else ""
+    currency_symbol = "$" if db_currency == "USD" else "원"
 
-    # 2. 결과 저장용 구조 (핵심)
+    # 2. 결과 저장용 구조
     final_report = {
         "meta": {
             "account_name": acc_name,
@@ -224,7 +224,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     )
 
 
-    # --- [추가] 팔로워 인구통계학 페이지 ---
+    # --- 팔로워 인구통계학 페이지 ---
     datasets = final_report["datasets"]
 
     followers_df = get_instagram_followers(fb_ad_account_id, start, end)
@@ -404,7 +404,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         }
         final_report["purchase_summary_page"] = {"is_visible": False}
 
-    # --- [추가] 광고비 & 매출발생 페이지 ---
+    # --- 광고비 & 매출발생 페이지 ---
     # purchase_summary_page가 이미 is_visible=True면 이 페이지는 건너뜀
     if final_report.get("purchase_summary_page", {}).get("is_visible"):
         print("광고비/매출발생 데이터 없음 (요약 페이지 표시 중)...")
@@ -448,7 +448,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
             "is_visible": False
         }
 
-     #  --- [추가] 구매 발생 컨텐츠  --
+     #  --- 구매 발생 컨텐츠  --
     purchase_contents_data = get_purchase_contents_pages_data(target_id, start, end)
 
     if purchase_contents_data and purchase_contents_data.get("total_count", 0) > 0:
@@ -483,9 +483,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
     _, threshold = get_imp_threshold(target_id, start, end)
 
-    # ================================
-    # 구매 전환 히트맵 페이지 추가
-    # ================================
+    #  --- 구매 전환 히트맵  --
     purchase_age_gender_data = get_purchase_age_gender_heatmap_page_data(target_id, start, end)
 
     if purchase_age_gender_data:
@@ -835,7 +833,6 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
             "footnote": "*등장한 전체 키워드 기준"
         }]
 
-    # 가공된 아이템 리스트 생성
     print("아이템 리스트 생성 중...")
     appendix_items = []
     appendix_items.extend(build_appendix_full_item(
@@ -875,7 +872,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         }
     ]
 
-    # --- [기존] 6. 최종 JSON 저장 ---
+    # --- 6. 최종 JSON 저장 ---
 
     # 6. 최종 JSON 저장
     output_path = "json_reports/integrated_report.json"

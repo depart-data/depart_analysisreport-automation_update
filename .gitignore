@@ -12,14 +12,15 @@ __pycache__/
 *.pyc
 *.pyo
 
+# macOS metadata
+.DS_Store
+**/.DS_Store
 
+# Outputs
 json_reports/*
 *.pdf
-output2/
-outputs-1
 outputs/
 report.html
 
 # claude
-.claude
 CLAUDE.md
