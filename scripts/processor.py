@@ -67,7 +67,7 @@ def get_active_ad_count(account_id, date_start, date_end):
         WHERE ad.account_id = {account_id}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3
+            AND ({account_id} IN (3, 2, 26)
                 OR c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -96,7 +96,7 @@ def get_total_content_count(account_id, date_start, date_end):
             AND ig.ig_timestamp IS NOT NULL
             AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
             AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
-            AND ({account_id} = 3 
+            AND ({account_id} IN (3, 2, 26)
                 OR c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -121,7 +121,7 @@ def get_ad_period(account_id, date_start, date_end):
         WHERE ad.account_id = {account_id}
             AND ad.fb_created_time >= '{date_start}'
             AND ad.fb_created_time <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3 OR 
+            AND ({account_id} IN (3, 2, 26) OR 
                 c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -152,7 +152,7 @@ def get_content_period(account_id, date_start, date_end):
             AND ig.ig_timestamp IS NOT NULL
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3 
+            AND ({account_id} IN (3, 2, 26) 
                 OR c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -178,7 +178,7 @@ def get_total_keyword_count(account_id, date_start, date_end):
         WHERE ad.account_id = {account_id}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3 
+            AND ({account_id} IN (3, 2, 26) 
                 OR c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -310,7 +310,7 @@ def get_ctr_data(account_id, date_start, date_end):
         WHERE ad.account_id = {account_id}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3 
+            AND ({account_id} IN (3, 2, 26) 
                 OR c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -342,7 +342,7 @@ def get_ctr_monthly_data(account_id, date_start, date_end):
         WHERE ad.account_id = {account_id}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3 
+            AND ({account_id} IN (3, 2, 26) 
                 OR c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -508,7 +508,7 @@ def get_imp_threshold(account_id, date_start, date_end):
         WHERE ad.account_id = {account_id}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3 
+            AND ({account_id} IN (3, 2, 26) 
                 OR c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -529,11 +529,11 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
     
     ads_query = f"""
     SELECT
-        ig.fb_ig_media_id,                       -- 콘텐츠(원본 게시물) 식별자 = 묶는 기준
+        COALESCE(ig.fb_ig_media_id, 'AD_' || ad.id::text)   AS content_key,  -- 묶음 키
         MIN(ad.id)                AS id,         -- 대표 광고 id (썸네일/표시용 아무거나 1개)
         MIN(ad.ad_name)           AS ad_name,    -- 대표 광고 이름
         MIN(ad.fb_ad_id)          AS fb_ad_id,
-        ig.ig_timestamp           AS uploaded_at,
+        COALESCE(MIN(ig.ig_timestamp), MIN(ad.fb_created_time)) AS uploaded_at,
         COALESCE(
             MAX(NULLIF(ig.thumbnail_url, '')),
             MAX(NULLIF(ig.media_url, '')),
@@ -549,19 +549,14 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
     LEFT JOIN ig_contents ig
         ON ad.source_ig_media_id = ig.fb_ig_media_id
     WHERE ad.account_id = {account_id}
-        AND (ig.ig_timestamp IS NULL OR (
-            (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
-            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
-        ))
         AND apd.as_of_date >= '{date_start}'
         AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-        AND ({account_id} = 3
+        AND ({account_id} IN (3, 2, 26)
             OR c.name ILIKE '%%depart%%'
             OR c.name LIKE '%%디파트%%'
             OR c.name ILIKE '%%de;part%%')
     GROUP BY
-        ig.fb_ig_media_id,
-        ig.ig_timestamp
+        COALESCE(ig.fb_ig_media_id, 'AD_' || ad.id::text)   -- ★ 이 키 하나로 "중복만 합치기"
     HAVING SUM(apd.impressions) >= {threshold}
     ORDER BY ctr {order_direction}
     LIMIT 3;
@@ -676,7 +671,7 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
             AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
             AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date
                 <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
-            AND ({account_id} = 3
+            AND ({account_id} IN (3, 2, 26)
                 OR c.name ILIKE '%%depart%%'
                 OR c.name LIKE '%%디파트%%'
                 OR c.name ILIKE '%%de;part%%')
@@ -715,7 +710,7 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
             'total_saves':    int(row['total_saves'] or 0),
             'total_comments': int(row['total_comments'] or 0),
             'total_reaction': int(row['total_reaction'] or 0),
-            'ctr': float(row['ctr'] or 0),
+            'ctr': (None if pd.isna(row['ctr']) else float(row['ctr'])),
             'content_id': int(row['content_id']),
         })
 
@@ -816,7 +811,7 @@ def get_target_avg_imp_ctr(account_id, date_start, date_end):
         WHERE ad.account_id = {account_id}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3 
+            AND ({account_id} IN (3, 2, 26) 
                 OR c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -852,7 +847,7 @@ def get_target_avg_imp_ctr_threshold(account_id, date_start, date_end, threshold
         WHERE ad.account_id = {account_id}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3 
+            AND ({account_id} IN (3, 2, 26) 
                 OR c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -954,7 +949,7 @@ def get_raw_keyword_performance(account_id, date_start, date_end, target_age=Non
             AND apd.as_of_date >= '{date_start}'::date
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             {target_filter}
-            AND ({account_id} = 3 OR c.name ~* 'depart|디파트|de;part')
+            AND ({account_id} IN (3, 2, 26) OR c.name ~* 'depart|디파트|de;part')
             AND apd.gender != 'unknown'
             AND apd.ad_id IS NOT NULL
             GROUP BY apd.ad_id
@@ -1225,7 +1220,7 @@ def get_overall_ctr(account_id, date_start, date_end):
         WHERE ad.account_id = {account_id}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3 
+            AND ({account_id} IN (3, 2, 26) 
                 OR c.name ILIKE '%%depart%%' 
                 OR c.name LIKE '%%디파트%%' 
                 OR c.name ILIKE '%%de;part%%')
@@ -1267,7 +1262,7 @@ def get_strategic_performance(account_id, date_start, date_end, target_age=None,
                 AND apd.as_of_date >= '{date_start}'
                 AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
                 {target_filter}
-                AND ({account_id} = 3 
+                AND ({account_id} IN (3, 2, 26) 
                     OR c.name ILIKE '%%depart%%' 
                     OR c.name LIKE '%%디파트%%' 
                     OR c.name ILIKE '%%de;part%%')
@@ -1428,7 +1423,7 @@ def get_essence_target_performance(account_id, date_start, date_end):
                 WHERE a.account_id = {account_id}
                 AND apd.as_of_date >= '{date_start}'::date
                 AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-                AND ({account_id} = 3 OR c.name ~* 'depart|디파트|de;part')
+                AND ({account_id} IN (3, 2, 26) OR c.name ~* 'depart|디파트|de;part')
                 GROUP BY 1, 2, 3
             ) p ON ak_u.ad_id = p.ad_id
             GROUP BY 1, 2, 3
@@ -1445,7 +1440,7 @@ def get_essence_target_performance(account_id, date_start, date_end):
             WHERE a.account_id = {account_id}
             AND apd.as_of_date >= '{date_start}'::date
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-            AND ({account_id} = 3 OR c.name ~* 'depart|디파트|de;part')
+            AND ({account_id} IN (3, 2, 26) OR c.name ~* 'depart|디파트|de;part')
             GROUP BY 1
         ) summ ON ts.single_ess = summ.single_ess
     ) res
@@ -1546,7 +1541,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
                     AND apd.as_of_date >= '{date_start}'::date
                     AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
                     AND (
-                        {account_id} = 3
+                        {account_id} IN (3, 2, 26)
                         OR c.name ~* 'depart|디파트|de;part'
                     )
 
@@ -1582,7 +1577,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
                 AND apd.as_of_date >= '{date_start}'::date
                 AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
                 AND (
-                    {account_id} = 3
+                    {account_id} IN (3, 2, 26)
                     OR c.name ~* 'depart|디파트|de;part'
                 )
 
@@ -1621,7 +1616,7 @@ def has_purchase_data(account_id, date_start, date_end):
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.purchase_count IS NOT NULL
           AND apd.purchase_count > 0
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+          AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
         LIMIT 1
     """
 
@@ -1646,7 +1641,7 @@ def get_purchase_roas_weekly(account_id, date_start, date_end):
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.spend IS NOT NULL
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+          AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
         GROUP BY (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date
         ORDER BY week_start
     """
@@ -1673,7 +1668,7 @@ def get_purchase_roas_monthly(account_id, date_start, date_end):
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.purchase_roas IS NOT NULL
           AND apd.spend IS NOT NULL
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+          AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
         GROUP BY DATE_TRUNC('month', apd.as_of_date)::date
         ORDER BY month_start
         """
@@ -1707,7 +1702,7 @@ def get_purchase_count_weekly(account_id, date_start, date_end):
                 AND apd.as_of_date >= '{date_start}'::date
                 AND apd.as_of_date <= '{date_end}'::date
                 AND apd.purchase_count IS NOT NULL
-                AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+                AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
 
             GROUP BY (DATE_TRUNC('week', apd.as_of_date) + INTERVAL '6 days')::date
             ORDER BY week_start
@@ -1749,7 +1744,7 @@ def get_purchase_count_monthly(account_id, date_start, date_end):
                 AND apd.as_of_date >= '{date_start}'::date
                 AND apd.as_of_date <= '{date_end}'::date
                 AND apd.purchase_count IS NOT NULL
-                AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+                AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
 
             GROUP BY DATE_TRUNC('month', apd.as_of_date)::date
             ORDER BY month_start
@@ -1805,7 +1800,7 @@ def get_purchase_age_gender_heatmap(account_id, date_start, date_end):
           AND apd.purchase_count IS NOT NULL
           AND apd.age_range IS NOT NULL
           AND apd.gender IS NOT NULL
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+          AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
 
         GROUP BY apd.age_range, apd.gender
         ORDER BY apd.age_range, apd.gender
@@ -1844,7 +1839,7 @@ def has_revenue_data(account_id, date_start, date_end):
           AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
           AND apd.spend IS NOT NULL
           AND apd.purchase_roas IS NOT NULL
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+          AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
         LIMIT 1
     """
 
@@ -1879,7 +1874,7 @@ def get_spend_and_revenue_weekly(account_id, date_start, date_end):
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND apd.spend IS NOT NULL
             AND apd.purchase_roas IS NOT NULL
-            AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+            AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
 
             GROUP BY DATE_TRUNC('week', apd.as_of_date)::date
             ORDER BY week_start
@@ -1924,7 +1919,7 @@ def get_spend_and_revenue_monthly(account_id, date_start, date_end):
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND apd.spend IS NOT NULL
             AND apd.purchase_roas IS NOT NULL
-            AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+            AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
 
             GROUP BY DATE_TRUNC('month', apd.as_of_date)::date
             ORDER BY month_start
@@ -1969,7 +1964,7 @@ def has_purchase_content_data(account_id, date_start, date_end):
           AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
           AND apd.purchase_count IS NOT NULL
           AND apd.purchase_count > 0
-          AND ({account_id} = 3 
+          AND ({account_id} IN (3, 2, 26)
           OR c.name ILIKE '%%depart%%' 
           OR c.name LIKE '%%디파트%%' 
           OR c.name ILIKE '%%de;part%%')
@@ -2010,7 +2005,7 @@ def get_purchase_contents_data(account_id, date_start, date_end):
           ))
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-          AND ({account_id} = 3
+          AND ({account_id} IN (3, 2, 26)
             OR c.name ILIKE '%%depart%%'
             OR c.name LIKE '%%디파트%%'
             OR c.name ILIKE '%%de;part%%')
@@ -2122,7 +2117,7 @@ def get_purchase_total_count(account_id, date_start, date_end):
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.purchase_count IS NOT NULL
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+          AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
     """
     df = pd.read_sql(query, engine)
     return int(df["total_purchases"].iloc[0]) if not df.empty else 0
@@ -2149,7 +2144,7 @@ def get_purchase_summary_page_data(account_id, date_start, date_end):
           AND apd.purchase_count > 0
           AND apd.spend IS NOT NULL
           AND apd.purchase_roas IS NOT NULL
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+          AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
     """
 
     top_content_query = f"""
@@ -2171,7 +2166,7 @@ def get_purchase_summary_page_data(account_id, date_start, date_end):
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.purchase_count IS NOT NULL
           AND apd.purchase_count > 0
-          AND ({account_id} = 3 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+          AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
         GROUP BY a.source_ig_media_id
         ORDER BY purchases DESC
         LIMIT 1
@@ -2629,7 +2624,7 @@ def get_target_spend_distribution(account_id, date_start, date_end):
         AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
         AND apd.gender  NOT IN ('unknown', 'Unknown')
         AND apd.age_range NOT IN ('unknown', 'Unknown')
-        AND ({account_id} = 3
+        AND ({account_id} IN (3, 2, 26)
             OR c.name ILIKE '%%depart%%'
             OR c.name LIKE '%%디파트%%'
             OR c.name ILIKE '%%de;part%%')
