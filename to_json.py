@@ -25,6 +25,7 @@ from scripts.processor import (
 )
 
 import re
+_ALLOWED = re.compile(r"[^0-9A-Za-z가-힣ㄱ-ㅎㅏ-ㅣ\s.,!?~%·…\-]")
 
 def _parse_korean_caption(caption: str, max_chars: int = 13) -> str:
     """
@@ -43,14 +44,14 @@ def _parse_korean_caption(caption: str, max_chars: int = 13) -> str:
     
     # 한글 유니코드 범위: 가-힣 (완성형 한글)
     match = re.search(r'[가-힣]', caption)
+    text = caption[match.start():] if match else caption
 
-    if match:
-        # 한글이 처음 등장하는 인덱스부터 슬라이싱
-        start_idx = match.start()
-        text = caption[start_idx:]
-    else:
-        # 한글이 없으면 처음부터 사용
-        text = caption
+    # 이모지, 특수문자 제거
+    text = _ALLOWED.sub("", text)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    if not text:
+        return ""
 
     if len(text) > max_chars:
         return text[:max_chars] + "..."
@@ -678,6 +679,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     print("반응 기반 콘텐츠 성과 생성 중...")
     for metric in ['likes', 'saves', 'shares']:
         overall_avg = get_reaction_metric_avg(target_id, start, end, metric=metric)
+        metric_has_data = float(overall_avg or 0) > 0 
 
     # metric 컬럼 이름 매핑: DB 반환 키와 일치시킴
         metric_key_map = {
@@ -740,6 +742,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
                 # 상위/하위 차트 양쪽 모두 이 값을 x축 최대 기준으로 사용한다.
                 # 하위 차트가 이 키를 읽어 x축을 상위 차트와 동일하게 맞춘다.
                 "x_scale_max":  x_scale_max,
+                "has_data": metric_has_data,
                 "items":        reaction_contents
             }
 

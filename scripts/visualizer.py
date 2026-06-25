@@ -975,7 +975,9 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], pale
         thumbnails.append(item.get("thumbnail"))
 
     n = len(labels)
-   
+    # 상위 차트에서만 0 행을 빈칸 처리. 하위 차트(is_top=False)는 전부 False → 기존 동작 유지
+    is_top = dataset.get("is_top", True)            # L999에 이미 있으면 중복 무방
+    blank_mask = [is_top and float(v) == 0 for v in values]
 
     TOP_STEP    = 1.43   # ★ 상위(1~5위) 막대끼리 간격 (키우면 상위 막대들이 벌어짐)
     BOTTOM_STEP = 1.43   # ★ 하위(6위~) 막대끼리 간격 (키우면 하위 막대들이 벌어짐)
@@ -1041,7 +1043,10 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], pale
     fig.subplots_adjust(left=0.22, right=0.99, top=0.97, bottom=0.08)
 
     # 전부 0이면 막대를 최소 폭으로 표시
-    plot_values = [x_scale_ref * 0.006 if all_zero else v for v in values]
+    plot_values = [
+        0.0 if z else (x_scale_ref * 0.006 if all_zero else v)
+        for v, z in zip(values, blank_mask)
+    ]
 
     bars = ax.barh(
         y_pos, plot_values,
@@ -1060,46 +1065,31 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], pale
     metric_icon_map = {
         "likes":  "\u2665",   # ♥ 하트 (좋아요)
         "saves":  "\u2605",   # ★ 별 (저장)
-        "shares": "\u21a6",   # ↦ 오른쪽 화살표 (공유)
+        "shares": "\u2192",   # → 오른쪽 화살표 (공유)
     }
     metric_icon = metric_icon_map.get(metric, "")
 
-    for bar, val in zip(bars, values):
+    for bar, val, z in zip(bars, values, blank_mask):
+        if z:
+            continue                # 0 행은 "♥ 0" 안 그림
         ax.text(
-            # 막대 끝 오프셋을 x_scale_ref 기준으로 계산하여 하위 차트에서
-            # 수치가 작아도 텍스트가 과도하게 우측으로 밀리지 않도록 한다.
             bar.get_width() + x_scale_ref * 0.015,
             bar.get_y() + bar.get_height() / 2,
             f"{metric_icon} {int(val):,}",
             va="center", ha="left",
-            fontsize=9, color="#333333",   # 검증후조정 — 막대 끝 수치 가독성 확대
-            zorder=10,
-            bbox=dict(
-                facecolor=(1.0, 1.0, 1.0, 0.5),
-                edgecolor="none",
-                pad=1.5,
-                boxstyle="round,pad=0.15",
-            ),
+            fontsize=9, color="#333333", zorder=10,
+            bbox=dict(facecolor=(1.0,1.0,1.0,0.5), edgecolor="none",
+                    pad=1.5, boxstyle="round,pad=0.15"),
         )
+
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(labels, fontsize=9, color="#333333")   # 막대 왼쪽 바깥에 검정 글자
+    ax.set_yticklabels(
+        ["" if z else lbl for lbl, z in zip(labels, blank_mask)],
+        fontsize=9, color="#333333",
+    )   # 막대 왼쪽 바깥에 검정 글자
     ax.yaxis.set_tick_params(length=0)
 
-    # 1~5위(상위): 막대 안쪽 왼쪽에 흰색으로 제목 표시
-    # (하위 6위~ 라벨/썸네일은 x축 범위 확정 후 아래 별도 블록에서 처리)
-    '''for i, (bar, lbl) in enumerate(zip(bars, labels)):
-        if i >= 5:
-            break
-        ax.text(
-            x_scale_ref * 0.012,
-            bar.get_y() + bar.get_height() / 2,
-            lbl,
-            va="center", ha="left",
-            fontsize=9,   # 검증후조정 — 막대 안 제목 가독성 확대
-            color="#FFFFFF",
-            zorder=11,
-        )'''
-
+    
     ax.set_xlabel(metric_label, fontsize=8, color="#555555", labelpad=4)
     # x축 상한을 x_scale_ref 기준으로 설정한다.
     # 1.18 배율은 수치 텍스트가 막대 바깥에 표시될 공간을 확보하기 위함이다.
@@ -1110,62 +1100,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], pale
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-    # ── 하위(6위~) 막대: 막대 영역 안쪽 좌측 인라인 썸네일 + 막대 안쪽 흰색 라벨 ──
-    # 상위 5개는 좌측 그리드에 이미 노출되므로 썸네일을 추가하지 않는다.
-    '''if n > 5:
-        from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-
-        # 데이터↔픽셀 변환을 확정하기 위해 한 번 렌더한다(xlim/ylim 확정 후).
-        fig.canvas.draw()
-        _p0 = ax.transData.transform((0.0, 0.0))
-        _p1y = ax.transData.transform((0.0, 1.0))
-        _p1x = ax.transData.transform((1.0, 0.0))
-        px_per_unit_y = abs(_p1y[1] - _p0[1]) or 1.0
-        px_per_unit_x = abs(_p1x[0] - _p0[0]) or 1.0
-
-        # 썸네일 표시 높이를 막대 높이(0.55 데이터 단위)와 비슷하게 맞춘다. // 검증후조정
-        thumb_data_h = 1.5  # 검증후조정 — 하위 썸네일을 막대보다 약간 크게 확대
-        target_px_h  = thumb_data_h * px_per_unit_y
-        # OffsetImage(zoom)은 dpi 보정이 적용되므로 72/dpi 로 환산해 픽셀 높이를 맞춘다.
-        _dpi = fig.get_dpi() or 100.0
-
-        for i in range(5, n):
-            thumb = thumbnails[i] if i < len(thumbnails) else None
-            arr = _load_thumbnail_array(thumb) if thumb else None
-            if arr is None:
-                # URL 없음/로드 실패 → 회색(#D0D0D0) placeholder (4:5 = 240×300)
-                arr = np.full((300, 240, 3), 0xD0, dtype=np.uint8)
-
-            img_h_px = arr.shape[0]
-            img_w_px = arr.shape[1]
-            zoom = (target_px_h / img_h_px) * (72.0 / _dpi)   # // 검증후조정
-
-            oimg = OffsetImage(arr, zoom=zoom)
-            ab = AnnotationBbox(
-                oimg,
-                (0.0, y_pos[i]),                       # 축 좌측 안쪽(x=0), 막대 중심 y
-                xycoords=("axes fraction", "data"),
-                box_alignment=(0.0, 0.5),
-                frameon=False,
-                pad=0.0,
-                zorder=12,
-            )
-            ax.add_artist(ab)
-
-            # 라벨 x 시작점을 썸네일 표시 폭 뒤로 두어 겹치지 않게 한다.
-            thumb_w_px   = img_w_px * zoom * (_dpi / 72.0)
-            thumb_w_data = thumb_w_px / px_per_unit_x
-            label_x = thumb_w_data + x_scale_ref * 0.012
-            ax.text(
-                label_x,
-                y_pos[i],
-                labels[i],
-                va="center", ha="left",
-                fontsize=9,   # 검증후조정 — 하위 막대 안 제목 가독성 확대
-                color="#FFFFFF",
-                zorder=13,
-            )'''
-
+    
     # 5위/6위 사이 가로 구분선 제거 (목표 디자인에 없음).
     # 상·하위 간격은 GAP_AFTER_5로 유지하고 선만 삭제한다.
 
@@ -1189,20 +1124,25 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], pale
         _raw_avg = 0
     overall_avg_val = float(_raw_avg)
 
-    avg_label_text = f"평균 : {int(round(overall_avg_val)):,}"
+    avg_label_text = f"평균 : {overall_avg_val:,.2f}"
 
     if x_scale_max_from_json > 0 and overall_avg_val > 0:
         # 평균값이 유효한 경우에만 선과 레이블을 표시
-        ax.axvline(
-            x=overall_avg_val,
+        LINE_BOTTOM = -0.04   # ↓ 음수일수록 아래로 더 길어짐 (0 = 축 하단)
+        LINE_TOP    = 1.04    # ↑ 1.0보다 클수록 위로 더 길어짐 (1.0 = 축 상단)
+        ax.plot(
+            [overall_avg_val, overall_avg_val],   # x: 평균값(데이터 좌표) 고정
+            [LINE_BOTTOM, LINE_TOP],              # y: 축 비율(0~1 밖으로 확장)
+            transform=ax.get_xaxis_transform(),
             color="#888888",
             linestyle=(0, (4, 4)),
             linewidth=1.2,
             zorder=5,
+            clip_on=False,                        # ★ 축 밖으로 나가도 안 잘리게
         )
         ax.text(
             overall_avg_val,
-            -0.06,
+            -0.062,
             avg_label_text,
             ha="center",
             va="top",

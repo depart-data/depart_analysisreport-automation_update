@@ -734,23 +734,30 @@ def get_reaction_metric_avg(account_id, date_start, date_end, metric='likes'):
     agg_expr = metric_col_map.get(metric, 'ici.likes')
 
     query = f"""
-    SELECT
-        ROUND(AVG(COALESCE({agg_expr}, 0))::numeric, 2) AS metric_avg
-    FROM ad_accounts aa
-        JOIN ig_accounts ia ON ia.id = aa.ig_account_id
-        JOIN ig_contents ic  ON ic.ig_id = ia.id
+    SELECT ROUND(AVG(metric_val)::numeric, 2) AS metric_avg
+    FROM (
+        SELECT DISTINCT ON (ig.fb_ig_media_id)
+            COALESCE({agg_expr}, 0) AS metric_val      -- agg_expr: 'ici.saved' 등 그대로
+        FROM ads ad
+        JOIN ad_sets t  ON ad.ad_set_id = t.id
+        JOIN campaigns c ON t.campaign_id = c.id
+        JOIN ig_contents ig ON ad.source_ig_media_id = ig.fb_ig_media_id
         JOIN LATERAL (
             SELECT likes, saved, shares
             FROM ig_content_insights
-            WHERE content_id = ic.id
+            WHERE content_id = ig.id
             ORDER BY as_of_date DESC
             LIMIT 1
         ) ici ON true
-    WHERE aa.id = {account_id}
-        AND ic.ig_timestamp IS NOT NULL
-        AND (ic.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
-        AND (ic.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date
-            <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+        WHERE ad.account_id = {account_id}
+            AND ig.ig_timestamp IS NOT NULL
+            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
+            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date
+                <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+            AND ({account_id} IN (3,2,26)
+                OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
+        ORDER BY ig.fb_ig_media_id       -- DISTINCT ON dedup (콘텐츠당 1행)
+    ) deduped;
     """
 
     result = pd.read_sql(query, engine)

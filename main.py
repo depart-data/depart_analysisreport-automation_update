@@ -505,14 +505,14 @@ def run():
     start_time = time.time()
 
     config = {
-        "target_id": "19", # account_id
-        "fb_ad_account_id":"act_2090736321329024",
-        "start":"2026-03-30", #YYYY-MM-DD
-        "end": "2026-06-28",
-        "main_age": ["35-44", "25-34"],
-        "main_gender": "male", # male, female
+        "target_id": "10", # account_id
+        "fb_ad_account_id":"act_1174056261489279",
+        "start":"2025-10-06", #YYYY-MM-DD
+        "end": "2026-04-12",
+        "main_age": ["25-34", "35-44"],
+        "main_gender": "female", # male, female
         "avoid_age": "",
-        "avoid_gender": "",
+        "avoid_gender": "male",
         "currency": ""  # ""=원화, "dollar"=달러
     }
 
@@ -533,7 +533,7 @@ def run():
                     avoid_age=avoid_age, avoid_gender=avoid_gender, currency=currency)
     
     report_path = "json_reports/integrated_report.json"
-    theme_color = "#201810"
+    theme_color = "#080F2A"
 
     report_json = _load_report(report_path)
     _apply_display_predicate_suffix(report_json)
@@ -802,10 +802,11 @@ def run():
                 # render_reaction_bar 반환값: {"items": [...], "chart_svg": "..."}
                 # 썸네일 S3 다운로드는 cards 리스트에 대해 수행한다.
                 _materialize_content_thumbnails(rendered.get("cards", []))
+                rendered["has_data"] = bool(ds.get("has_data"))
                 reaction_datasets[key] = rendered
             else:
                 # 예상치 못한 반환 타입 방어
-                reaction_datasets[key] = {"cards": [], "chart_svg": ""}
+                reaction_datasets[key] = {"cards": [], "chart_svg": "", "has_data": False}
 
 
     # 타겟별 광고비 파이차트 (여성·남성)
@@ -884,12 +885,12 @@ def run():
             "bottom": bottom_items,
             "overall_ctr": overall_ctr,
             # 반응 기반 콘텐츠 (6종)
-            "reaction_likes_top":     reaction_datasets.get("reaction_likes_top",     {"cards": [], "chart_svg": ""}),
-            "reaction_likes_bottom":  reaction_datasets.get("reaction_likes_bottom",  {"cards": [], "chart_svg": ""}),
-            "reaction_saves_top":     reaction_datasets.get("reaction_saves_top",     {"cards": [], "chart_svg": ""}),
-            "reaction_saves_bottom":  reaction_datasets.get("reaction_saves_bottom",  {"cards": [], "chart_svg": ""}),
-            "reaction_shares_top":    reaction_datasets.get("reaction_shares_top",    {"cards": [], "chart_svg": ""}),
-            "reaction_shares_bottom": reaction_datasets.get("reaction_shares_bottom", {"cards": [], "chart_svg": ""}),
+            "reaction_likes_top":     reaction_datasets.get("reaction_likes_top",     {"cards": [], "chart_svg": "", "has_data": False}),
+            "reaction_likes_bottom":  reaction_datasets.get("reaction_likes_bottom",  {"cards": [], "chart_svg": "", "has_data": False}),
+            "reaction_saves_top":     reaction_datasets.get("reaction_saves_top",     {"cards": [], "chart_svg": "", "has_data": False}),
+            "reaction_saves_bottom":  reaction_datasets.get("reaction_saves_bottom",  {"cards": [], "chart_svg": "", "has_data": False}),
+            "reaction_shares_top":    reaction_datasets.get("reaction_shares_top",    {"cards": [], "chart_svg": "", "has_data": False}),
+            "reaction_shares_bottom": reaction_datasets.get("reaction_shares_bottom", {"cards": [], "chart_svg": "", "has_data": False}),
         },
         "target_bubble": {"chart": target_bubble_svg},                  # ← 추가
         "charts": charts,
