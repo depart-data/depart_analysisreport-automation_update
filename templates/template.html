@@ -485,7 +485,7 @@
   {# =========================================================
      (13) Followers_demographics
      ========================================================= #}
-     {% if follower_demographics_pages and follower_demographics_pages.is_visible %}
+  {% if follower_demographics_pages and follower_demographics_pages.is_visible %}
   <section class="page page--follower-demographics">
     {{ page_header(follower_demographics_pages.titles.section_title) }}
     {{ big_title(follower_demographics_pages.titles.page_1_title) }}
@@ -518,11 +518,31 @@
       </div>
     </div>
   </section>
-{% endif %}
+  {% endif %}
 
 
   {# =========================================================
-     (14) Content Performance - Top CTR
+  (14) Target - Spend Pie Chart
+   ========================================================= #}
+  <section class="page">
+    {{ page_header('타겟 분석') }}
+    {{ big_title('타겟별 광고비 분포') }}
+    <div class="page-body" style="align-content: start; padding-top: 6mm;">
+
+      <div class="span-12" style="display: flex; justify-content: center;">
+        {% if target_bubble.chart %}
+          <div class="figure__svg" style="width: 68%;">{{ target_bubble.chart | safe }}</div>
+        {% else %}
+          <div class="figure__placeholder">데이터 없음</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </section>
+
+  
+  {# =========================================================
+     (15) Content Performance - Top CTR
      ========================================================= #}
   <section class="page">
     {{ page_header('콘텐츠 성과') }}
@@ -569,7 +589,7 @@
 
 
   {# =========================================================
-     (15) Content Performance - Bottom CTR
+     (16) Content Performance - Bottom CTR
      ========================================================= #}
   <section class="page">
     {{ page_header('콘텐츠 성과') }}
@@ -613,8 +633,10 @@
     </div>
   </section>
 
+  {# =========================================================
+    (17) likes, saves, shares contents
+     ========================================================= #}
 
-  {# ── 반응 기반 콘텐츠 매크로 ── #}
   {% macro reaction_page(section_label, data, highlight_metric) %}
     {% if data.has_data %}
     {% set k = data.row_count if data.row_count is not none else 0 %}
@@ -717,25 +739,54 @@
   {{ reaction_page('공유 하위 콘텐츠',    content.reaction_shares_bottom, 'shares') }}
 
 
+  {# =========================================================
+      (18) Purchase Contents
+      ========================================================= #}
+  {% if purchase_contents_pages and purchase_contents_pages["is_visible"] %}
+    {% for page_items in purchase_contents_pages["pages"] %}
+    <section class="page page--purchase-contents">
+      {{ page_header('전체 매출 데이터 분석') }}
+      {{ big_title('구매 발생 콘텐츠') }}
 
-{# =========================================================
-   타겟별 광고비 분포 버블 그리드
-   ========================================================= #}
-  <section class="page">
-    {{ page_header('타겟 분석') }}
-    {{ big_title('타겟별 광고비 분포') }}
-    <div class="page-body" style="align-content: start; padding-top: 6mm;">
+      <div class="page-body purchase-contents-body">
+        {% for item in page_items %}
+          <div class="span-3">
+            <div class="purchase-content-card">
+              <div class="purchase-content-card__thumb">
+                {% if item.thumbnail %}
+                  <img src="{{ item.thumbnail }}" alt="thumbnail">
+                {% else %}
+                  <div class="purchase-thumb-placeholder">NO IMAGE</div>
+                {% endif %}
+              </div>
 
-      <div class="span-12" style="display: flex; justify-content: center;">
-        {% if target_bubble.chart %}
-          <div class="figure__svg" style="width: 68%;">{{ target_bubble.chart | safe }}</div>
-        {% else %}
-          <div class="figure__placeholder">데이터 없음</div>
-        {% endif %}
+              <div class="purchase-content-card__meta">
+                ({{ item.uploaded_at }} 업로드)
+              </div>
+
+              <div class="purchase-content-card__chart">
+                {% if item.chart %}
+                  {% set _chart = item.chart | trim %}
+                  {% if _chart.startswith('<svg') %}
+                    <div class="purchase-chart-svg">{{ item.chart | safe }}</div>
+                  {% else %}
+                    <img src="{{ item.chart }}" alt="purchase chart">
+                  {% endif %}
+                {% else %}
+                  <div class="purchase-chart-placeholder">CHART</div>
+                {% endif %}
+              </div>
+
+              <div class="purchase-content-card__count">
+                (총 {{ item.purchases }}건)
+              </div>
+            </div>
+          </div>
+        {% endfor %}
       </div>
-
-    </div>
-  </section>
+    </section>
+    {% endfor %}
+  {% endif %}
 
 
   {% if quadrant_chart.image %}
@@ -756,9 +807,8 @@
   {% endif %}
 
 
-
   {# =========================================================
-     (16) Keywords - Overall Top 10
+     (19) Keywords - Overall Top 10
      - ✅ noun / verb_adj 분리 차트가 있으면 2개 출력
      - ✅ 없으면 기존 keyword_overall_top 1개 출력
      - ✅ 표는 keywords.overall_top_tables 리스트로 받는 방식 지원
@@ -800,7 +850,7 @@
 
 
   {# =========================================================
-     (17) Keywords - Overall Combo Pages
+     (20) Keywords - Overall Combo Pages
      ========================================================= #}
   {% for p in keywords.overall_combo_pages %}
     {% set grouped_cards = (p.cards or []) | batch(3) %}
@@ -836,9 +886,9 @@
   {% endfor %}
 
 
-
+  
   {# =========================================================
-     (18) Keywords - Overall Bottom 10
+     (21) Keywords - Overall Bottom 10
      ========================================================= #}
   <section class="page">
     {{ page_header('타겟별 키워드') }}
@@ -877,7 +927,7 @@
 
 
   {# =========================================================
-     (19) Main target keywords (optional)
+     (22) Main target keywords (optional)
      ========================================================= #}
   {% if keywords.main_target %}
     <section class="page">
@@ -976,7 +1026,7 @@
 
   
   {# =========================================================
-     (20) Avoiding target keywords (optional)
+     (23) Avoiding target keywords (optional)
      ========================================================= #}
   {% if keywords.avoid_target %}
     <section class="page">
@@ -1074,55 +1124,7 @@
   {% endif %}
 
 
-  {# =========================================================
-      (21) Purchase Contents
-      ========================================================= #}
-  {% if purchase_contents_pages and purchase_contents_pages["is_visible"] %}
-    {% for page_items in purchase_contents_pages["pages"] %}
-    <section class="page page--purchase-contents">
-      {{ page_header('전체 매출 데이터 분석') }}
-      {{ big_title('구매 발생 콘텐츠') }}
-
-      <div class="page-body purchase-contents-body">
-        {% for item in page_items %}
-          <div class="span-3">
-            <div class="purchase-content-card">
-              <div class="purchase-content-card__thumb">
-                {% if item.thumbnail %}
-                  <img src="{{ item.thumbnail }}" alt="thumbnail">
-                {% else %}
-                  <div class="purchase-thumb-placeholder">NO IMAGE</div>
-                {% endif %}
-              </div>
-
-              <div class="purchase-content-card__meta">
-                ({{ item.uploaded_at }} 업로드)
-              </div>
-
-              <div class="purchase-content-card__chart">
-                {% if item.chart %}
-                  {% set _chart = item.chart | trim %}
-                  {% if _chart.startswith('<svg') %}
-                    <div class="purchase-chart-svg">{{ item.chart | safe }}</div>
-                  {% else %}
-                    <img src="{{ item.chart }}" alt="purchase chart">
-                  {% endif %}
-                {% else %}
-                  <div class="purchase-chart-placeholder">CHART</div>
-                {% endif %}
-              </div>
-
-              <div class="purchase-content-card__count">
-                (총 {{ item.purchases }}건)
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </section>
-    {% endfor %}
-  {% endif %}
-
+ 
 
 
   {# =========================================================

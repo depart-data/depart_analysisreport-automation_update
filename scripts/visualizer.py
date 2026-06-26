@@ -1107,17 +1107,6 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], pale
     # 5위/6위 사이 가로 구분선 제거 (목표 디자인에 없음).
     # 상·하위 간격은 GAP_AFTER_5로 유지하고 선만 삭제한다.
 
-    # 전부 0일 때 안내 문구
-    if all_zero:
-        ax.text(
-            0.5, -0.08,
-            "해당 기간 집계된 데이터가 없습니다",
-            transform=ax.transAxes,
-            ha="center", va="top",
-            fontsize=7, color="#aaaaaa",
-        )
-
-
 
     # 전체 평균 세로 점선 렌더링.
     _raw_avg = dataset.get("overall_avg")
@@ -1950,9 +1939,9 @@ def render_follower_gender_doughnut_chart(chart_data, color_map):
 
     values = [float(v) for v in values]
 
-    COLOR_MALE    = "#5BB8E0"
-    COLOR_FEMALE  = "#E87DA8"
-    COLOR_KNOWN   = "#5B8A38"
+    COLOR_MALE    = "#8DC8E1"
+    COLOR_FEMALE  = "#EAB3C9"
+    COLOR_KNOWN   = "#A8C194"
     COLOR_UNKNOWN = "#B0B0B0"
 
     def _pick_color(label: str) -> str:
@@ -1993,9 +1982,6 @@ def render_follower_gender_doughnut_chart(chart_data, color_map):
     )
 
     for i, t in enumerate(autotexts):
-        # 회색(알 수 없음)만 어두운 텍스트, 나머지는 흰색
-        t.set_color("#252525" if colors[i] == COLOR_UNKNOWN else "white")
-
         t.set_fontsize(14)
         t.set_fontweight("bold")
 
