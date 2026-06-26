@@ -617,7 +617,9 @@
   {# ── 반응 기반 콘텐츠 매크로 ── #}
   {% macro reaction_page(section_label, data, highlight_metric) %}
     {% if data.has_data %}
-    <section class="page">
+    {% set k = data.row_count if data.row_count is not none else 0 %}
+    {% set layout = 'stacked' if k <= 3 else ('count4' if k == 4 else 'grid') %}
+    <section class="page reaction-page reaction-page--{{ layout }}">
       {{ page_header('콘텐츠 성과') }}
       {{ big_title(section_label) }}
 

@@ -1484,6 +1484,53 @@ body {
 .reaction-thumb-cell--pos4 { grid-column: 3 / span 2; }
 .reaction-thumb-cell--pos5 { grid-column: 5 / span 2; }
 
+/* ===== k==4: 좌측 썸네일 2×2 동일 크기 ===== */
+.reaction-page--count4 .reaction-thumb-cell--pos3 { grid-column: 1 / span 3; }
+.reaction-page--count4 .reaction-thumb-cell--pos4 { grid-column: 4 / span 3; }
+
+/* ===== k≤3: 썸네일 위 가로 일렬 / 차트 아래 풀폭 ===== */
+.reaction-page--stacked .reaction-content-wrapper {
+  flex-direction: column;
+  padding-left: 0;
+  gap: 6mm;
+}
+.reaction-page--stacked .reaction-thumb-row {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  margin-top: 0;
+}
+.reaction-page--stacked .reaction-thumb-cell {
+  flex: 1 1 0;
+  max-width: 240px;          /* 동일 크기 상한, 4:5는 img-wrap이 자동 유지 */
+}
+.reaction-page--stacked .reaction-thumb-cell--large,
+.reaction-page--stacked .reaction-thumb-cell--small { grid-row: auto; }
+.reaction-page--stacked .reaction-chart-wrap {
+  width: 100%;
+  height: auto;
+  margin-top: 0;
+}
+
+/* count4: 썸네일 높이 고정 → 2행이 페이지에 들어가게 (짤림 방지), 4:5 유지 */
+.reaction-page--count4 .reaction-thumb-cell__img-wrap {
+  width: auto;
+  height: 450px;          
+  aspect-ratio: 4 / 5;    /* 폭은 자동, 비율 유지 */
+  margin: 0 auto;         /* 셀 안에서 가운데 정렬 */
+}
+.reaction-page--count4 .reaction-thumb-row { gap: 18px 50px; }   /* 행 간격(18px) 축소 */
+
+/* count4: 4칸 폰트 통일 (위/아래 동일 크기) */
+.reaction-page--count4 .reaction-thumb-row .reaction-thumb-cell__rank {
+  min-width: 26px; height: 26px; font-size: 16pt;
+}
+.reaction-page--count4 .reaction-thumb-row .reaction-thumb-cell__upload-date { font-size: 13pt; }
+.reaction-page--count4 .reaction-thumb-row .reaction-thumb-cell__ctr        { font-size: 13pt; }
+
 .reaction-thumb-cell {
   display: flex;
   flex-direction: column;

@@ -679,7 +679,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     print("반응 기반 콘텐츠 성과 생성 중...")
     for metric in ['likes', 'saves', 'shares']:
         overall_avg = get_reaction_metric_avg(target_id, start, end, metric=metric)
-        metric_has_data = float(overall_avg or 0) > 0 
+        metric_has_data = float(overall_avg or 0) > 0          # ★ 그 메트릭만 판정
 
     # metric 컬럼 이름 매핑: DB 반환 키와 일치시킴
         metric_key_map = {
@@ -728,8 +728,13 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
                     item["ctr"] = None
                 else:
                     item["ctr"] = float(raw_ctr)
-
-            reaction_contents = _assign_reaction_ranks(reaction_contents, metric_col)
+            
+            if is_top:
+                reaction_contents = [
+                    it for it in (reaction_contents or [])
+                    if float(it.get(metric_col, 0) or 0) > 0
+                ]
+                reaction_contents = _assign_reaction_ranks(reaction_contents, metric_col)
 
             final_report["datasets"][f"reaction_{metric}_{suffix}"] = {
                 "kind":         "reaction_bar",

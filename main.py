@@ -792,7 +792,7 @@ def run():
             key = f"reaction_{metric}_{suffix}"
             ds  = datasets.get(key)
             if not ds:
-                reaction_datasets[key] = {"cards": [], "chart_svg": ""}
+                reaction_datasets[key] = {"cards": [], "chart_svg": "", "has_data": False, "row_count": 0}
                 continue
 
             render_kwargs = {"palette": COMP_CMAP} if suffix == "bottom" else {}
@@ -806,7 +806,7 @@ def run():
                 reaction_datasets[key] = rendered
             else:
                 # 예상치 못한 반환 타입 방어
-                reaction_datasets[key] = {"cards": [], "chart_svg": "", "has_data": False}
+                reaction_datasets[key] = {"cards": [], "chart_svg": "", "has_data": False, "row_count": 0}
 
 
     # 타겟별 광고비 파이차트 (여성·남성)
