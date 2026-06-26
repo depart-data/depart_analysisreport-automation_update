@@ -1060,9 +1060,17 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], pale
 
     # y축 위아래 여백 명시 — 막대·라벨이 캔버스 경계와 겹치지 않도록 (검증후조정)
     # 여백을 줄여 막대가 차트 높이를 더 채우도록(=두꺼워 보이도록) 한다.
+    cap_applied = False
     if y_pos:
-        ax.set_ylim(min(y_pos) - 0.5, max(y_pos) + 0.5)
-
+        lo, hi = min(y_pos) - 0.5, max(y_pos) + 0.5
+        span = hi - lo
+        MIN_SLOTS = 6
+        min_span = MIN_SLOTS * TOP_STEP
+        if span < min_span:
+            mid = (lo + hi) / 2
+            lo, hi = mid - min_span / 2, mid + min_span / 2
+            cap_applied = True          # ★ 막대가 적어 cap이 걸린 상태
+        ax.set_ylim(lo, hi)
 
     # 지표별 유니코드 아이콘 매핑
     metric_icon_map = {
@@ -1120,21 +1128,35 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], pale
 
     if x_scale_max_from_json > 0 and overall_avg_val > 0:
         # 평균값이 유효한 경우에만 선과 레이블을 표시
-        LINE_BOTTOM = -0.04   # ↓ 음수일수록 아래로 더 길어짐 (0 = 축 하단)
-        LINE_TOP    = 1.04    # ↑ 1.0보다 클수록 위로 더 길어짐 (1.0 = 축 상단)
+        if cap_applied:
+            # 막대가 가운데로 몰린 경우: 막대 묶음 범위에 맞춰 짧게 (+살짝만 튀어나오게)
+            STICK = 0.8                       # 막대 위아래로 삐져나오는 정도(데이터 단위)
+            y0 = min(y_pos) - STICK
+            y1 = max(y_pos) + STICK
+            line_transform = ax.transData     # x·y 모두 데이터 좌표
+            label_y = y0                      # 라벨을 선 아래 끝에
+            label_transform = ax.transData  
+        else:
+            # 평소: 차트 전체 높이 기준 (기존 동작)
+            y0, y1 = -0.04, 1.04
+            line_transform = ax.get_xaxis_transform()
+            label_y = -0.062                  
+            label_transform = ax.get_xaxis_transform()
+
         ax.plot(
-            [overall_avg_val, overall_avg_val],   # x: 평균값(데이터 좌표) 고정
-            [LINE_BOTTOM, LINE_TOP],              # y: 축 비율(0~1 밖으로 확장)
-            transform=ax.get_xaxis_transform(),
+            [overall_avg_val, overall_avg_val],
+            [y0, y1],
+            transform=line_transform,
             color="#888888",
             linestyle=(0, (4, 4)),
             linewidth=1.2,
             zorder=5,
-            clip_on=False,                        # ★ 축 밖으로 나가도 안 잘리게
+            clip_on=False,
         )
+
         ax.text(
             overall_avg_val,
-            -0.062,
+            label_y,
             avg_label_text,
             ha="center",
             va="top",
@@ -1147,7 +1169,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], pale
                 pad=2,
                 boxstyle="round,pad=0.2",
             ),
-            transform=ax.get_xaxis_transform(),
+            transform=label_transform,
         )
     # else 분기 제거: 평균이 0이거나 scale이 없으면 선을 그리지 않음
 
@@ -1341,8 +1363,10 @@ def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str,
 
     gender_kr = {"female": "여성", "male": "남성"}
 
-    # 연령 파이 전용 컬러맵
-    pie_cmap = plt.cm.viridis_r
+    # 연령 파이 전용 컬러맵 — 팔로워 차트 '남/여 전체' 초록(#AEC69F) 채도 계열
+    pie_cmap = LinearSegmentedColormap.from_list(
+        "sage_green", ["#D6EAC8", "#AEC69F", "#5E8845"]
+    )
 
     def cmap_colors(spends):
         """지출 큰 순서대로 진한 색 적용 (차트 내 정규화)."""
@@ -1844,18 +1868,20 @@ def render_follower_age_gender_stacked_barh_chart(chart_data, color_map):
 
     # 시리즈 이름/데이터 정리
     parsed = []
+    NAME_MAP = {
+        "male": ("남성", COLOR_MALE), "남성": ("남성", COLOR_MALE),
+        "female": ("여성", COLOR_FEMALE), "여성": ("여성", COLOR_FEMALE),
+        "unknown": ("알 수 없음", COLOR_UNKNOWN), "알 수 없음": ("알 수 없음", COLOR_UNKNOWN),
+        "known": ("남/여 전체", COLOR_KNOWN), "남/여 전체": ("남/여 전체", COLOR_KNOWN),
+    }
+
     for s in series:
         name = str(s.get("name", "")).strip().lower()
         data = pd.to_numeric(pd.Series(s.get("data", [])), errors="coerce").fillna(0).tolist()
 
-        if name in ["male", "남성"]:
-            parsed.append(("남성", data, COLOR_MALE, "#252525"))
-        elif name in ["female", "여성"]:
-            parsed.append(("여성", data, COLOR_FEMALE, "#252525"))
-        elif name in ["unknown", "알 수 없음"]:
-            parsed.append(("알 수 없음", data, COLOR_UNKNOWN, "#252525"))
-        elif name in ["known", "남/여 전체"]:
-            parsed.append(("남/여 전체", data, COLOR_KNOWN, "#252525"))
+        if name in NAME_MAP:
+            label, color = NAME_MAP[name]
+            parsed.append((label, data, color, "#252525"))
 
     if not parsed:
         return ""

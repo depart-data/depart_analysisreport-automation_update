@@ -564,6 +564,7 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
             OR c.name ILIKE '%%depart%%'
             OR c.name LIKE '%%디파트%%'
             OR c.name ILIKE '%%de;part%%')
+        AND ig.fb_ig_media_id is NOT NULL
     GROUP BY
         COALESCE(ig.fb_ig_media_id, 'AD_' || ad.id::text)   -- ★ 이 키 하나로 "중복만 합치기"
     HAVING SUM(apd.impressions) >= {threshold}
@@ -1963,26 +1964,24 @@ def has_purchase_content_data(account_id, date_start, date_end):
 
     query = f"""
         SELECT 1
-        
         FROM ad_performance_daily apd
         JOIN ads a ON apd.ad_id = a.id
         JOIN ad_sets ads ON a.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
-        JOIN ig_contents ig
-          ON a.source_ig_media_id = ig.fb_ig_media_id
-
+        LEFT JOIN ig_contents ig ON a.source_ig_media_id = ig.fb_ig_media_id
         WHERE a.account_id = {account_id}
-          AND ig.ig_timestamp IS NOT NULL
           AND a.source_ig_media_id IS NOT NULL
-          AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
-          AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+          AND (ig.ig_timestamp IS NULL OR (
+              (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
+              AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+          ))
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
           AND apd.purchase_count IS NOT NULL
           AND apd.purchase_count > 0
           AND ({account_id} IN (3, 2, 26)
-          OR c.name ILIKE '%%depart%%' 
-          OR c.name LIKE '%%디파트%%' 
+          OR c.name ILIKE '%%depart%%'
+          OR c.name LIKE '%%디파트%%'
           OR c.name ILIKE '%%de;part%%')
         LIMIT 1
     """
@@ -2147,7 +2146,10 @@ def get_purchase_summary_page_data(account_id, date_start, date_end):
         SELECT
             COALESCE(SUM(apd.purchase_count), 0) AS total_purchases,
             ROUND(
-                (SUM(apd.spend * apd.purchase_roas) / NULLIF(SUM(apd.spend), 0))::numeric
+                (SUM(CASE WHEN apd.spend IS NOT NULL AND apd.purchase_roas IS NOT NULL
+                          THEN apd.spend * apd.purchase_roas END)
+                / NULLIF(SUM(CASE WHEN apd.spend IS NOT NULL AND apd.purchase_roas IS NOT NULL
+                                  THEN apd.spend END), 0))::numeric
             , 1) AS avg_roas
         FROM ad_performance_daily apd
         JOIN ads a ON apd.ad_id = a.id
@@ -2158,8 +2160,6 @@ def get_purchase_summary_page_data(account_id, date_start, date_end):
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.purchase_count IS NOT NULL
           AND apd.purchase_count > 0
-          AND apd.spend IS NOT NULL
-          AND apd.purchase_roas IS NOT NULL
           AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
     """
 
@@ -2170,7 +2170,12 @@ def get_purchase_summary_page_data(account_id, date_start, date_end):
                 MAX(NULLIF(ig.thumbnail_url, '')),
                 MAX(NULLIF(ig.media_url, ''))
             ) AS thumbnail,
-            COALESCE(SUM(apd.purchase_count), 0) AS purchases
+            COALESCE(SUM(apd.purchase_count), 0) AS purchases,
+            CASE
+                WHEN SUM(apd.impressions) > 0
+                THEN SUM(apd.clicks)::numeric * 100 / SUM(apd.impressions)
+                ELSE 0
+            END AS ctr
         FROM ad_performance_daily apd
         JOIN ads a ON apd.ad_id = a.id
         JOIN ad_sets ads ON a.ad_set_id = ads.id
@@ -2184,7 +2189,7 @@ def get_purchase_summary_page_data(account_id, date_start, date_end):
           AND apd.purchase_count > 0
           AND ({account_id} IN (3, 2, 26) OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
         GROUP BY a.source_ig_media_id
-        ORDER BY purchases DESC
+        ORDER BY purchases DESC, ctr DESC
         LIMIT 1
     """
 
