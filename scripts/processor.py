@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 # .env에서 NLTK_DATA 경로 로드 후 nltk 초기화
 try:
     from dotenv import load_dotenv
-    load_dotenv(dotenv_path=Path(__file__).parent.parent / "db_update" / ".env")
+    load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 except Exception:
     pass
 
@@ -1001,6 +1001,35 @@ VERB_ADJ_TAGS = {"VA", "VV"}
 ADVERB_TAGS = {"MAG", "MAJ"}
 VALID_KEYWORD_TAGS = NOUN_TAGS | VERB_ADJ_TAGS
 BLOCKED_KEYWORD_FORMS = {"포로"}
+_VERB_MORPHEME_PREFIXES = ("었", "았", "겠", "셨", "였", "었었", "았았")
+# 형용사 판별 접미사 목록
+_EN_JJ_SUFFIXES = ("ful", "ous", "ive", "ible", "able", "ish", "less", "ent", "ant", "ern", "al", "y")
+# 한국어 패션 광고에서 명사로 고정 사용되는 영문 어휘
+_EN_FASHION_NOUN_SET = frozenset({
+    "look", "wear", "outfit", "fit", "style", "mood", "basic",
+    "outer", "inner", "item", "piece", "set", "top", "bottom",
+    "cut", "line", "detail", "color", "texture", "fabric",
+})
+# NLTK 맥락 태그가 패션 명사와 동일해 자동 구분 불가한 동사/형용사 명시 목록
+# (이 목록에 있는 단어는 명사 버킷에 들어가지 않도록 강제)
+_EN_FORCE_VERB_ADJ = frozenset({
+    "avoid", "refresh", "repaint", "longer", "shorter", "faster", "slower",
+    "online", "offline", "trendy", "thank", "upgrade", "update",
+})
+
+_nltk_path_ready = False
+
+def _ensure_nltk_path():
+    global _nltk_path_ready
+    if _nltk_path_ready:
+        return
+    nltk_data = os.environ.get("NLTK_DATA", "").strip().strip("\"'")
+    if nltk_data:
+        import nltk as _n
+        path = str(Path(nltk_data).expanduser())
+        if path not in _n.data.path:
+            _n.data.path.insert(0, path)
+    _nltk_path_ready = True
 
 
 @lru_cache(maxsize=50000)
@@ -1063,6 +1092,42 @@ def _best_adverb_score(raw_text):
     return best_score
 
 
+@lru_cache(maxsize=50000)
+def _best_verb_adj_score(raw_text):
+    """VV/VA 및 불규칙 활용(VV-R, VV-I, VA-R, VA-I 등) 포함한 최선 동사/형용사 점수 반환."""
+    text = str(raw_text).strip()
+    if not text:
+        return None
+    best_score = None
+    for tokens, score in kiwi.analyze(text, top_n=5):
+        if not tokens:
+            continue
+        first = tokens[0]
+        ftag = str(first.tag)
+        if ftag.startswith("VV") or ftag.startswith("VA"):
+            cur = float(score)
+            if best_score is None or cur > best_score:
+                best_score = cur
+    return best_score
+
+
+@lru_cache(maxsize=50000)
+def _best_overall_score(raw_text):
+    """kiwi.analyze top_n=5 후보 중 가장 높은 점수 반환.
+    NNG 명사 점수가 이보다 5점 이상 낮으면 명사로 보지 않는다."""
+    text = str(raw_text).strip()
+    if not text:
+        return None
+    best = None
+    for tokens, score in kiwi.analyze(text, top_n=5):
+        if not tokens:
+            continue
+        cur = float(score)
+        if best is None or cur > best:
+            best = cur
+    return best
+
+
 def _is_blocked_keyword_form(form):
     token = str(form).strip()
     if not token:
@@ -1072,25 +1137,33 @@ def _is_blocked_keyword_form(form):
 
 @lru_cache(maxsize=50000)
 def _looks_like_predicate_stem(form):
-    """
-    '강하'처럼 명사/용언 어간이 겹치는 경우를 분리하기 위한 보조 판별.
-    form + '다'를 재분석해 동일 어형이 VA/VV로 해석되면 용언 어간으로 본다.
-    """
+    """'강하'처럼 명사/용언 어간이 겹치는 경우를 분리하기 위한 보조 판별.
+    form+'다'를 재분석해 동일 어형이 VA/VV로 해석되면 용언 어간으로 본다.
+    '조이다'처럼 '다' 앞에서 VV 대신 NNG+VCP로 분석되는 경우는 '고'/'면' 어미로 보완 검출."""
     stem = str(form).strip()
     if not stem:
         return False
 
-    for tokens, _ in kiwi.analyze(f"{stem}다", top_n=3):
+    # top_n=1: 최선 해석만 신뢰. 하위 순위 VA 해석으로 인한 오분류 방지
+    for tokens, _ in kiwi.analyze(f"{stem}다", top_n=1):
         if not tokens:
             continue
-
         first = next((tok for tok in tokens if tok.tag in VALID_KEYWORD_TAGS), None)
         if first and first.form == stem and first.tag in VERB_ADJ_TAGS:
             return True
-
-        # 예: 강/XR + 하/XSA + 다/EF
+        # 예: 강/XR+하/XSA+다/EF, 코디/NNG+하/XSV+다/EF, 여유/NNG+롭/XSA-I+다/EF
         if len(tokens) >= 2 and tokens[0].form + tokens[1].form == stem:
-            if tokens[0].tag == "XR" and tokens[1].tag in {"XSA", "XSV"}:
+            if (tokens[0].tag in {"XR", "NNG", "NNP"}
+                    and (tokens[1].tag in {"XSA", "XSV"}
+                         or str(tokens[1].tag).startswith("XSA"))):
+                return True
+
+    for ending in ("고", "면"):
+        for tokens, _ in kiwi.analyze(f"{stem}{ending}", top_n=1):
+            if not tokens:
+                continue
+            first = next((tok for tok in tokens if tok.tag in VALID_KEYWORD_TAGS), None)
+            if first and first.form == stem and first.tag in VERB_ADJ_TAGS:
                 return True
 
     return False
@@ -1105,9 +1178,46 @@ def _normalize_keyword_by_pos(text, pos_type='noun'):
         cleaned = _re.sub(r"[^a-zA-Z0-9]", "", str(text)).strip()
         if len(cleaned) < 2:
             return None
-        # NLTK pos_tag로 영어 품사 판별
+        # 4-맥락 NLTK 태깅으로 영어 품사 판별
+        # 단독 태깅의 NN 편향을 보정: solo/the(명사맥락)/is(형용사맥락)/they(동사맥락)
+        lower = cleaned.lower()
         try:
-            en_tag = _en_pos_tag([cleaned])[0][1] if _en_pos_tag else "NN"
+            _ensure_nltk_path()
+            if not _en_pos_tag:
+                raise RuntimeError("pos_tag unavailable")
+
+            # 명시적 목록 우선 처리 (NLTK 맥락보다 우선)
+            if lower in _EN_FASHION_NOUN_SET:
+                en_tag = "NN"
+            elif lower in _EN_FORCE_VERB_ADJ:
+                en_tag = "JJ"
+            else:
+                t_solo = _en_pos_tag([lower])[0][1]
+                t_the  = _en_pos_tag(["the",  lower])[1][1]
+                t_is   = _en_pos_tag(["is",   lower])[1][1]
+                t_they = _en_pos_tag(["they", lower])[1][1]
+
+                s4 = len(lower) >= 4 and any(lower.endswith(s) for s in _EN_JJ_SUFFIXES)
+                s5 = len(lower) >= 5 and any(lower.endswith(s) for s in _EN_JJ_SUFFIXES)
+
+                if t_solo.startswith("VBG") and t_the.startswith("NN"):
+                    # 게런드-명사 (lightning, evening): 단독=VBG지만 the맥락=NN
+                    en_tag = "NN"
+                elif t_solo.startswith("JJ") or t_the.startswith("JJ"):
+                    # 확실한 형용사: 단독 또는 the맥락에서 JJ
+                    en_tag = "JJ"
+                elif t_is.startswith("JJ") and s4:
+                    # is맥락 JJ + 형용사 접미사 (stylish, elegant, cozy, timeless 등)
+                    en_tag = "JJ"
+                elif s5 and not t_they.startswith(("VBP", "VBD")):
+                    # 접미사만 있고 동사 맥락 없음 (effortless 등 드문 케이스)
+                    en_tag = "JJ"
+                elif t_they.startswith(("VBP", "VBD")) and not t_is.startswith("JJ"):
+                    # 순수 동사: they맥락=VBP/VBD이고 is맥락≠JJ
+                    # (is=JJ이면 명사-동사 겸용어 가능성 → 명사 유지)
+                    en_tag = "VBP"
+                else:
+                    en_tag = t_solo if not t_solo.startswith("VBG") else "NN"
         except Exception:
             en_tag = "NN"
         if pos_type == 'noun':
@@ -1129,12 +1239,41 @@ def _normalize_keyword_by_pos(text, pos_type='noun'):
         # 용언 후보가 더 우세하면 명사로 강제 변환하지 않는다.
         if verb_adj_best is not None and verb_adj_best[2] >= noun_best[2]:
             return None
+        # 부사 해석이 더 우세하면 명사로 분류하지 않는다 (예: 제대로→제대 오분류 방지)
+        adverb_score = _best_adverb_score(text)
+        if adverb_score is not None and adverb_score >= noun_best[2]:
+            return None
+        # 불규칙 동사 포함 동사/형용사 점수가 명사와 1.5 이내면 동사로 판단 (예: 입지)
+        va_score = _best_verb_adj_score(text)
+        if va_score is not None and va_score >= noun_best[2] - 1.5:
+            return None
+        # 명사 후보 점수가 전체 최선 점수보다 5점 이상 낮으면 명사로 보지 않는다 (예: 스럽지)
+        best_overall = _best_overall_score(text)
+        if best_overall is not None and noun_best[2] < best_overall - 5.0:
+            return None
         noun_form = noun_best[0]
+        # 원문 전체가 명사 후보로 존재하면 부분 추출보다 우선 (예: 아우터 → 아우 아님)
+        if noun_form != text:
+            for form, tag, _ in candidates:
+                if form == text and tag in NOUN_TAGS:
+                    noun_form = text
+                    break
         if _is_blocked_keyword_form(noun_form):
+            return None
+        # 동사 시제 형태소로 시작하는 형태는 명사가 아님 (예: 었기, 았는데)
+        if noun_form.startswith(_VERB_MORPHEME_PREFIXES):
             return None
         # 어간형(예: 강하)이 명사로 오인되는 케이스를 차단
         if _looks_like_predicate_stem(noun_form):
             return None
+        # 조사가 붙은 형태(예: 핏과)가 NNG로 오인된 경우를 차단
+        for toks, score in kiwi.analyze(noun_form, top_n=8):
+            if (len(toks) >= 2
+                    and str(toks[-1].tag).startswith("J")
+                    and noun_form.endswith(toks[-1].form)
+                    and len(noun_form) - len(toks[-1].form) >= 1
+                    and score >= noun_best[2] - 4.0):
+                return None
         return noun_form
 
     if pos_type == "verb_adj":
