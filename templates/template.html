@@ -299,10 +299,12 @@
           <div class="overview-kpi__value">{{ purchase_summary_page.total_purchases }}건</div>
           <div class="overview-kpi__label">총 구매전환</div>
         </div>
+        {% if purchase_summary_page.has_roas_data %}
         <div class="overview-kpi">
-          <div class="overview-kpi__value">{{ (purchase_summary_page.avg_roas ~ '%') if purchase_summary_page.avg_roas is not none else '-' }}</div>
+          <div class="overview-kpi__value">{{ purchase_summary_page.avg_roas }}%</div>
           <div class="overview-kpi__label">평균 ROAS</div>
         </div>
+        {% endif %}
         {% if top and top.thumbnail %}
         <div class="purchase-summary__content-item">
           <div class="purchase-summary__thumb-wrap">
@@ -321,7 +323,7 @@
   {# =========================================================
      (7) Purchase Analysis - ROAS
      ========================================================= #}
-  {% if purchase_analysis_pages and purchase_analysis_pages.is_visible %}
+  {% if purchase_analysis_pages and purchase_analysis_pages.is_visible and purchase_analysis_pages.has_roas_data %}
   <section class="page">
     {{ page_header(purchase_analysis_pages.titles.section_title) }}
     {{ big_title(purchase_analysis_pages.titles.page_1_title) }}
