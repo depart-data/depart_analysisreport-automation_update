@@ -418,33 +418,48 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         spend_revenue_weekly_df = get_spend_and_revenue_weekly(target_id, start, end)
         spend_revenue_monthly_df = get_spend_and_revenue_monthly(target_id, start, end)
 
+        has_revenue = bool(
+            spend_revenue_weekly_df is not None
+            and not spend_revenue_weekly_df.empty
+            and (spend_revenue_weekly_df["revenue"].fillna(0) != 0).any()
+        )
+
+        if has_revenue:
+            series = ["spend", "revenue"]
+            page_title = "광고비 & 매출 발생"
+            extra_meta = {"show_legend": True}
+        else:
+            series = ["spend"]
+            page_title = "광고비"
+            extra_meta = {}
+
         add_ds(
             "spend_revenue_weekly",
             "line",
-            "광고비 & 매출발생 (주별)",
+            f"{page_title} (주별)",
             spend_revenue_weekly_df,
             currency_symbol,
             "week_start",
-            ["spend", "revenue"],
-            extra_meta={"show_legend": True}
+            series,
+            extra_meta=extra_meta
         )
 
         add_ds(
             "spend_revenue_monthly",
             "line",
-            "광고비 & 매출발생 (월별)",
+            f"{page_title} (월별)",
             spend_revenue_monthly_df,
             currency_symbol,
             "month_start",
-            ["spend", "revenue"],
-            extra_meta={"show_legend": True}
+            series,
+            extra_meta=extra_meta
         )
 
         final_report["spend_revenue_pages"] = {
             "is_visible": True,
             "titles": {
                 "section_title": "전체 매출 데이터 분석",
-                "page_1_title": "광고비 & 매출 발생"
+                "page_1_title": page_title
             }
         }
     else:
