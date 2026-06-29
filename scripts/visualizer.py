@@ -1422,7 +1422,7 @@ def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str,
     gen_rgba    = [GENDER_FIXED.get(g, "#B0B0B0") for g in gen_genders]
 
     ax_all.set_facecolor("white")
-    ax_all.set_title("성별", fontsize=13, fontweight="bold", pad=16)
+    fig.text(0.255, 0.91, "성별", ha='center', va='bottom', fontsize=12, fontweight="normal")
 
     if not gen_spends:
         ax_all.text(0.5, 0.5, "데이터 없음", ha="center", va="center",
@@ -1473,7 +1473,7 @@ def render_target_spend_pie_charts(dataset: Dict[str, Any], color_map: Dict[str,
     rgba_list = cmap_colors(spends)
 
     ax_age.set_facecolor("white")
-    ax_age.set_title("연령", fontsize=13, fontweight="bold", pad=16)
+    fig.text(0.73, 0.91, "연령", ha='center', va='bottom', fontsize=12, fontweight="normal")
 
     if not spends:
         ax_age.text(0.5, 0.5, "데이터 없음", ha="center", va="center",
