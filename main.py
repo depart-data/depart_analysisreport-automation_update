@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
 import pandas as pd
-from scripts.processor import _normalize_keyword_by_pos, _best_adverb_score, kiwi, VERB_ADJ_TAGS
+from scripts.processor import _normalize_keyword_by_pos, _best_adverb_score, kiwi, VERB_ADJ_TAGS, _KO_BLOCK_DA_SUFFIX
 from scripts.visualizer import (build_color_map, complementary_hex, render_dataset, is_dark_color, 
                                 render_bubble_chart, render_purchase_pie_chart, render_follower_gender_doughnut_chart, render_follower_age_gender_stacked_barh_chart,
                                 render_target_spend_pie_charts, render_ctr_follows_quadrant_chart,)
@@ -261,6 +261,8 @@ def _append_da_if_predicate(value: Any) -> Any:
     if len(token) < 2:
         return value
     if " " in token or not _KOREAN_RE.search(token):
+        return value
+    if token in _KO_BLOCK_DA_SUFFIX:
         return value
 
     if not _is_predicate_for_display(token):

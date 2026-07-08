@@ -569,6 +569,7 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
     ads_query = f"""
     SELECT
         COALESCE(ig.fb_ig_media_id, 'AD_' || ad.id::text)   AS content_key,  -- 묶음 키
+        MIN(ig.fb_ig_media_id)    AS source_ig_media_id,  -- 게시물 식별자 (드릴다운 합산용)
         MIN(ad.id)                AS id,         -- 대표 광고 id (썸네일/표시용 아무거나 1개)
         MIN(ad.ad_name)           AS ad_name,    -- 대표 광고 이름
         MIN(ad.fb_ad_id)          AS fb_ad_id,
@@ -619,7 +620,8 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
             'fb_ad_id': row.get('fb_ad_id'),
             'uploaded_at': row['uploaded_at'].date() if pd.notna(row['uploaded_at']) else None,
             'thumbnail': thumb_val,
-            'ctr': row['ctr']
+            'ctr': row['ctr'],
+            'source_ig_media_id': row.get('source_ig_media_id'),
         })
 
     return results # 이제 3개의 데이터가 담긴 리스트를 반환합니다.
@@ -686,13 +688,23 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
                 + COALESCE(ici.shares, 0)
                 + COALESCE(ici.saved, 0)                    AS total_reaction,
             (
+            -- 동일 게시물(source_ig_media_id)을 참조하는 모든 광고의 클릭/노출을 합산하여 CTR 계산
+            -- (단일 ad.id만 보면 같은 게시물이 여러 광고에서 돌았을 때 값이 누락됨)
             SELECT ROUND(
                 (SUM(apd2.clicks)::numeric / NULLIF(SUM(apd2.impressions), 0)) * 100, 2
             )
             FROM ad_performance_daily apd2
-            WHERE apd2.ad_id = ad.id
+            JOIN ads ad2      ON apd2.ad_id = ad2.id
+            JOIN ad_sets ads2 ON ad2.ad_set_id = ads2.id
+            JOIN campaigns c2 ON ads2.campaign_id = c2.id
+            WHERE ad2.source_ig_media_id = ad.source_ig_media_id
+              AND ad2.account_id = {account_id}
               AND apd2.as_of_date >= '{date_start}'
               AND apd2.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
+              AND ({account_id} IN (3, 2, 26)
+                  OR c2.name ILIKE '%%depart%%'
+                  OR c2.name LIKE '%%디파트%%'
+                  OR c2.name ILIKE '%%de;part%%')
             )                                               AS ctr
         FROM ads ad
             JOIN ad_sets ads ON ad.ad_set_id = ads.id
@@ -856,28 +868,38 @@ def log_missing_reaction_insights(account_id, date_start, date_end):
 
 
 
-# 특정 광고들의 타겟별 CTR 데이터
-def get_a_content_target_ctr_data(ad_id, date_start, date_end):
+# 특정 광고(또는 동일 게시물의 모든 광고)의 타겟별 CTR 데이터
+def get_a_content_target_ctr_data(ad_id, date_start, date_end, account_id=None, source_ig_media_id=None):
     engine = get_engine()
-    
+
+    # source_ig_media_id가 주어지면 동일 게시물을 참조하는 모든 광고를 합산한다.
+    # 없으면(예: 게시물 연결이 없는 콘텐츠) 기존처럼 단일 ad_id 기준으로 조회한다.
+    if source_ig_media_id:
+        content_filter = f"ad.source_ig_media_id = '{source_ig_media_id}'"
+    else:
+        content_filter = f"ad.id = {ad_id}"
+
+    account_filter = f"AND ad.account_id = {account_id}" if account_id else ""
+
     query = f"""
-        SELECT 
+        SELECT
             apd.age_range AS age, apd.gender,
             ROUND((SUM(apd.clicks)::numeric / NULLIF(SUM(apd.impressions), 0)::numeric) * 100, 2) as ctr
         FROM ads ad
         JOIN ad_sets ads ON ad.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
         LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
-        WHERE ad.id = {ad_id}
+        WHERE {content_filter}
+            {account_filter}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND apd.gender != 'unknown'
         GROUP BY apd.age_range, apd.gender
         ORDER BY ctr DESC;
     """
-    
+
     df = pd.read_sql(query, engine)
-    
+
     if df.empty:
         return None
 
@@ -1088,6 +1110,7 @@ _EN_FASHION_NOUN_SET = frozenset({
     "look", "wear", "outfit", "fit", "style", "mood", "basic",
     "outer", "inner", "item", "piece", "set", "top", "bottom",
     "cut", "line", "detail", "color", "texture", "fabric",
+    "intelligence", "signature",
 })
 # NLTK 맥락 태그가 패션 명사와 동일해 자동 구분 불가한 동사/형용사 명시 목록
 # (이 목록에 있는 단어는 명사 버킷에 들어가지 않도록 강제)
@@ -1098,6 +1121,19 @@ _EN_FORCE_VERB_ADJ = frozenset({
 # kiwi가 XR 어근을 NNG로 오분류해 명사 버킷에 들어가는 형용사/동사 어간 직접 지정
 _KO_FORCE_VERB_ADJ = frozenset({
     "거창하", "거창",   # 거창하다(VA) — kiwi가 '거창'을 XR 어근으로 분리해 NNG 오분류
+    "이르",             # 이르다(VA, '러' 불규칙) — kiwi가 VA-R/VV-R/VV-I 태그를 정확 매칭하지 못해 NNP(명사)로 오분류
+})
+
+# kiwi가 '다리다'/'다리고' 활용형을 동사(옷을 다리다)로 오분석해
+# _looks_like_predicate_stem이 True를 반환, 명사인 어간이 동사/형용사 버킷으로 분류되는 것을 막기 위한 예외 목록
+_KO_FORCE_NOUN = frozenset({
+    "다리",  # 다리(NNG, 다리/교량) — kiwi가 '다리고'를 다리다(VV)로 오분석해 동사로 오분류
+})
+
+# main.py 표시 단계에서 '다'를 붙여 재분석할 때(예: '다리'+'다'='다리다')
+# 전혀 다른 동사(옷을 다리다)로 오분석되어 명사가 동사처럼 표시되는 것을 막기 위한 예외 목록
+_KO_BLOCK_DA_SUFFIX = frozenset({
+    "다리",  # 다리다(VV, 옷을 다리다)로 오분석 — '다리'는 항상 명사(다리)로만 표시
 })
 
 _nltk_path_ready = False
@@ -1323,6 +1359,12 @@ def _normalize_keyword_by_pos(text, pos_type='noun'):
             return None
         if pos_type == "verb_adj":
             return cleaned_text
+
+    if cleaned_text in _KO_FORCE_NOUN:
+        if pos_type == "noun":
+            return cleaned_text
+        if pos_type == "verb_adj":
+            return None
 
     if pos_type == "noun":
         if noun_best is None:
@@ -2136,7 +2178,15 @@ def get_spend_and_revenue_weekly(account_id, date_start, date_end):
     """
 
     df = pd.read_sql(query, engine)
-    return None if df.empty else df
+    if df.empty:
+        return None
+
+    # 광고비가 처음 발생하기 이전의 0값 구간(집행 시작 전)을 제거
+    nonzero_idx = df.index[df["spend"] != 0]
+    if len(nonzero_idx) > 0:
+        df = df.loc[nonzero_idx[0]:].reset_index(drop=True)
+
+    return df
 
 
 def get_spend_and_revenue_monthly(account_id, date_start, date_end):
@@ -2181,7 +2231,15 @@ def get_spend_and_revenue_monthly(account_id, date_start, date_end):
     """
 
     df = pd.read_sql(query, engine)
-    return None if df.empty else df
+    if df.empty:
+        return None
+
+    # 광고비가 처음 발생하기 이전의 0값 구간(집행 시작 전)을 제거
+    nonzero_idx = df.index[df["spend"] != 0]
+    if len(nonzero_idx) > 0:
+        df = df.loc[nonzero_idx[0]:].reset_index(drop=True)
+
+    return df
 
 
 # ----------------------------------
@@ -2305,7 +2363,6 @@ def get_a_content_target_purchase_data(ad_ids, date_start, date_end):
         WHERE apd.ad_id IN ({ad_ids_str})
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
-          AND apd.gender != 'unknown'
         GROUP BY apd.age_range, apd.gender
         HAVING COALESCE(SUM(apd.purchase_count), 0) > 0
         ORDER BY purchases DESC, apd.age_range

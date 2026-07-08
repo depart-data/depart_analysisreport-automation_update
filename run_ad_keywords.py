@@ -49,6 +49,11 @@ _ENGLISH_FUNCTION_WORDS = {
     "me", "my",
     "do", "did", "does",
 }
+# NLTK 태거가 헤드라인체(연속 대문자/타이틀케이스 명사구) 뒤에서 과거분사를 고유명사(NNP)로
+# 오분류해 lemmatization이 적용되지 않는 케이스에 대한 명시적 원형 매핑
+_EN_LEMMA_OVERRIDES = {
+    "engineered": "engineer",
+}
 _KIWI_EXCLUDE_PREFIXES = ("J", "E")
 # 인접 토큰 병합 시도 시 두 번째 토큰(t_next)이 이 태그 집합에 속해야만 병합 가능.
 _MERGE_NEXT_ALLOWED_TAGS = {"NNG", "NNP", "NNB", "IC", "XR", "XSN", "SL"}
@@ -175,8 +180,11 @@ class AdNounExtractor:
             norm = re.sub(r"[^a-zA-Z0-9]", "", w).lower()
             if not norm or norm in _ENGLISH_FUNCTION_WORDS:
                 continue
-            # 대문자 약어(SNS 등)는 lemmatization 스킵 (lemmatize("sns", NOUN) → "sn" 방지)
-            lemma = norm if w.isupper() else self.lemmatizer.lemmatize(norm, pos=_wn_pos(pos))
+            if norm in _EN_LEMMA_OVERRIDES:
+                lemma = _EN_LEMMA_OVERRIDES[norm]
+            else:
+                # 대문자 약어(SNS 등)는 lemmatization 스킵 (lemmatize("sns", NOUN) → "sn" 방지)
+                lemma = norm if w.isupper() else self.lemmatizer.lemmatize(norm, pos=_wn_pos(pos))
             if lemma not in seen:
                 result.append(lemma)
                 seen.add(lemma)
@@ -430,6 +438,7 @@ def main():
         "오버핏", "슬림핏", "레귤러핏",
         "프로바이오틱스",   # 하이굿: '프로바이오틱스로' → '스로' 단편 방지
         "캐치드로우",       # '캐치드'+'로우'로 분리되는 오분석 방지
+        "미니벨로",         # '미니벨'+'로'(JKB 조사)로 분리되는 오분석 방지
     ]
     raw_custom_dict = os.environ.get("CUSTOM_DICT", "")
     custom_dict = _BASE_FASHION_DICT + [w.strip() for w in raw_custom_dict.split(",") if w.strip()]

@@ -1492,31 +1492,29 @@ body {
 .reaction-page--count4 .reaction-thumb-cell--pos3 { grid-column: 1 / span 3; }
 .reaction-page--count4 .reaction-thumb-cell--pos4 { grid-column: 4 / span 3; }
 
-/* ===== k≤3: 썸네일 위 가로 일렬 / 차트 아래 풀폭 ===== */
-.reaction-page--stacked .reaction-content-wrapper {
-  flex-direction: column;
-  padding-left: 0;
-  gap: 6mm;
-}
+/* ===== k≤3: 우측 차트는 grid/count4와 동일한 좌우 배치를 유지하고
+   좌측 썸네일 배치만 개수에 맞게 재구성 ===== */
 .reaction-page--stacked .reaction-thumb-row {
-  flex: 0 0 auto;
   display: flex;
-  flex-direction: row;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 16px;
-  width: 100%;
+  align-content: center;
+  align-items: center;
+  align-self: stretch;
+  gap: 50px;
+  height: 100%;
   margin-top: 0;
 }
-.reaction-page--stacked .reaction-thumb-cell {
-  flex: 1 1 0;
-  max-width: 240px;          /* 동일 크기 상한, 4:5는 img-wrap이 자동 유지 */
+.reaction-page--stacked .reaction-thumb-cell--large {
+  flex: 0 0 calc((100% - 5 * 50px) / 6 * 3 + 50px * 2);   /* 기존 pos1/pos2와 동일 폭 공식 */
 }
-.reaction-page--stacked .reaction-thumb-cell--large,
-.reaction-page--stacked .reaction-thumb-cell--small { grid-row: auto; }
-.reaction-page--stacked .reaction-chart-wrap {
-  width: 100%;
-  height: auto;
-  margin-top: 0;
+.reaction-page--stacked .reaction-thumb-cell--small {
+  flex: 0 0 calc((100% - 5 * 50px) / 6 * 2 + 50px * 1);   /* 기존 pos3/4/5와 동일 폭 공식 */
+}
+/* k=3 전용: 1위를 단독 줄로 강제 줄바꿈시켜 2,3위가 아래 줄에 나란히 배치되게 함 */
+.reaction-page--k3 .reaction-thumb-row__break {
+  flex-basis: 100%;
+  height: 0;
 }
 
 /* count4: 썸네일 높이 고정 → 2행이 페이지에 들어가게 (짤림 방지), 4:5 유지 */

@@ -1032,13 +1032,7 @@ def render_reaction_bar(dataset: Dict[str, Any], color_map: Dict[str, Any], pale
 
     # ── 그래프 캔버스 생성 ──
     all_zero = all(v == 0 for v in values) if values else True
-    # 검증후조정: 차트가 우측 폭(좌측 33%로 축소되며 넓어짐)에 맞춰 height:auto로 렌더되면
-    # 세로가 과대해져 제목과 한 페이지에 못 들어가 다음 페이지로 넘어갔다.
-    # 막대 겹침은 데이터 단위(GAP/ylim/height)로 제어되므로 fig_h를 낮춰도 안전하다.
-    if n <= 3:
-        fig_h = max(1.8, n * 0.8)
-    else:
-        fig_h = 5.0
+    fig_h = 5.0
     fig, ax = plt.subplots(figsize=(7, fig_h))
     fig.patch.set_alpha(0)
     ax.patch.set_alpha(0)
@@ -1706,10 +1700,18 @@ def render_purchase_pie_chart(rows: List[Dict[str, Any]], color_map: Dict[str, A
             return "여성"
         if g == "male":
             return "남성"
+        if g == "unknown":
+            return "성별미상"
         return str(g)
 
+    def _age_label(a):
+        a_str = str(a).strip()
+        if a_str.lower() == "unknown":
+            return "연령미상"
+        return a_str
+
     labels = [
-        f"{str(row['age']).strip()} {_gender_label(row['gender'])}"
+        f"{_age_label(row['age'])} {_gender_label(row['gender'])}"
         for _, row in df.iterrows()
     ]
     values = df["purchases"].tolist()

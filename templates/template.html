@@ -229,14 +229,20 @@
     {{ page_header('전체 성과 분석') }}
     {{ big_title('인스타그램 프로필 방문수') }}
 
+    {% if charts.profile_visits_2 %}
     <div class="page-body line-chart-row">
+    {% else %}
+    <div class="page-body line-chart-row line-chart-row--single">
+    {% endif %}
       <div class="span-6">
         {{ figure(charts.profile_visits_1, alt='profile visits chart 1') }}
 
       </div>
+      {% if charts.profile_visits_2 %}
       <div class="span-6">
         {{ figure(charts.profile_visits_2, alt='profile visits chart 2') }}
       </div>
+      {% endif %}
     </div>
   </section>
 
@@ -249,13 +255,19 @@
     {{ page_header('전체 성과 분석') }}
     {{ big_title('오가닉 조회수') }}
 
+    {% if charts.organic_views_2 %}
     <div class="page-body line-chart-row">
+    {% else %}
+    <div class="page-body line-chart-row line-chart-row--single">
+    {% endif %}
       <div class="span-6">
         {{ figure(charts.organic_views_1, alt='organic views chart 1') }}
       </div>
+      {% if charts.organic_views_2 %}
       <div class="span-6">
         {{ figure(charts.organic_views_2, alt='organic views chart 2') }}
       </div>
+      {% endif %}
 
       {{ chips_row(annotations.organic) }}
     </div>
@@ -270,13 +282,19 @@
     {{ page_header('전체 성과 분석') }}
     {{ big_title('CTR') }}
 
+    {% if charts.ctr_monthly %}
     <div class="page-body line-chart-row">
+    {% else %}
+    <div class="page-body line-chart-row line-chart-row--single">
+    {% endif %}
       <div class="span-6">
         {{ figure(charts.ctr_weekly, alt='ctr weekly chart') }}
       </div>
+      {% if charts.ctr_monthly %}
       <div class="span-6">
         {{ figure(charts.ctr_monthly, alt='ctr monthly chart') }}
       </div>
+      {% endif %}
 
       {{ chips_row(annotations.ctr) }}
     </div>
@@ -356,13 +374,19 @@
       {{ page_header(purchase_analysis_pages.titles.section_title) }}
       {{ big_title(purchase_analysis_pages.titles.page_2_title) }}
 
+      {% if charts.purchase_count_monthly %}
       <div class="page-body line-chart-row">
+      {% else %}
+      <div class="page-body line-chart-row line-chart-row--single">
+      {% endif %}
         <div class="span-6">
           {{ figure(charts.purchase_count_weekly, alt='purchase count weekly') }}
         </div>
+        {% if charts.purchase_count_monthly %}
         <div class="span-6">
           {{ figure(charts.purchase_count_monthly, alt='purchase count monthly') }}
         </div>
+        {% endif %}
       </div>
     </section>
   {% endif %}
@@ -645,7 +669,7 @@
     {% if data.has_data %}
     {% set k = data.row_count if data.row_count is not none else 0 %}
     {% set layout = 'stacked' if k <= 3 else ('count4' if k == 4 else 'grid') %}
-    <section class="page reaction-page reaction-page--{{ layout }}">
+    <section class="page reaction-page reaction-page--{{ layout }} reaction-page--k{{ k }}">
       {{ page_header('콘텐츠 성과') }}
       {{ big_title(section_label) }}
 
@@ -659,10 +683,11 @@
         #}
         <div class="reaction-content-wrapper">
 
-          {# 좌측: 썸네일 상단 2개 하단 3개 #}
+          {# 좌측: 썸네일 대형/소형 개수는 레이아웃별로 다름 (stacked는 k에 따라 1/2/1+2) #}
+          {% set large_n = (1 if k == 3 else k) if layout == 'stacked' else 2 %}
           <div class="reaction-thumb-row">
-            {# 대형 썸네일: 1~2위 (최대 2개) — 위치 인덱스 클래스(--pos1/--pos2) 부여 #}
-            {% for item in data.cards[:2] %}
+            {# 대형 썸네일 — 위치 인덱스 클래스(--pos1/--pos2..) 부여 #}
+            {% for item in data.cards[:large_n] %}
               <div class="reaction-thumb-cell reaction-thumb-cell--large reaction-thumb-cell--pos{{ loop.index }}">
                 <div class="reaction-thumb-cell__header">
                   <div class="reaction-thumb-cell__header-left">
@@ -689,12 +714,17 @@
               </div>
             {% endfor %}
 
-            {# 소형 썸네일: 3~5위 (최대 3개) — 위치 인덱스 클래스(--pos3/--pos4/--pos5) 부여 #}
-            {% for item in data.cards[2:5] %}
-              <div class="reaction-thumb-cell reaction-thumb-cell--small reaction-thumb-cell--pos{{ loop.index + 2 }}">
+            {% if layout == 'stacked' and k == 3 %}
+              {# k=3 전용: 대형 썸네일과 소형 썸네일 사이에 강제 줄바꿈 #}
+              <div class="reaction-thumb-row__break"></div>
+            {% endif %}
+
+            {# 소형 썸네일 — 위치 인덱스 클래스(--pos{{ large_n + 1 }}..) 부여 #}
+            {% for item in data.cards[large_n:5] %}
+              <div class="reaction-thumb-cell reaction-thumb-cell--small reaction-thumb-cell--pos{{ loop.index + large_n }}">
                 <div class="reaction-thumb-cell__header">
                   <div class="reaction-thumb-cell__header-left">
-                    <span class="reaction-thumb-cell__rank">{{ item.rank if item.rank is not none else (loop.index + 2) }}</span>
+                    <span class="reaction-thumb-cell__rank">{{ item.rank if item.rank is not none else (loop.index + large_n) }}</span>
                     <span class="reaction-thumb-cell__upload-date">{{ item.uploaded_at }} 업로드</span>
                   </div>
                   <div class="reaction-thumb-cell__ctr">
@@ -707,7 +737,7 @@
                 </div>
                 <div class="reaction-thumb-cell__img-wrap">
                   {% if item.thumbnail %}
-                    <img src="{{ item.thumbnail }}" alt="콘텐츠 {{ loop.index + 2 }} 썸네일"
+                    <img src="{{ item.thumbnail }}" alt="콘텐츠 {{ loop.index + large_n }} 썸네일"
                         onerror="this.style.display='none'; this.parentNode.classList.add('no-img');">
                     <div class="thumb-placeholder-text">썸네일</div>
                   {% else %}

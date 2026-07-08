@@ -197,16 +197,18 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     # 월별 프로필 방문수 데이터 로드
     profile_monthly_df = get_profile_visits_monthly(fb_ad_account_id, start, effective_end)
 
-    add_ds(
-        "insta_profile_visits_monthly",
-        "line",                   # 방문수는 막대 그래프가 보기 편합니다
-        "인스타그램 프로필 방문수 (월별)", 
-        profile_monthly_df, 
-        "회", 
-        "updated_at", 
-        ["profile_views"]
-    )
-    
+    # 주별 데이터가 8개 미만이면 월별 집계는 의미가 없으므로 표시하지 않는다.
+    if insta_df is not None and len(insta_df) >= 8:
+        add_ds(
+            "insta_profile_visits_monthly",
+            "line",                   # 방문수는 막대 그래프가 보기 편합니다
+            "인스타그램 프로필 방문수 (월별)",
+            profile_monthly_df,
+            "회",
+            "updated_at",
+            ["profile_views"]
+        )
+
     organic_df = get_organic_data(target_id, start, effective_end)  # (주별) 추가
     prev_q_organic = get_prev_quarter_organic_avg(target_id, end)
     organic_meta = {"current_quarter": current_quarter_info}
@@ -220,15 +222,17 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     # 4주 단위 월별 데이터 바로 가져오기
     organic_monthly_df = get_organic_monthly_data(target_id, start, effective_end)
 
-    add_ds(
-        "organic_trend_monthly", 
-        "line", 
-        "오가닉 조회수 추이 (월별)", 
-        organic_monthly_df, 
-        "회", 
-        "date_start", 
-        ["organic_impressions"]
-    )
+    # 주별 데이터가 8개 미만이면 월별 집계는 의미가 없으므로 표시하지 않는다.
+    if organic_df is not None and len(organic_df) >= 8:
+        add_ds(
+            "organic_trend_monthly",
+            "line",
+            "오가닉 조회수 추이 (월별)",
+            organic_monthly_df,
+            "회",
+            "date_start",
+            ["organic_impressions"]
+        )
 
 
     # --- 팔로워 인구통계학 페이지 ---
@@ -352,7 +356,9 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         extra_meta=ctr_meta
     )
     ctr_monthly_df = get_ctr_monthly_data(target_id, start, effective_end)
-    add_ds("ctr_trend_monthly", "line", "월별 CTR 추이", ctr_monthly_df, "%", "month_start", ["ctr"])
+    # 주별 데이터가 8개 미만이면 월별 집계는 의미가 없으므로 표시하지 않는다.
+    if ctr_weekly_df is not None and len(ctr_weekly_df) >= 8:
+        add_ds("ctr_trend_monthly", "line", "월별 CTR 추이", ctr_monthly_df, "%", "month_start", ["ctr"])
 
     #  --- [추가] ROAS, 구매건수 (2페이지 분량) ---
     total_purchases = get_purchase_total_count(target_id, start, effective_end)
@@ -367,9 +373,13 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         has_roas_data = bool(roas_weekly_df is not None and not roas_weekly_df.empty and (roas_weekly_df["avg_roas"].fillna(0) != 0).any())
         if has_roas_data:
             add_ds("purchase_roas_weekly", "line", "평균 ROAS (주별)", roas_weekly_df, "%", "week_start", ["avg_roas"])
-            add_ds("purchase_roas_monthly", "line", "평균 ROAS (월별)", roas_monthly_df, "%", "month_start", ["avg_roas"])
+            # 주별 데이터가 8개 미만이면 월별 집계는 의미가 없으므로 표시하지 않는다.
+            if roas_weekly_df is not None and len(roas_weekly_df) >= 8:
+                add_ds("purchase_roas_monthly", "line", "평균 ROAS (월별)", roas_monthly_df, "%", "month_start", ["avg_roas"])
         add_ds("purchase_count_weekly", "line", "구매전환 (주별)", purchase_weekly_df, "건", "week_start", ["purchases"])
-        add_ds("purchase_count_monthly", "line", "구매전환 (월별)", purchase_monthly_df, "건", "month_start", ["purchases"])
+        # 주별 데이터가 8개 미만이면 월별 집계는 의미가 없으므로 표시하지 않는다.
+        if purchase_weekly_df is not None and len(purchase_weekly_df) >= 8:
+            add_ds("purchase_count_monthly", "line", "구매전환 (월별)", purchase_monthly_df, "건", "month_start", ["purchases"])
 
         final_report["purchase_analysis_pages"] = {
             "is_visible": True,
@@ -450,16 +460,18 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
             extra_meta=extra_meta
         )
 
-        add_ds(
-            "spend_revenue_monthly",
-            "line",
-            f"{page_title} (월별)",
-            spend_revenue_monthly_df,
-            currency_symbol,
-            "month_start",
-            series,
-            extra_meta=extra_meta
-        )
+        # 주별 데이터가 8개 미만이면 월별 집계는 의미가 없으므로 표시하지 않는다.
+        if spend_revenue_weekly_df is not None and len(spend_revenue_weekly_df) >= 8:
+            add_ds(
+                "spend_revenue_monthly",
+                "line",
+                f"{page_title} (월별)",
+                spend_revenue_monthly_df,
+                currency_symbol,
+                "month_start",
+                series,
+                extra_meta=extra_meta
+            )
 
         final_report["spend_revenue_pages"] = {
             "is_visible": True,
@@ -686,7 +698,11 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         
         content_results = []
         for item in contents[:3]: # 상/하위 3개씩
-            detail_df = get_a_content_target_ctr_data(item["ad_id"], start, end)
+            detail_df = get_a_content_target_ctr_data(
+                item["ad_id"], start, end,
+                account_id=target_id,
+                source_ig_media_id=item.get("source_ig_media_id"),
+            )
             if detail_df is not None:
                 # 상세 타겟 데이터를 리스트로 변환하여 포함
                 item["target_details"] = detail_df.to_dict(orient='records')
