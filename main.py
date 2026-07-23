@@ -1,3 +1,9 @@
+# ----
+# 실행방법
+# 1. 전체 실행시 : python3 main.py configs.csv 실행
+# 2. 단일 실행시 : _DEFAULT_CONFIG에 직접 작성 후 python3 main.py 실행 
+# ----
+
 import json
 import os
 import re
@@ -503,19 +509,22 @@ def export_to_pdf(html_path, output_pdf_path):
     print(f" PDF 저장 완료: {output_pdf_path}")
 
 # 변수 지정 함수
-def run():
+_DEFAULT_CONFIG = {
+    "target_id": "41", # account_id
+    "fb_ad_account_id": "act_2142172949658464",
+    "start": "2026-04-30", #YYYY-MM-DD
+    "end": "2026-06-30",
+    "main_age": "25-34",
+    "main_gender": "female", # male, female
+    "avoid_age": ["45-54","55-64","65+"],
+    "avoid_gender": "",
+    "theme_color": "#651F2A",
+}
+
+def run(config=None):
     start_time = time.time()
 
-    config = {
-        "target_id": "39", # account_id
-        "fb_ad_account_id":"act_945284817907415",
-        "start":"2026-05-13", #YYYY-MM-DD
-        "end": "2026-06-30",
-        "main_age": ["25-34","35-44"],
-        "main_gender": "female", # male, female
-        "avoid_age": "",
-        "avoid_gender": "",
-    }
+    config = {**_DEFAULT_CONFIG, **(config or {})}
 
     target_id, fb_ad_account_id = config["target_id"], config["fb_ad_account_id"]
     start, end = config["start"], config["end"]
@@ -531,9 +540,9 @@ def run():
                   start=start, end=end,\
                    main_age=main_age, main_gender=main_gender,\
                     avoid_age=avoid_age, avoid_gender=avoid_gender)
-    
+
     report_path = "json_reports/integrated_report.json"
-    theme_color = "#C9A67F"
+    theme_color = config["theme_color"]
 
     report_json = _load_report(report_path)
     _apply_display_predicate_suffix(report_json)
@@ -997,5 +1006,48 @@ def run():
     print(f"⏳ 총 소요 시간: {elapsed_time:.2f}초") # 소수점 2자리까지 표시
     print("-" * 50)
 
+
+def _parse_multi(value):
+    value = str(value).strip()
+    if not value:
+        return ""
+    if ";" in value:
+        return [v.strip() for v in value.split(";") if v.strip()]
+    return value
+
+
+def run_batch(csv_path):
+    df = pd.read_csv(csv_path, dtype=str).fillna("")
+
+    succeeded, failed = [], []
+    for i, row in df.iterrows():
+        config = {
+            "target_id": str(row["target_id"]).strip(),
+            "fb_ad_account_id": str(row["fb_ad_account_id"]).strip(),
+            "start": str(row["start"]).strip(),
+            "end": str(row["end"]).strip(),
+            "main_age": _parse_multi(row.get("main_age", "")),
+            "main_gender": str(row.get("main_gender", "")).strip(),
+            "avoid_age": _parse_multi(row.get("avoid_age", "")),
+            "avoid_gender": str(row.get("avoid_gender", "")).strip(),
+            "theme_color": str(row.get("theme_color", "")).strip() or _DEFAULT_CONFIG["theme_color"],
+        }
+        print(f"\n{'='*60}\n▶ [{i+1}/{len(df)}] target_id={config['target_id']} 처리 시작\n{'='*60}")
+        try:
+            run(config)
+            succeeded.append(config["target_id"])
+        except Exception as e:
+            print(f"❌ target_id={config['target_id']} 처리 실패: {e}")
+            failed.append((config["target_id"], str(e)))
+
+    print(f"\n🏁 배치 완료 | 성공 {len(succeeded)}건, 실패 {len(failed)}건")
+    for tid, err in failed:
+        print(f"   - target_id={tid}: {err}")
+
+
 if __name__ == "__main__":
-    run()
+    import sys
+    if len(sys.argv) > 1:
+        run_batch(sys.argv[1])
+    else:
+        run()

@@ -388,7 +388,7 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                     boxstyle="round,pad=0.15",
                     facecolor="white",
                     edgecolor="none",
-                    alpha=0.85
+                    alpha=0.7
                 ),
             )
 
@@ -531,18 +531,30 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                     period_text = "분석 기간 전체"
                 cur_label = f"{period_text} 평균"
 
-            # 2. 텍스트 라벨 (왼쪽 고정, 빨간 글씨)
-            ax.text(
-                x=0.02,
-                y=avg_val,
-                s=f"{cur_label}: {avg_val:,.1f}{unit}",
+            # 두 평균선이 가까우면 라벨이 겹치므로, 위쪽 선은 선 위로 / 아래쪽 선은 선 아래로 라벨을 벌린다
+            AVG_LABEL_GAP_PT = 5
+            AVG_LABEL_BBOX = dict(boxstyle="round,pad=0.2", facecolor="white", edgecolor="none", alpha=0.7)
+            has_prev = prev_avg_val is not None
+            close = has_prev and abs(avg_val - prev_avg_val) < (y_high - y_low) * 0.15
+
+            if close and prev_avg_val > avg_val:
+                cur_va, cur_offset = "top", -AVG_LABEL_GAP_PT
+            else:
+                cur_va, cur_offset = "bottom", AVG_LABEL_GAP_PT
+
+            # 2. 텍스트 라벨 (왼쪽 고정, 빨간 글씨) — 점선과 간격을 두고, 박스는 텍스트에 맞게 fit
+            ax.annotate(
+                f"{cur_label}: {avg_val:,.1f}{unit}",
+                xy=(0.02, avg_val),
+                xycoords=ax.get_yaxis_transform(),
+                textcoords="offset points",
+                xytext=(0, cur_offset),
                 color="#e53935",
-                fontsize=10,
+                fontsize=7.5,
                 fontweight="bold",
-                ha="left", va="bottom",
-                bbox=dict(facecolor="white", edgecolor="none", alpha=0.9, pad=3),
+                ha="left", va=cur_va,
+                bbox=AVG_LABEL_BBOX,
                 zorder=1000,
-                transform=ax.get_yaxis_transform()
             )
 
             # 3. 차트 하단 평균선 기준 설명
@@ -555,27 +567,33 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                 color="#e53935",
                 clip_on=False,
             )
-            
+
             # 4. 이전 분기 평균선 (회색)
-            if prev_quarter_avg and prev_quarter_avg.get("avg") is not None:
+            if has_prev:
                 prev_year = prev_quarter_avg.get("year")
                 prev_quarter = prev_quarter_avg.get("quarter")
 
                 # 4-1. 점선 그리기
                 ax.axhline(y=prev_avg_val, color="#858585", linestyle="--", linewidth=1.5, zorder=998)
 
+                if close and prev_avg_val <= avg_val:
+                    prev_va, prev_offset = "top", -AVG_LABEL_GAP_PT
+                else:
+                    prev_va, prev_offset = "bottom", AVG_LABEL_GAP_PT
+
                 # 4-2. 텍스트 라벨
-                ax.text(
-                    x=0.02,
-                    y=prev_avg_val,
-                    s=f"{prev_year}년 {prev_quarter}분기 평균: {prev_avg_val:,.1f}{unit}",
+                ax.annotate(
+                    f"{prev_year}년 {prev_quarter}분기 평균: {prev_avg_val:,.1f}{unit}",
+                    xy=(0.02, prev_avg_val),
+                    xycoords=ax.get_yaxis_transform(),
+                    textcoords="offset points",
+                    xytext=(0, prev_offset),
                     color="#858585",
-                    fontsize=10,
+                    fontsize=7.5,
                     fontweight="bold",
-                    ha="left", va="bottom",
-                    bbox=dict(facecolor="white", edgecolor="none", alpha=0.9, pad=3),
+                    ha="left", va=prev_va,
+                    bbox=AVG_LABEL_BBOX,
                     zorder=997,
-                    transform=ax.get_yaxis_transform()
                 )
 
                 # 4-3. 차트 하단 설명 
