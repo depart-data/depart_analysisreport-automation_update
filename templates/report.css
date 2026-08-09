@@ -146,6 +146,30 @@ body {
   background-color: color-mix(in srgb, var(--highlight-avoid-color) 85%, transparent);
 }
 
+.kw-dup-box {
+  display: inline-block;
+  padding: 0.05em 0.25em;
+  border-radius: 0.15em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.kw-dup-box--main {
+  background-color: color-mix(in srgb, var(--chart-main-color) 10%, transparent);
+}
+
+.kw-dup-box--avoid {
+  background-color: color-mix(in srgb, var(--chart-avoid-color) 10%, transparent);
+}
+
+.kw-dup-note--main {
+  color: var(--chart-main-color);
+}
+
+.kw-dup-note--avoid {
+  color: var(--chart-avoid-color);
+}
+
 /* =========================
    Body grid (12 columns)
    ========================= */
@@ -1121,6 +1145,12 @@ body {
 .keyword-quad .table th,
 .keyword-quad .table td {
   padding: 1.2mm 1.5mm;
+}
+
+.keyword-quad .footnote {
+  font-size: 11.4pt;
+  line-height: 1.25;
+  margin-top: 0.8mm;
 }
 
 /* =========================

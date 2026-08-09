@@ -145,6 +145,16 @@ def is_dark_color(hex_color: str) -> bool:
     return relative_luminance(hex_color) < 0.5
 
 
+def ensure_min_lightness(hex_color: str, min_lightness: float = 0.40) -> str:
+    """HSL 명도가 min_lightness 미만이면 색상/채도는 유지한 채 명도만 끌어올린다."""
+    r, g, b = _hex_to_rgb01(hex_color)
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    if l >= min_lightness:
+        return _normalize_hex(hex_color)
+    r, g, b = colorsys.hls_to_rgb(h, min_lightness, s)
+    return _rgb01_to_hex(r, g, b)
+
+
 def _fig_to_svg(fig) -> str:
     buf = io.StringIO()
     fig.savefig(buf, format="svg", bbox_inches="tight")

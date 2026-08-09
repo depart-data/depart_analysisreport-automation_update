@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
 import pandas as pd
-from scripts.processor import _normalize_keyword_by_pos, _best_adverb_score, kiwi, VERB_ADJ_TAGS, _KO_BLOCK_DA_SUFFIX
-from scripts.visualizer import (build_color_map, complementary_hex, render_dataset, is_dark_color, 
+from scripts.processor import _normalize_keyword_by_pos, _best_adverb_score, kiwi, VERB_ADJ_TAGS, _KO_BLOCK_DA_SUFFIX, _KO_FORCE_VERB_ADJ_DISPLAY
+from scripts.visualizer import (build_color_map, complementary_hex, render_dataset, is_dark_color, ensure_min_lightness,
                                 render_bubble_chart, render_purchase_pie_chart, render_follower_gender_doughnut_chart, render_follower_age_gender_stacked_barh_chart,
                                 render_target_spend_pie_charts, render_ctr_follows_quadrant_chart,)
 from scripts.reporter import generate_html
@@ -271,6 +271,9 @@ def _append_da_if_predicate(value: Any) -> Any:
     if token in _KO_BLOCK_DA_SUFFIX:
         return value
 
+    if token in _KO_FORCE_VERB_ADJ_DISPLAY:
+        return _KO_FORCE_VERB_ADJ_DISPLAY[token]
+
     if not _is_predicate_for_display(token):
         return value
     return f"{token}다"
@@ -510,15 +513,15 @@ def export_to_pdf(html_path, output_pdf_path):
 
 # 변수 지정 함수
 _DEFAULT_CONFIG = {
-    "target_id": "41", # account_id
-    "fb_ad_account_id": "act_2142172949658464",
-    "start": "2026-04-30", #YYYY-MM-DD
-    "end": "2026-06-30",
-    "main_age": "25-34",
-    "main_gender": "female", # male, female
-    "avoid_age": ["45-54","55-64","65+"],
+    "target_id": "14", # account_id
+    "fb_ad_account_id": "act_799496024940107",
+    "start": "2025-11-18", #YYYY-MM-DD
+    "end": "2026-08-03",
+    "main_age": ["25-34","35-44"],
+    "main_gender": "", # male, female
+    "avoid_age": ["55-64", "65+"],
     "avoid_gender": "",
-    "theme_color": "#651F2A",
+    "theme_color": "#081F2C",
 }
 
 def run(config=None):
@@ -570,6 +573,10 @@ def run(config=None):
         "title": color_map["darker"],
         "highlight_main": color_map["highlight"],
         "highlight_avoid": comp_color_map["highlight"],
+        # 중복 키워드 표시용 색상: THEME_CMAP/COMP_CMAP의 base가 둘 다 어두워 구분이 안 되는 걸 방지하기 위해
+        # 명도 최솟값을 40으로 보정 (다른 차트에서 쓰는 THEME_CMAP/COMP_CMAP 자체는 변경하지 않음)
+        "chart_main": ensure_min_lightness(color_map["base"], 0.40),
+        "chart_avoid": ensure_min_lightness(comp_color_map["base"], 0.40),
         "cover_text": "#ffffff" if is_dark_color(color_map["base"]) else "#000000",
     }
 
@@ -679,18 +686,57 @@ def run(config=None):
         )
 
 
-    def add_table(dataset_key: str, title: str, rank_head: str, kw_head: str):
+    def _kw_set(dataset_key: str) -> set:
         ds = datasets.get(dataset_key)
-        
+        return set((ds or {}).get("labels") or [])
+
+    main_top_noun_kw = _kw_set("main_top_noun")
+    main_top_va_kw = _kw_set("main_top_va")
+    main_bottom_noun_kw = _kw_set("main_bottom_noun")
+    main_bottom_va_kw = _kw_set("main_bottom_va")
+    avoid_top_noun_kw = _kw_set("avoid_top_noun")
+    avoid_top_va_kw = _kw_set("avoid_top_va")
+    avoid_bottom_noun_kw = _kw_set("avoid_bottom_noun")
+    avoid_bottom_va_kw = _kw_set("avoid_bottom_va")
+
+    NOTE_AVOID_TOP = "*기피타겟 상위 키워드와 중복"
+    NOTE_AVOID_BOTTOM = "*기피타겟 하위 키워드와 중복"
+    NOTE_MAIN_TOP = "*메인타겟 상위 키워드와 중복"
+    NOTE_MAIN_BOTTOM = "*메인타겟 하위 키워드와 중복"
+
+    # 메인 타겟 표: 기피타겟 TOP과 겹치면 기피색, 기피타겟 BOTTOM과 겹치면 메인색
+    main_noun_rules = [
+        (avoid_top_noun_kw, "avoid", NOTE_AVOID_TOP),
+        (avoid_bottom_noun_kw, "main", NOTE_AVOID_BOTTOM),
+    ]
+    main_va_rules = [
+        (avoid_top_va_kw, "avoid", NOTE_AVOID_TOP),
+        (avoid_bottom_va_kw, "main", NOTE_AVOID_BOTTOM),
+    ]
+    # 기피 타겟 표: 메인타겟 TOP과 겹치면 메인색, 메인타겟 BOTTOM과 겹치면 기피색
+    avoid_noun_rules = [
+        (main_top_noun_kw, "main", NOTE_MAIN_TOP),
+        (main_bottom_noun_kw, "avoid", NOTE_MAIN_BOTTOM),
+    ]
+    avoid_va_rules = [
+        (main_top_va_kw, "main", NOTE_MAIN_TOP),
+        (main_bottom_va_kw, "avoid", NOTE_MAIN_BOTTOM),
+    ]
+
+    def add_table(dataset_key: str, title: str, rank_head: str, kw_head: str, highlight_rules=None):
+        ds = datasets.get(dataset_key)
+
         # [수정] 데이터프레임 형식이 아니라 labels/series 형식을 체크합니다.
         if not ds or "labels" not in ds or "series" not in ds:
             return None
-        
+
         labels = ds.get("labels", [])
         # series 안의 첫 번째 요소에서 data 리스트를 가져옵니다.
         series_data = ds.get("series", [{}])[0].get("data", [])
-        
+
         rows = []
+        dup_notes = []
+        seen_notes = set()
         # labels(키워드)와 series_data(CTR 값)를 매칭 — 동률은 같은 순위, 다음 순위는 건너뜀
         rank = 1
         for i, (label, value) in enumerate(zip(labels, series_data)):
@@ -698,12 +744,23 @@ def run(config=None):
                 prev_value = series_data[i - 1]
                 if value != prev_value:
                     rank = i + 1   # 동률이 있으면 그 개수만큼 건너뜀
-            rows.append([
+            row = [
                 f"{rank}위",
                 label,
                 f"{value:.2f}%"
-            ])
-        
+            ]
+            if highlight_rules:
+                kind = None
+                for kw_set, rule_kind, note_text in highlight_rules:
+                    if label in kw_set:
+                        kind = rule_kind
+                        if note_text not in seen_notes:
+                            seen_notes.add(note_text)
+                            dup_notes.append({"kind": rule_kind, "text": note_text})
+                        break
+                row.append(kind)
+            rows.append(row)
+
         if not rows:
             return None
 
@@ -713,13 +770,16 @@ def run(config=None):
                 return head
             return head.replace("(", "<br>(") if "(" in head else head
 
-        return {
+        result = {
             "title": title,
             "headers": [_header_with_break(rank_head), _header_with_break(kw_head), "평균 CTR"],
             "rows": rows,
             "footnote": ""
         }
-        
+        if highlight_rules:
+            result["dup_notes"] = dup_notes
+        return result
+
 
     # 2. 각 계층별(Overall, Main, Avoid) 테이블 묶음 생성
     # [Overall]
@@ -736,24 +796,24 @@ def run(config=None):
     m_top, m_bot = [], []
     if has_main_target:
         m_top = [
-            add_table("main_top_noun", f"{main_label} TOP 10 (명사)", "순위(상위)", "키워드(명사)"),
-            add_table("main_top_va", f"{main_label} TOP 10 (형용사/동사)", "순위(상위)", "키워드(형용사/동사)")
+            add_table("main_top_noun", f"{main_label} TOP 10 (명사)", "순위(상위)", "키워드(명사)", highlight_rules=main_noun_rules),
+            add_table("main_top_va", f"{main_label} TOP 10 (형용사/동사)", "순위(상위)", "키워드(형용사/동사)", highlight_rules=main_va_rules)
         ]
         m_bot = [
-            add_table("main_bottom_noun", f"{main_label} BOTTOM 10 (명사)", "순위(하위)", "키워드(명사)"),
-            add_table("main_bottom_va", f"{main_label} BOTTOM 10 (형용사/동사)", "순위(하위)", "키워드(형용사/동사)")
+            add_table("main_bottom_noun", f"{main_label} BOTTOM 10 (명사)", "순위(하위)", "키워드(명사)", highlight_rules=main_noun_rules),
+            add_table("main_bottom_va", f"{main_label} BOTTOM 10 (형용사/동사)", "순위(하위)", "키워드(형용사/동사)", highlight_rules=main_va_rules)
         ]
 
     # [Avoid Target] - 조건부 생성
     a_top, a_bot = [], []
     if has_avoid_target:
         a_top = [
-            add_table("avoid_top_noun", f"{avoid_label} TOP 10 (명사)", "순위(상위)", "키워드(명사)"),
-            add_table("avoid_top_va", f"{avoid_label} TOP 10 (형용사/동사)", "순위(상위)", "키워드(형용사/동사)")
+            add_table("avoid_top_noun", f"{avoid_label} TOP 10 (명사)", "순위(상위)", "키워드(명사)", highlight_rules=avoid_noun_rules),
+            add_table("avoid_top_va", f"{avoid_label} TOP 10 (형용사/동사)", "순위(상위)", "키워드(형용사/동사)", highlight_rules=avoid_va_rules)
         ]
         a_bot = [
-            add_table("avoid_bottom_noun", f"{avoid_label} BOTTOM 10 (명사)", "순위(하위)", "키워드(명사)"),
-            add_table("avoid_bottom_va", f"{avoid_label} BOTTOM 10 (형용사/동사)", "순위(하위)", "키워드(형용사/동사)")
+            add_table("avoid_bottom_noun", f"{avoid_label} BOTTOM 10 (명사)", "순위(하위)", "키워드(명사)", highlight_rules=avoid_noun_rules),
+            add_table("avoid_bottom_va", f"{avoid_label} BOTTOM 10 (형용사/동사)", "순위(하위)", "키워드(형용사/동사)", highlight_rules=avoid_va_rules)
         ]
 
     # 3. None 값(데이터 없음) 필터링 함수
