@@ -291,7 +291,7 @@ class AdNounExtractor:
         return all_words
 
 
-def classify_keywords(extracted_words, init_map, brand_set=None):
+def classify_keywords(extracted_words, init_map, brand_set=None, body_text=None):
     if not extracted_words:
         return [], []
 
@@ -316,37 +316,27 @@ def classify_keywords(extracted_words, init_map, brand_set=None):
     if not init_map:
         return [], list(normalized_map.values())
 
-    init_norms = list(init_map.keys())
-    matched_init_norms = set()
+    # 필수 키워드는 실제로 해당 광고 본문에 등장하는 경우에만 인정한다.
+    # (추출된 단어와 사전 항목을 서로 부분 문자열로 비교하면, "사이"처럼 흔한 단어가
+    # "아사이베리"처럼 본문에 없는 긴 사전 항목의 일부와 우연히 겹쳐 본문과 무관한
+    # 키워드가 essential_keywords에 들어가는 문제가 생긴다. 본문 전체(공백 제거)에
+    # 사전 항목이 그대로 등장하는지로 판단하면, Kiwi가 복합명사를 여러 토큰으로
+    # 쪼개는 경우도 안전하게 처리하면서 본문에 없는 단어는 절대 섞이지 않는다.)
+    body_norm = normalize_keyword(body_text) if body_text else ""
 
     essential = []
-    variable_norms = []
-
-    for norm in normalized_map.keys():
-        hit = None
-        if norm in init_map:
-            hit = norm
-        else:
-            if len(norm) >= 2 and re.search(r"[가-힣]", norm):
-                for e_norm in init_norms:
-                    if len(e_norm) >= 2 and (norm in e_norm or e_norm in norm):
-                        hit = e_norm
-                        break
-
-        if hit:
-            if hit not in matched_init_norms:
-                essential.append(init_map[hit])
-                matched_init_norms.add(hit)
-            else:
-                variable_norms.append(norm)
-        else:
-            variable_norms.append(norm)
-
-    final_variable = []
-    for norm in variable_norms:
-        if norm in matched_init_norms:
+    matched_init_norms = set()
+    for e_norm, original in init_map.items():
+        if len(e_norm) < 2:
             continue
-        final_variable.append(normalized_map[norm])
+        if e_norm in normalized_map or (body_norm and e_norm in body_norm):
+            essential.append(original)
+            matched_init_norms.add(e_norm)
+
+    final_variable = [
+        normalized_map[norm] for norm in normalized_map.keys()
+        if norm not in matched_init_norms
+    ]
 
     return essential, final_variable
 
@@ -591,7 +581,7 @@ def _process_batch(conn, extractor, ads, debug, target_mode):
         extracted      = extractor.extract_words(body, debug=debug)
         init_map       = account_keywords.get(account_id_int, {})
         brand_set      = account_brands.get(account_id_int, set())
-        essential, variable = classify_keywords(extracted, init_map, brand_set)
+        essential, variable = classify_keywords(extracted, init_map, brand_set, body_text=body)
 
         try:
             conn.run("""
