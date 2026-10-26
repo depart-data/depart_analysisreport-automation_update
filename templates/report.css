@@ -229,6 +229,95 @@ body {
   color: #202947;
 }
 
+/* =========================
+   전체 성과 요약 (팔로워 변화 차트 + KPI 2개)
+   ========================= */
+.overall-summary {
+  align-content: center;
+  row-gap: 0;
+}
+
+.overall-summary__label {
+  font-size: 26pt;
+  font-weight: 900;
+  color: #202947;
+  text-align: center;
+  word-break: keep-all;
+}
+
+.overall-summary__follower {
+  display: grid;
+  justify-items: center;
+  row-gap: 13.8mm; /* 차트 안쪽 위 여백(값 라벨 공간)과 합쳐 제목~차트 실제 간격 74px */
+}
+
+.overall-summary__chart {
+  width: 720pt;
+}
+
+.overall-summary__chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.overall-summary__kpis {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: 24mm;
+  max-width: 1320pt;
+  width: 100%;
+  margin: 21mm auto 0;
+}
+
+.overall-summary__kpi {
+  display: grid;
+  justify-items: center;
+  row-gap: 6mm;
+}
+
+.overall-summary__divider {
+  width: 1.5pt;
+  height: 36mm;
+  background: #d9d9d9;
+}
+
+.overall-summary__value {
+  font-size: 72pt;
+  line-height: 1;
+  letter-spacing: -1.1px;
+  font-weight: 900;
+  color: #202947;
+  white-space: nowrap;
+}
+
+.overall-summary__foot {
+  display: grid;
+  justify-items: center;
+  row-gap: 4mm;
+  margin-top: 24mm;
+}
+
+.overall-summary__period {
+  display: flex;
+  column-gap: 6mm;
+  font-size: 20pt;
+  color: #202947;
+}
+
+.overall-summary__period-label {
+  font-weight: 900;
+}
+
+/* 히트맵 페이지 참고설명(.rank-block__footnote)과 같은 색·크기 */
+.overall-summary__note {
+  text-align: center;
+  line-height: 1.08;
+  font-size: 15.2pt;
+  color: #999999;
+}
+
 .overview-periods {
   max-width: 1040pt;
   width: 100%;

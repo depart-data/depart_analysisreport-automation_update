@@ -16,7 +16,7 @@ import pandas as pd
 from scripts.processor import _normalize_keyword_by_pos, _best_adverb_score, kiwi, VERB_ADJ_TAGS, _KO_BLOCK_DA_SUFFIX, _KO_FORCE_VERB_ADJ_DISPLAY
 from scripts.visualizer import (build_color_map, complementary_hex, render_dataset, is_dark_color, ensure_min_lightness,
                                 render_bubble_chart, render_purchase_pie_chart, render_follower_gender_doughnut_chart, render_follower_age_gender_stacked_barh_chart,
-                                render_target_spend_pie_charts, render_ctr_follows_quadrant_chart,)
+                                render_target_spend_pie_charts, render_ctr_follows_quadrant_chart, render_follower_change_chart,)
 from scripts.reporter import generate_html
 from scripts.to_json import run as generate_json
 import time
@@ -516,12 +516,14 @@ _DEFAULT_CONFIG = {
     "target_id": "14", # account_id
     "fb_ad_account_id": "act_799496024940107",
     "start": "2025-11-18", #YYYY-MM-DD
-    "end": "2026-08-03",
-    "main_age": ["25-34","35-44"],
+    "end": "2026-09-28",
+    "main_age": ["18-24","25-34"],
     "main_gender": "", # male, female
-    "avoid_age": ["55-64", "65+"],
+    "avoid_age": "",
     "avoid_gender": "",
     "theme_color": "#081F2C",
+    "filter_scope": "all", # 날짜 필터 범위: "all"(광고+게시물 모두, 기본값) / "ads_only"(광고에만)
+    "include_out_of_period_post_ads": False, # 기간 밖에 업로드된 게시물을 쓴 광고를 광고 집계에 포함할지 (기본 False = 제외)
 }
 
 def run(config=None):
@@ -542,7 +544,9 @@ def run(config=None):
     generate_json(target_id=target_id, fb_ad_account_id=fb_ad_account_id,\
                   start=start, end=end,\
                    main_age=main_age, main_gender=main_gender,\
-                    avoid_age=avoid_age, avoid_gender=avoid_gender)
+                    avoid_age=avoid_age, avoid_gender=avoid_gender,\
+                     filter_scope=config["filter_scope"],\
+                      include_out_of_period_post_ads=config["include_out_of_period_post_ads"])
 
     report_path = "json_reports/integrated_report.json"
     theme_color = config["theme_color"]
@@ -906,6 +910,17 @@ def run(config=None):
     cards_main = _combo_cards(datasets.get("main_keyword_combo_detail"), palette=THEME_CMAP) if has_main_target else []
     cards_avoid = _combo_cards(datasets.get("avoid_keyword_combo_detail"), palette=COMP_CMAP) if has_avoid_target else []
 
+    # 전체 성과 요약 페이지 — 팔로워 수 변화 차트
+    overall_summary_page = report_json.get("overall_summary_page", {"is_visible": False})
+    if overall_summary_page.get("is_visible"):
+        overall_summary_page["chart"] = render_follower_change_chart(
+            overall_summary_page.get("follower_start_value"),
+            overall_summary_page.get("follower_end_value"),
+            overall_summary_page.get("first_date"),
+            overall_summary_page.get("last_date"),
+            color_map,
+        )
+
     # 구매 요약 페이지 — 썸네일 처리
     purchase_summary_page = report_json.get("purchase_summary_page", {"is_visible": False})
     if purchase_summary_page.get("is_visible"):
@@ -1026,6 +1041,7 @@ def run(config=None):
         #     }
         # ]
         "appendix": [],
+        "overall_summary_page": overall_summary_page,  # 전체 성과 요약 추가
         "purchase_summary_page": report_json.get(
             "purchase_summary_page",
             {"is_visible": False}
@@ -1091,6 +1107,8 @@ def run_batch(csv_path):
             "avoid_age": _parse_multi(row.get("avoid_age", "")),
             "avoid_gender": str(row.get("avoid_gender", "")).strip(),
             "theme_color": str(row.get("theme_color", "")).strip() or _DEFAULT_CONFIG["theme_color"],
+            "filter_scope": str(row.get("filter_scope", "")).strip() or _DEFAULT_CONFIG["filter_scope"],
+            "include_out_of_period_post_ads": str(row.get("include_out_of_period_post_ads", "")).strip() or _DEFAULT_CONFIG["include_out_of_period_post_ads"],
         }
         print(f"\n{'='*60}\n▶ [{i+1}/{len(df)}] target_id={config['target_id']} 처리 시작\n{'='*60}")
         try:

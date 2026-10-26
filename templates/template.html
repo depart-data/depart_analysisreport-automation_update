@@ -1200,6 +1200,49 @@
 
 
   {# =========================================================
+     Overall - Summary (별첨 앞)
+     ========================================================= #}
+  {% if overall_summary_page and overall_summary_page.is_visible %}
+  <section class="page">
+    {{ page_header('전체 성과 분석') }}
+    {{ big_title('전체 성과 요약') }}
+
+    <div class="page-body overall-summary">
+      <div class="span-12 overall-summary__follower">
+        <div class="overall-summary__label">디파트와 함께하면서 생긴 팔로워 수 변화</div>
+        {% if overall_summary_page.chart %}
+          <div class="overall-summary__chart">{{ overall_summary_page.chart | safe }}</div>
+        {% else %}
+          <div class="overall-summary__value">-</div>
+        {% endif %}
+      </div>
+
+      <div class="span-12 overall-summary__kpis">
+        <div class="overall-summary__kpi">
+          <div class="overall-summary__label">디파트와 함께하면서 발생한 총 조회수</div>
+          <div class="overall-summary__value">{{ overall_summary_page.total_views }}{% if overall_summary_page.total_views != '-' %}회{% endif %}</div>
+        </div>
+        <div class="overall-summary__divider"></div>
+        <div class="overall-summary__kpi">
+          <div class="overall-summary__label">디파트와 함께하면서 발생한 총 프로필 방문</div>
+          <div class="overall-summary__value">{{ overall_summary_page.total_profile_visits }}{% if overall_summary_page.total_profile_visits != '-' %}회{% endif %}</div>
+        </div>
+      </div>
+
+      <div class="span-12 overall-summary__foot">
+        <div class="overall-summary__period">
+          <span class="overall-summary__period-label">집계 기간</span>
+          <span>{{ overall_summary_page.period }}</span>
+        </div>
+        <div class="overall-summary__note">*팔로워 수 변화: 첫 집계일과 마지막 집계일의 팔로워 수<br>*총 프로필 방문: 광고로 발생한 프로필 방문 수</div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+
+
+  {# =========================================================
      Appendix
      - ✅ appendix_groups 있으면 그룹별 출력
      - ✅ 없으면 appendix 리스트 1회 출력

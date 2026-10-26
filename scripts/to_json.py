@@ -8,8 +8,8 @@ from scripts.processor import (
     get_account_meta, get_account_name, get_active_ad_count, get_total_content_count,
     get_last_collected_date,
     get_ad_period, get_content_period, get_total_keyword_count,
-    get_instagram_followers, get_ctr_data, get_ctr_monthly_data, get_organic_data, get_organic_monthly_data, get_imp_threshold,
-    get_content_ctr_data, get_a_content_target_ctr_data, get_profile_visits_monthly, get_content_reaction_data, get_reaction_metric_avg,
+    get_instagram_followers, get_instagram_followers_weekly, clean_follower_series, get_overall_summary, filter_full_weeks, get_ctr_data, get_ctr_monthly_data, get_organic_data, get_organic_monthly_data, get_imp_threshold,
+    get_content_ctr_data, get_a_content_target_ctr_data, get_profile_visits_weekly, get_profile_visits_monthly, get_content_reaction_data, get_reaction_metric_avg,
     log_missing_reaction_insights,
     get_target_avg_imp_ctr, get_target_avg_imp_ctr_threshold,
     get_raw_keyword_performance, filter_keywords_by_pos, get_overall_ctr,
@@ -23,6 +23,7 @@ from scripts.processor import (
     get_target_spend_distribution, 
     get_ctr_follows_scatter_data, get_prev_quarter_ctr_follows_means,
     get_prev_quarter_organic_avg, get_prev_quarter_profile_visits_avg, get_prev_quarter_ctr_avg, get_quarter_info,
+    normalize_filter_scope, set_include_out_of_period_post_ads,
 )
 
 import re
@@ -85,8 +86,14 @@ def _assign_reaction_ranks(items, metric_col):
     return items
 
 
-def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", avoid_age="", avoid_gender="", currency=""):
+def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", avoid_age="", avoid_gender="", currency="", filter_scope="all", include_out_of_period_post_ads=False):
     # 1. 기본 설정 및 파라미터
+    # filter_scope: "all"(광고+게시물 업로드일 모두 기간 필터) / "ads_only"(광고 성과일만 기간 필터)
+    filter_scope = normalize_filter_scope(filter_scope)
+    print(f"날짜 필터 범위: {filter_scope}")
+    # include_out_of_period_post_ads: 광고 단위 집계에 '기간 밖에 업로드된 게시물을 쓴 광고'를 포함할지 (기본 False = 제외)
+    set_include_out_of_period_post_ads(include_out_of_period_post_ads)
+    print(f"기간 외 게시물 광고 포함: {include_out_of_period_post_ads}")
 
     # 실제 집계 마지막 날: date_end가 속한 주의 직전 일요일
     end_dt = datetime.strptime(end, "%Y-%m-%d")
@@ -102,7 +109,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
     acc_name, db_currency = get_account_meta(target_id)
     ad_start, ad_end = get_ad_period(target_id, start, end)
-    content_start, content_end = get_content_period(target_id, start, end)
+    content_start, content_end = get_content_period(target_id, start, end, filter_scope)
 
     # 통화 설정: DB의 ad_accounts.currency 기준 (USD → $, 그 외 → 원)
     currency = "dollar" if db_currency == "USD" else ""
@@ -124,7 +131,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
         "summary": {
             "total_ads": get_active_ad_count(target_id, start, end),
-            "total_contents": get_total_content_count(target_id, start, end),
+            "total_contents": get_total_content_count(target_id, start, end, filter_scope),
             "total_keywords": get_total_keyword_count(target_id, start, end)
         },
         "datasets": {}
@@ -179,18 +186,20 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
     # 1. 인스타그램 및 오가닉 추이
     print("인스타그램 및 오가닉 추이 생성 중...")
-    insta_df = get_instagram_followers(fb_ad_account_id, start, effective_end)
+    # 주별 1개 값만 사용 (집계 오류로 하루만 급락한 값은 제외)
+    insta_df = get_instagram_followers_weekly(fb_ad_account_id, start, effective_end)
 
     # 'date' -> 'updated_at'으로 수정
     add_ds("insta_followers", "line", "팔로워 추이", insta_df, "명", "updated_at", ["follower_count"])
     
-    # 주별
+    # 주별 (06-30 이전 주간 합계/이후 일별 수집을 월~일 주 단위로 통일)
+    profile_weekly_df = get_profile_visits_weekly(fb_ad_account_id, start, effective_end)
     prev_q_profile_visits = get_prev_quarter_profile_visits_avg(fb_ad_account_id, end)
     profile_visits_meta = {"current_quarter": current_quarter_info}
     if prev_q_profile_visits:
         profile_visits_meta["prev_quarter_avg"] = prev_q_profile_visits
     add_ds(
-        "insta_profile_visits", "line", "프로필 방문 수(주별)", insta_df, "회", "updated_at", ["profile_views"],
+        "insta_profile_visits", "line", "프로필 방문 수(주별)", profile_weekly_df, "회", "updated_at", ["profile_views"],
         extra_meta=profile_visits_meta
     )
 
@@ -198,7 +207,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     profile_monthly_df = get_profile_visits_monthly(fb_ad_account_id, start, effective_end)
 
     # 주별 데이터가 8개 미만이면 월별 집계는 의미가 없으므로 표시하지 않는다.
-    if insta_df is not None and len(insta_df) >= 8:
+    if profile_weekly_df is not None and len(profile_weekly_df) >= 8:
         add_ds(
             "insta_profile_visits_monthly",
             "line",                   # 방문수는 막대 그래프가 보기 편합니다
@@ -235,10 +244,27 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         )
 
 
+    # --- 전체 성과 요약 페이지 ---
+    overall_summary = get_overall_summary(target_id, fb_ad_account_id, start, effective_end)
+
+    def _fmt_count(value):
+        return "-" if value is None else f"{value:,}"
+
+    final_report["overall_summary_page"] = {
+        "is_visible": any(overall_summary[k] is not None for k in ("follower_end", "total_views", "total_profile_visits")),
+        "follower_start_value": overall_summary["follower_start"],
+        "follower_end_value": overall_summary["follower_end"],
+        "first_date": overall_summary["first_date"],
+        "last_date": overall_summary["last_date"],
+        "total_views": _fmt_count(overall_summary["total_views"]),
+        "total_profile_visits": _fmt_count(overall_summary["total_profile_visits"]),
+        "period": f"{overall_summary['first_date']} ~ {overall_summary['last_date']}" if overall_summary["first_date"] else "-",
+    }
+
     # --- 팔로워 인구통계학 페이지 ---
     datasets = final_report["datasets"]
 
-    followers_df = get_instagram_followers(fb_ad_account_id, start, effective_end)
+    followers_df = clean_follower_series(get_instagram_followers(fb_ad_account_id, start, effective_end))
     current_followers = None
     if followers_df is not None and not followers_df.empty:
         follower_series = followers_df["follower_count"].dropna()
@@ -346,7 +372,8 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
     # 2. CTR 추이
     print("CTR 추이 생성 중...")
-    ctr_weekly_df = get_ctr_data(target_id, start, effective_end)
+    # 주별 그래프는 7일이 모두 기간에 포함된 주만 사용
+    ctr_weekly_df = filter_full_weeks(get_ctr_data(target_id, start, effective_end), "week_start", start, effective_end)
     prev_q_ctr = get_prev_quarter_ctr_avg(target_id, end)
     ctr_meta = {"current_quarter": current_quarter_info}
     if prev_q_ctr:
@@ -365,9 +392,9 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
     if total_purchases >= 10:
         print("ROAS, 구매건수 생성 중...")
-        roas_weekly_df = get_purchase_roas_weekly(target_id, start, effective_end)
+        roas_weekly_df = filter_full_weeks(get_purchase_roas_weekly(target_id, start, effective_end), "week_start", start, effective_end, label="sunday")
         roas_monthly_df = get_purchase_roas_monthly(target_id, start, effective_end)
-        purchase_weekly_df = get_purchase_count_weekly(target_id, start, effective_end)
+        purchase_weekly_df = filter_full_weeks(get_purchase_count_weekly(target_id, start, effective_end), "week_start", start, effective_end, label="sunday")
         purchase_monthly_df = get_purchase_count_monthly(target_id, start, effective_end)
 
         has_roas_data = bool(roas_weekly_df is not None and not roas_weekly_df.empty and (roas_weekly_df["avg_roas"].fillna(0) != 0).any())
@@ -431,7 +458,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         print("광고비/매출발생 데이터 없음 (요약 페이지 표시 중)...")
     elif has_revenue_data(target_id, start, effective_end):
         print("광고비/매출발생 데이터 생성 중...")
-        spend_revenue_weekly_df = get_spend_and_revenue_weekly(target_id, start, effective_end)
+        spend_revenue_weekly_df = filter_full_weeks(get_spend_and_revenue_weekly(target_id, start, effective_end), "week_start", start, effective_end)
         spend_revenue_monthly_df = get_spend_and_revenue_monthly(target_id, start, effective_end)
 
         has_revenue = bool(
@@ -487,7 +514,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         }
 
      #  --- 구매 발생 컨텐츠  --
-    purchase_contents_data = get_purchase_contents_pages_data(target_id, start, end)
+    purchase_contents_data = get_purchase_contents_pages_data(target_id, start, end, filter_scope)
 
     if purchase_contents_data and purchase_contents_data.get("total_count", 0) > 0:
         print("구매 발생 콘텐츠 생성 중...")
@@ -694,7 +721,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
     print("콘텐츠별 타겟 성과 (상/하위) 생성 중...")
     for is_top in [True, False]:
         suffix = "top" if is_top else "bottom"
-        contents = get_content_ctr_data(target_id, start, end, threshold, is_top=is_top)
+        contents = get_content_ctr_data(target_id, start, end, threshold, is_top=is_top, filter_scope=filter_scope)
         
         content_results = []
         for item in contents[:3]: # 상/하위 3개씩
@@ -716,9 +743,9 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
     # 6. 반응 기반 콘텐츠 성과 (지표별 TOP/BOTTOM 3, 6페이지)
     print("반응 기반 콘텐츠 성과 생성 중...")
-    log_missing_reaction_insights(target_id, start, end)
+    log_missing_reaction_insights(target_id, start, end, filter_scope)
     for metric in ['likes', 'saves', 'shares']:
-        overall_avg = get_reaction_metric_avg(target_id, start, end, metric=metric)
+        overall_avg = get_reaction_metric_avg(target_id, start, end, metric=metric, filter_scope=filter_scope)
         metric_has_data = float(overall_avg or 0) > 0          # ★ 그 메트릭만 판정
 
     # metric 컬럼 이름 매핑: DB 반환 키와 일치시킴
@@ -734,7 +761,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         # 상위 5개 콘텐츠 수치의 최대값과 overall_avg 중 더 큰 값을 사용한다.
         # 이렇게 하면 하위 차트에서 막대가 과장되어 늘어나는 현상을 방지한다.
         top_contents_for_scale = get_content_reaction_data(
-            target_id, start, end, is_top=True, metric=metric
+            target_id, start, end, is_top=True, metric=metric, filter_scope=filter_scope
         )
         top_values_for_scale = [
             float(item.get(metric_col, 0) or 0)
@@ -751,7 +778,7 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
         for is_top in [True, False]:
             suffix = "top" if is_top else "bottom"
             reaction_contents = get_content_reaction_data(
-                target_id, start, end, is_top=is_top, metric=metric
+                target_id, start, end, is_top=is_top, metric=metric, filter_scope=filter_scope
             )
 
             for item in (reaction_contents or []):
@@ -808,8 +835,8 @@ def run(target_id, fb_ad_account_id, start, end, main_age="", main_gender="", av
 
 
     # ── CTR × 팔로우 산점도 데이터 ───────────────────────────
-    scatter_rows = get_ctr_follows_scatter_data(target_id, start, end)
-    prev_means = get_prev_quarter_ctr_follows_means(target_id, start)
+    scatter_rows = get_ctr_follows_scatter_data(target_id, start, end, filter_scope)
+    prev_means = get_prev_quarter_ctr_follows_means(target_id, start, filter_scope)
 
     if scatter_rows:
         final_report["ctr_follows_scatter"] = {
