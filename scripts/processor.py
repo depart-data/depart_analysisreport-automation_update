@@ -59,6 +59,82 @@ def get_account_name(account_id):
     return name
 
 # ----------------------------------
+# 날짜 필터 범위(filter_scope)
+#   "all"      : 광고 성과일(apd.as_of_date) + 게시물 업로드일(ig_timestamp) 모두 기간으로 필터링 (기본값)
+#   "ads_only" : 광고 성과일(apd.as_of_date)만 기간으로 필터링 (게시물 업로드일은 무관)
+FILTER_SCOPE_ALL = "all"
+FILTER_SCOPE_ADS_ONLY = "ads_only"
+
+
+def normalize_filter_scope(filter_scope):
+    scope = str(filter_scope or FILTER_SCOPE_ALL).strip().lower()
+    if scope not in (FILTER_SCOPE_ALL, FILTER_SCOPE_ADS_ONLY):
+        raise ValueError(f"filter_scope는 '{FILTER_SCOPE_ALL}' 또는 '{FILTER_SCOPE_ADS_ONLY}'만 가능합니다: {filter_scope!r}")
+    return scope
+
+
+def _upload_date_filter(date_start, date_end, filter_scope, alias="ig", allow_null=False):
+    """filter_scope가 'all'이면 게시물 업로드일(KST) 기간 조건 SQL을, 아니면 빈 문자열을 반환한다."""
+    if normalize_filter_scope(filter_scope) != FILTER_SCOPE_ALL:
+        return ""
+    upload_date = f"({alias}.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date"
+    cond = (
+        f"({upload_date} >= '{date_start}'::date"
+        f" AND {upload_date} <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date)"
+    )
+    if allow_null:
+        return f"AND ({alias}.ig_timestamp IS NULL OR {cond})"
+    return f"AND {cond}"
+
+
+def _reaction_period_filter(date_start, date_end, filter_scope, ad_alias="ad"):
+    """
+    반응 지표 쿼리용 기간 조건.
+    반응 쿼리는 광고 성과 테이블을 조인하지 않으므로,
+    'ads_only'일 때는 업로드일 대신 '기간 내 광고 성과가 발생한 게시물'로 대상을 한정한다.
+    """
+    if normalize_filter_scope(filter_scope) == FILTER_SCOPE_ALL:
+        return _upload_date_filter(date_start, date_end, filter_scope)
+    return f"""AND EXISTS (
+                SELECT 1 FROM ad_performance_daily apd_p
+                WHERE apd_p.ad_id = {ad_alias}.id
+                  AND apd_p.as_of_date >= '{date_start}'
+                  AND apd_p.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
+            )"""
+
+# ----------------------------------
+
+
+# 광고 단위 집계에서 "기간 밖에 업로드된 게시물을 쓴 광고" 포함 여부 (기본값 False = 제외)
+# to_json.run()에서 set_include_out_of_period_post_ads()로 리포트 실행마다 설정한다.
+_include_out_of_period_post_ads = False
+
+
+def set_include_out_of_period_post_ads(value):
+    global _include_out_of_period_post_ads
+    if isinstance(value, str):
+        value = value.strip().lower() in ("1", "true", "yes", "y")
+    _include_out_of_period_post_ads = bool(value)
+
+
+def _ad_post_period_filter(date_start, date_end, ad_alias="ad"):
+    """
+    광고 성과가 기간 안에 있어도, 광고에 연결된 게시물의 업로드일(KST)이 기간 밖이면 제외하는 조건.
+    업로드일 기간은 _upload_date_filter와 동일(date_end가 속한 주의 직전 일요일까지).
+    연결된 게시물이 없거나 업로드일을 알 수 없는 광고는 판단할 수 없으므로 유지한다.
+    """
+    if _include_out_of_period_post_ads:
+        return ""
+    upload_date = "(ig_pf.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date"
+    return f"""AND NOT EXISTS (
+                SELECT 1 FROM ig_contents ig_pf
+                WHERE ig_pf.fb_ig_media_id = {ad_alias}.source_ig_media_id
+                  AND ig_pf.ig_timestamp IS NOT NULL
+                  AND ({upload_date} < '{date_start}'::date
+                       OR {upload_date} > (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date)
+            )"""
+
+# ----------------------------------
 
 # ad_performance_daily 실제 마지막 적재일
 def get_last_collected_date(account_id, date_start, date_end):
@@ -101,6 +177,7 @@ def get_active_ad_count(account_id, date_start, date_end):
         JOIN campaigns c ON ads.campaign_id = c.id
         JOIN ad_performance_daily apd ON ad.id = apd.ad_id
         WHERE ad.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "ad")}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26)
@@ -116,7 +193,7 @@ def get_active_ad_count(account_id, date_start, date_end):
     return 0
 
 # 총 콘텐츠 개수
-def get_total_content_count(account_id, date_start, date_end):
+def get_total_content_count(account_id, date_start, date_end, filter_scope=FILTER_SCOPE_ALL):
     """해당 기간 동안 성과가 발생한 광고에 연결된 콘텐츠(source_ig_media_id)의 총 개수를 반환"""
     engine = get_engine()
 
@@ -132,6 +209,7 @@ def get_total_content_count(account_id, date_start, date_end):
         WHERE ad.account_id = {account_id}
             AND ig.ig_permalink IS NOT NULL
             AND ig.ig_timestamp IS NOT NULL
+            {_upload_date_filter(date_start, date_end, filter_scope)}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26)
@@ -148,17 +226,22 @@ def get_total_content_count(account_id, date_start, date_end):
 
 # 광고 진행 기간
 def get_ad_period(account_id, date_start, date_end):
+    # 대상 광고: 생성일(KST)이 date_start ~ date_end 안에 있는 광고
+    # 표시 기간: 해당 광고들의 실제 성과 발생일(as_of_date) 범위 (date_end가 속한 주의 월요일까지)
     engine = get_engine()
     query = f"""
         SELECT
-            MIN(ad.fb_created_time) AS start_date,
-            MAX(ad.fb_created_time)::date AS end_date
+            MIN(apd.as_of_date) AS start_date,
+            MAX(apd.as_of_date) AS end_date
         FROM ads ad
         JOIN ad_sets ads ON ad.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
         JOIN ad_performance_daily apd ON ad.id = apd.ad_id
         WHERE ad.account_id = {account_id}
-            AND apd.as_of_date >= '{date_start}'
+            {_ad_post_period_filter(date_start, date_end, "ad")}
+            AND (ad.fb_created_time AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
+            AND (ad.fb_created_time AT TIME ZONE 'Asia/Seoul')::date <= '{date_end}'::date
+            AND apd.as_of_date >= '{date_start}'::date
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26) OR
                 c.name ILIKE '%%depart%%'
@@ -173,10 +256,10 @@ def get_ad_period(account_id, date_start, date_end):
     return None, None
 
 # 콘텐츠 진행 기간
-def get_content_period(account_id, date_start, date_end):
+def get_content_period(account_id, date_start, date_end, filter_scope=FILTER_SCOPE_ALL):
     engine = get_engine()
     # 해당 기간에 실제 노출된 광고들의 ig_timestamp(업로드일) 범위를 반환합니다.
-    # ig_timestamp 날짜로 필터링하지 않고, ad_performance_daily 기준으로 대상 광고를 특정합니다.
+    # ad_performance_daily 기준으로 대상 광고를 특정하고, filter_scope='all'이면 업로드일도 기간으로 제한합니다.
     query = f"""
         SELECT
             MIN(ig.ig_timestamp) AS start_date,
@@ -189,6 +272,7 @@ def get_content_period(account_id, date_start, date_end):
             ON ad.source_ig_media_id = ig.fb_ig_media_id
         WHERE ad.account_id = {account_id}
             AND ig.ig_timestamp IS NOT NULL
+            {_upload_date_filter(date_start, date_end, filter_scope)}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26) 
@@ -215,6 +299,7 @@ def get_total_keyword_count(account_id, date_start, date_end):
         JOIN ad_performance_daily apd ON ad.id = apd.ad_id
         LEFT JOIN ad_keywords ak ON ad.id = ak.ad_id
         WHERE ad.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "ad")}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26) 
@@ -285,7 +370,8 @@ def get_instagram_followers(fb_ad_account_id, date_start, date_end):
         aa.name AS account_name, 
         it.as_of_date AS updated_at, 
         it.followers_count AS follower_count, 
-        it.profile_views
+        it.profile_views,
+        it.total_views
     FROM ig_insights_total it
     JOIN ig_accounts ia
         ON it.ig_id = ia.id
@@ -308,26 +394,177 @@ def get_instagram_followers(fb_ad_account_id, date_start, date_end):
         
     return df
 
-def get_profile_visits_monthly(fb_ad_account_id, date_start, date_end):
-    # 1. 원본 데이터 가져오기
-    df = get_instagram_followers(fb_ad_account_id, date_start, date_end)
+def filter_full_weeks(df, week_col, date_start, date_end, label="monday"):
+    """
+    주별 df에서 월~일 7일이 모두 [date_start, date_end] 안에 들어가는 주만 남긴다.
+    label: week_col 값이 주의 월요일이면 "monday", 일요일이면 "sunday"
+    (예: date_end가 월요일이면 그 주는 하루만 포함되므로 제외)
+    """
+    if df is None or df.empty or week_col not in df.columns:
+        return df
 
+    start = pd.Timestamp(date_start).normalize()
+    end = pd.Timestamp(date_end).normalize()
+    first_monday = start + pd.Timedelta(days=(7 - start.weekday()) % 7)
+    last_sunday = end - pd.Timedelta(days=(end.weekday() + 1) % 7)
+
+    week_monday = pd.to_datetime(df[week_col])
+    if label == "sunday":
+        week_monday = week_monday - pd.Timedelta(days=6)
+
+    mask = (week_monday >= first_monday) & (week_monday + pd.Timedelta(days=6) <= last_sunday)
+    filtered = df[mask.values].reset_index(drop=True)
+    return filtered if not filtered.empty else None
+
+
+# 팔로워 집계 오류 판정 기준: 직전 유효값 대비 이 비율 이상 급락했다가 다음날 바로 복귀하면 오류로 본다
+FOLLOWER_DIP_THRESHOLD = 0.05
+
+
+def clean_follower_series(df):
+    """
+    일별 팔로워 df에서 집계 오류 행을 제거한다.
+    오류 조건: 직전 유효값 대비 FOLLOWER_DIP_THRESHOLD 이상 낮고,
+              바로 다음날 값이 직전 유효값 수준(같은 기준 이내)으로 돌아온 경우
+    """
+    if df is None or df.empty or 'follower_count' not in df.columns:
+        return df
+
+    df = df.dropna(subset=['follower_count']).copy()
+    df['updated_at'] = pd.to_datetime(df['updated_at'])
+    df = df.sort_values('updated_at').reset_index(drop=True)
+
+    counts = df['follower_count'].astype(float).tolist()
+    dates = df['updated_at'].tolist()
+    keep = [True] * len(df)
+    prev = None
+    for i, cur in enumerate(counts):
+        if prev is not None and i + 1 < len(counts):
+            floor = prev * (1 - FOLLOWER_DIP_THRESHOLD)
+            next_day = (dates[i + 1] - dates[i]).days == 1
+            if next_day and cur < floor and counts[i + 1] >= floor:
+                keep[i] = False
+                print(f"팔로워 집계 오류 제외: {dates[i].date()} ({int(cur)}명, 직전 {int(prev)}명)")
+                continue
+        prev = cur
+
+    cleaned = df[keep].reset_index(drop=True)
+    return cleaned if not cleaned.empty else None
+
+
+def get_instagram_followers_weekly(fb_ad_account_id, date_start, date_end):
+    """팔로워 추이(주별): 집계 오류를 제외한 뒤 월~일 주마다 마지막 값 하나만 남긴다."""
+    df = clean_follower_series(get_instagram_followers(fb_ad_account_id, date_start, date_end))
     if df is None or df.empty:
         return None
-    
-    if 'profile_views' not in df.columns:
+
+    df['week'] = df['updated_at'].dt.to_period('W-SUN')
+    weekly_df = df.groupby('week', sort=True).tail(1).drop(columns='week').reset_index(drop=True)
+    return weekly_df
+
+
+def get_overall_summary(account_id, fb_ad_account_id, date_start, date_end):
+    """
+    전체 성과 요약 페이지 데이터.
+      - follower_start / follower_end: 첫 집계일 / 마지막 집계일 팔로워 수 (집계 오류 제외)
+      - total_views: 인스타 계정 전체 조회수 합계 (06-30 이전 주간 수집행 + 이후 일별행)
+      - total_profile_visits: 광고로 발생한 프로필 방문 수 합계
+    """
+    summary = {
+        "follower_start": None, "follower_end": None, "first_date": None, "last_date": None,
+        "total_views": None, "total_profile_visits": None,
+    }
+
+    raw_df = get_instagram_followers(fb_ad_account_id, date_start, date_end)
+    followers_df = clean_follower_series(raw_df)
+    if followers_df is not None and not followers_df.empty:
+        summary["follower_start"] = int(followers_df['follower_count'].iloc[0])
+        summary["follower_end"] = int(followers_df['follower_count'].iloc[-1])
+        summary["first_date"] = followers_df['updated_at'].iloc[0].strftime('%Y-%m-%d')
+        summary["last_date"] = followers_df['updated_at'].iloc[-1].strftime('%Y-%m-%d')
+
+    if raw_df is not None and 'total_views' in raw_df.columns:
+        views = pd.to_numeric(raw_df['total_views'], errors='coerce').dropna()
+        if not views.empty:
+            summary["total_views"] = int(views.sum())
+
+    engine = get_engine()
+    query = f"""
+        SELECT SUM(apd.instagram_profile_visits) AS total_profile_visits
+        FROM ads ad
+        JOIN ad_sets ads ON ad.ad_set_id = ads.id
+        JOIN campaigns c ON ads.campaign_id = c.id
+        JOIN ad_performance_daily apd ON ad.id = apd.ad_id
+        WHERE ad.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "ad")}
+            AND apd.as_of_date >= '{date_start}'
+            -- 집계 기간(팔로워·조회수)과 같은 끝: date_end가 속한 주의 직전 일요일
+            AND apd.as_of_date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+            AND ({account_id} IN (3, 2, 26) 
+                OR c.name ILIKE '%%depart%%' 
+                OR c.name LIKE '%%디파트%%' 
+                OR c.name ILIKE '%%de;part%%')
+    """
+    df = pd.read_sql(query, engine)
+    if not df.empty and pd.notna(df['total_profile_visits'].iloc[0]):
+        summary["total_profile_visits"] = int(df['total_profile_visits'].iloc[0])
+
+    return summary
+
+
+# ig_insights_total 수집 방식 변경일
+#   이전: 주 1회 수집 → 기존 로직 그대로 (수집 행 1개 = 주별 점 1개)
+#   이후: 매일 하루치 수집 → 월~일 주 단위로 합산해 주별 점 1개
+PROFILE_VIEWS_DAILY_SINCE = pd.Timestamp("2026-06-30")
+
+
+def get_profile_visits_weekly(fb_ad_account_id, date_start, date_end):
+    """
+    주별 프로필 방문수.
+      - PROFILE_VIEWS_DAILY_SINCE 이전: 수집 행을 그대로 사용 (updated_at = 수집일)
+      - 이후: 일별 값을 월~일 주 단위로 합산 (updated_at = 주 시작 월요일, 전환 주는 전환일)
+    """
+    df = get_instagram_followers(fb_ad_account_id, date_start, date_end)
+    if df is None or df.empty or 'profile_views' not in df.columns:
         return None
 
-    # 2. 실제 달력 연월 기준으로 그룹화 (4개 단위 아님)
+    df = df[['updated_at', 'profile_views']].dropna(subset=['profile_views']).copy()
+    df['updated_at'] = pd.to_datetime(df['updated_at'])
+
+    old_df = df[df['updated_at'] < PROFILE_VIEWS_DAILY_SINCE]
+    new_df = df[df['updated_at'] >= PROFILE_VIEWS_DAILY_SINCE].copy()
+    if not new_df.empty:
+        new_df['week_start'] = new_df['updated_at'].dt.to_period('W-SUN').dt.start_time
+        new_df = new_df.groupby('week_start', sort=True)['profile_views'].sum().reset_index()
+        new_df['updated_at'] = new_df['week_start'].clip(lower=PROFILE_VIEWS_DAILY_SINCE)
+        new_df = new_df[['updated_at', 'profile_views']]
+
+    weekly_df = pd.concat([old_df, new_df], ignore_index=True).sort_values('updated_at').reset_index(drop=True)
+    weekly_df['profile_views'] = weekly_df['profile_views'].astype(int)
+    return weekly_df if not weekly_df.empty else None
+
+
+def get_profile_visits_monthly(fb_ad_account_id, date_start, date_end):
+    """
+    월별 프로필 방문수 (달력 월 합계).
+      - PROFILE_VIEWS_DAILY_SINCE 이전: 해당 월 수집 행(주 1회) 합계 (기존 로직)
+      - 이후: 해당 월 일별 값 합계
+    두 구간 모두 '해당 월에 수집된 행의 합'이므로 한 번에 합산한다.
+    """
+    df = get_instagram_followers(fb_ad_account_id, date_start, date_end)
+    if df is None or df.empty or 'profile_views' not in df.columns:
+        return None
+
+    df = df[['updated_at', 'profile_views']].dropna(subset=['profile_views']).copy()
     df['updated_at'] = pd.to_datetime(df['updated_at'])
     df['year_month'] = df['updated_at'].dt.to_period('M')
 
-    # 3. 연월별 합산 (방문수는 sum, updated_at은 해당 월의 첫 날짜 사용)
+    # 연월별 합산 (updated_at은 해당 월의 첫 데이터 일자)
     monthly_df = df.groupby('year_month', sort=True).agg(
         updated_at=('updated_at', 'first'),
         profile_views=('profile_views', 'sum')
     ).reset_index(drop=True)
-
+    monthly_df['profile_views'] = monthly_df['profile_views'].astype(int)
     return monthly_df
 
 # 주차별 CTR(%) 데이터 가져오기
@@ -347,6 +584,7 @@ def get_ctr_data(account_id, date_start, date_end):
         JOIN campaigns c ON ads.campaign_id = c.id
         LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
         WHERE ad.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "ad")}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26) 
@@ -379,6 +617,7 @@ def get_ctr_monthly_data(account_id, date_start, date_end):
         JOIN campaigns c ON ads.campaign_id = c.id
         LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
         WHERE ad.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "ad")}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26) 
@@ -509,8 +748,8 @@ def get_prev_quarter_organic_avg(account_id, date_end):
 def get_prev_quarter_profile_visits_avg(fb_ad_account_id, date_end):
     """이전 분기 프로필 방문수(주별) 평균"""
     year, quarter, start_date, end_date = get_prev_quarter_range(date_end)
-    df = get_instagram_followers(fb_ad_account_id, str(start_date), str(end_date))
-    if df is None or df.empty or 'profile_views' not in df.columns:
+    df = get_profile_visits_weekly(fb_ad_account_id, str(start_date), str(end_date))
+    if df is None or df.empty:
         return None
     vals = df['profile_views'].dropna()
     if vals.empty:
@@ -545,6 +784,7 @@ def get_imp_threshold(account_id, date_start, date_end):
         JOIN campaigns c ON ads.campaign_id = c.id
         LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
         WHERE ad.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "ad")}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26) 
@@ -559,7 +799,7 @@ def get_imp_threshold(account_id, date_start, date_end):
     return total_site_imp, threshold
 
 # CTR 상위 광고 3개 정보 데이터 가져오기 (임계점 이상 노출 광고)  
-def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=True):
+def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=True, filter_scope=FILTER_SCOPE_ALL):
     engine = get_engine()
     
     order_direction = "DESC" if is_top else "ASC"
@@ -596,6 +836,7 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
             OR c.name LIKE '%%디파트%%'
             OR c.name ILIKE '%%de;part%%')
         AND ig.fb_ig_media_id is NOT NULL
+        {_upload_date_filter(date_start, date_end, filter_scope)}
     GROUP BY
         COALESCE(ig.fb_ig_media_id, 'AD_' || ad.id::text)   -- ★ 이 키 하나로 "중복만 합치기"
     HAVING SUM(apd.impressions) >= {threshold}
@@ -628,7 +869,7 @@ def get_content_ctr_data(account_id, date_start, date_end, threshold, is_top=Tru
 
 
 # 반응 기반 콘텐츠 성과 (좋아요+저장+공유 합산) 상위/하위 3개
-def get_content_reaction_data(account_id, date_start, date_end, is_top=True, metric='total_reaction'):
+def get_content_reaction_data(account_id, date_start, date_end, is_top=True, metric='total_reaction', filter_scope=FILTER_SCOPE_ALL):
     engine = get_engine()
     order_direction = "DESC" if is_top else "ASC"
 
@@ -720,9 +961,7 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
             ) ici ON true
         WHERE ad.account_id = {account_id}
             AND ig.ig_timestamp IS NOT NULL
-            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
-            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date
-                <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+            {_reaction_period_filter(date_start, date_end, filter_scope)}
             AND ({account_id} IN (3, 2, 26)
                 OR c.name ILIKE '%%depart%%'
                 OR c.name LIKE '%%디파트%%'
@@ -769,7 +1008,7 @@ def get_content_reaction_data(account_id, date_start, date_end, is_top=True, met
     return results
 
 
-def get_reaction_metric_avg(account_id, date_start, date_end, metric='likes'):
+def get_reaction_metric_avg(account_id, date_start, date_end, metric='likes', filter_scope=FILTER_SCOPE_ALL):
     """
     전체 기간(date_start ~ date_end), 전체 콘텐츠를 대상으로
     지정 반응 지표(likes / saves / shares)의 평균값을 반환한다.
@@ -803,9 +1042,7 @@ def get_reaction_metric_avg(account_id, date_start, date_end, metric='likes'):
         ) ici ON true
         WHERE ad.account_id = {account_id}
             AND ig.ig_timestamp IS NOT NULL
-            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
-            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date
-                <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+            {_reaction_period_filter(date_start, date_end, filter_scope)}
             AND ({account_id} IN (3,2,26)
                 OR c.name ILIKE '%%depart%%' OR c.name LIKE '%%디파트%%' OR c.name ILIKE '%%de;part%%')
         ORDER BY ig.fb_ig_media_id       -- DISTINCT ON dedup (콘텐츠당 1행)
@@ -818,7 +1055,7 @@ def get_reaction_metric_avg(account_id, date_start, date_end, metric='likes'):
     return float(result['metric_avg'].iloc[0])
 
 
-def log_missing_reaction_insights(account_id, date_start, date_end):
+def log_missing_reaction_insights(account_id, date_start, date_end, filter_scope=FILTER_SCOPE_ALL):
     """
     리포트 기간 내 분석 대상 게시물(source_ig_media_id 기준) 중
     ig_content_insights에 데이터가 전혀 없는 게시물을 찾아 콘솔에 로그로 표시한다.
@@ -840,9 +1077,7 @@ def log_missing_reaction_insights(account_id, date_start, date_end):
             ON ici.content_id = ig.id
         WHERE ad.account_id = {account_id}
             AND ig.ig_timestamp IS NOT NULL
-            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
-            AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date
-                <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
+            {_reaction_period_filter(date_start, date_end, filter_scope)}
             AND ({account_id} IN (3, 2, 26)
                 OR c.name ILIKE '%%depart%%'
                 OR c.name LIKE '%%디파트%%'
@@ -927,6 +1162,7 @@ def get_target_avg_imp_ctr(account_id, date_start, date_end):
         JOIN campaigns c ON ads.campaign_id = c.id
         LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
         WHERE ad.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "ad")}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26) 
@@ -963,6 +1199,7 @@ def get_target_avg_imp_ctr_threshold(account_id, date_start, date_end, threshold
         JOIN campaigns c ON ads.campaign_id = c.id
         LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
         WHERE ad.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "ad")}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26) 
@@ -1064,6 +1301,7 @@ def get_raw_keyword_performance(account_id, date_start, date_end, target_age=Non
             INNER JOIN ad_sets ads ON a.ad_set_id = ads.id
             INNER JOIN campaigns c ON ads.campaign_id = c.id
             WHERE a.account_id = {account_id}
+                {_ad_post_period_filter(date_start, date_end, "a")}
             AND apd.as_of_date >= '{date_start}'::date
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             {target_filter}
@@ -1123,6 +1361,13 @@ _KO_FORCE_VERB_ADJ = frozenset({
     "거창하", "거창",   # 거창하다(VA) — kiwi가 '거창'을 XR 어근으로 분리해 NNG 오분류
     "이르",             # 이르다(VA, '러' 불규칙) — kiwi가 VA-R/VV-R/VV-I 태그를 정확 매칭하지 못해 NNP(명사)로 오분류
 })
+
+# 위 강제 목록 중, 원문 추출 단계에서 '하'가 누락되어 단순히 '다'만 붙이면
+# 틀린 원형이 되는 경우의 정확한 표시 원형을 직접 지정 (예: '거창'+'다'='거창다'(X) → '거창하다'(O))
+_KO_FORCE_VERB_ADJ_DISPLAY = {
+    "거창": "거창하다",
+    "거창하": "거창하다",
+}
 
 # kiwi가 '다리다'/'다리고' 활용형을 동사(옷을 다리다)로 오분석해
 # _looks_like_predicate_stem이 True를 반환, 명사인 어간이 동사/형용사 버킷으로 분류되는 것을 막기 위한 예외 목록
@@ -1507,6 +1752,7 @@ def get_overall_ctr(account_id, date_start, date_end):
         JOIN campaigns c ON ads.campaign_id = c.id
         LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
         WHERE ad.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "ad")}
             AND apd.as_of_date >= '{date_start}'
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26) 
@@ -1548,6 +1794,7 @@ def get_strategic_performance(account_id, date_start, date_end, target_age=None,
             JOIN ad_keywords ak ON ad.id = ak.ad_id
             LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
             WHERE ad.account_id = {account_id}
+                {_ad_post_period_filter(date_start, date_end, "ad")}
                 AND apd.as_of_date >= '{date_start}'
                 AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
                 {target_filter}
@@ -1710,6 +1957,7 @@ def get_essence_target_performance(account_id, date_start, date_end):
             INNER JOIN ad_sets ads ON a.ad_set_id = ads.id
             INNER JOIN campaigns c ON ads.campaign_id = c.id
                 WHERE a.account_id = {account_id}
+                    {_ad_post_period_filter(date_start, date_end, "a")}
                 AND apd.as_of_date >= '{date_start}'::date
                 AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
                 AND ({account_id} IN (3, 2, 26) OR c.name ~* 'depart|디파트|de;part')
@@ -1727,6 +1975,7 @@ def get_essence_target_performance(account_id, date_start, date_end):
             INNER JOIN campaigns c ON ads.campaign_id = c.id
             INNER JOIN ad_performance_daily apd ON a.id = apd.ad_id
             WHERE a.account_id = {account_id}
+                {_ad_post_period_filter(date_start, date_end, "a")}
             AND apd.as_of_date >= '{date_start}'::date
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND ({account_id} IN (3, 2, 26) OR c.name ~* 'depart|디파트|de;part')
@@ -1827,6 +2076,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
                     ON ads.campaign_id = c.id
 
                 WHERE a.account_id = {account_id}
+                    {_ad_post_period_filter(date_start, date_end, "a")}
                     AND apd.as_of_date >= '{date_start}'::date
                     AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
                     AND (
@@ -1863,6 +2113,7 @@ def get_variable_target_performance(account_id, date_start, date_end):
                 ON a.id = apd.ad_id
 
             WHERE a.account_id = {account_id}
+                {_ad_post_period_filter(date_start, date_end, "a")}
                 AND apd.as_of_date >= '{date_start}'::date
                 AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
                 AND (
@@ -1901,6 +2152,7 @@ def has_purchase_data(account_id, date_start, date_end):
         JOIN ad_sets ads ON a.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
         WHERE a.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "a")}
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.purchase_count IS NOT NULL
@@ -1927,6 +2179,7 @@ def get_purchase_roas_weekly(account_id, date_start, date_end):
         JOIN ad_sets ads ON a.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
         WHERE a.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "a")}
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.spend IS NOT NULL
@@ -1953,6 +2206,7 @@ def get_purchase_roas_monthly(account_id, date_start, date_end):
         JOIN ad_sets ads ON a.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
         WHERE a.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "a")}
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.purchase_roas IS NOT NULL
@@ -1988,6 +2242,7 @@ def get_purchase_count_weekly(account_id, date_start, date_end):
             JOIN campaigns c ON ads.campaign_id = c.id
 
             WHERE a.account_id = {account_id}
+                {_ad_post_period_filter(date_start, date_end, "a")}
                 AND apd.as_of_date >= '{date_start}'::date
                 AND apd.as_of_date <= '{date_end}'::date
                 AND apd.purchase_count IS NOT NULL
@@ -2030,6 +2285,7 @@ def get_purchase_count_monthly(account_id, date_start, date_end):
             JOIN campaigns c ON ads.campaign_id = c.id
 
             WHERE a.account_id = {account_id}
+                {_ad_post_period_filter(date_start, date_end, "a")}
                 AND apd.as_of_date >= '{date_start}'::date
                 AND apd.as_of_date <= '{date_end}'::date
                 AND apd.purchase_count IS NOT NULL
@@ -2084,6 +2340,7 @@ def get_purchase_age_gender_heatmap(account_id, date_start, date_end):
         JOIN campaigns c ON ads.campaign_id = c.id
 
         WHERE a.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "a")}
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
           AND apd.purchase_count IS NOT NULL
@@ -2124,6 +2381,7 @@ def has_revenue_data(account_id, date_start, date_end):
         JOIN ad_sets ads ON a.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
         WHERE a.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "a")}
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
           AND apd.spend IS NOT NULL
@@ -2159,6 +2417,7 @@ def get_spend_and_revenue_weekly(account_id, date_start, date_end):
             JOIN campaigns c ON ads.campaign_id = c.id
 
             WHERE a.account_id = {account_id}
+                {_ad_post_period_filter(date_start, date_end, "a")}
             AND apd.as_of_date >= '{date_start}'::date
             AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
             AND apd.spend IS NOT NULL
@@ -2212,6 +2471,7 @@ def get_spend_and_revenue_monthly(account_id, date_start, date_end):
             JOIN campaigns c ON ads.campaign_id = c.id
 
             WHERE a.account_id = {account_id}
+                {_ad_post_period_filter(date_start, date_end, "a")}
             AND apd.as_of_date >= '{date_start}'::date
             AND apd.as_of_date <= '{date_end}'::date
             AND apd.spend IS NOT NULL
@@ -2247,7 +2507,7 @@ def get_spend_and_revenue_monthly(account_id, date_start, date_end):
 # ----------------------------------
 
 # 구매 발생 콘텐츠 여부
-def has_purchase_content_data(account_id, date_start, date_end):
+def has_purchase_content_data(account_id, date_start, date_end, filter_scope=FILTER_SCOPE_ALL):
     engine = get_engine()
 
     query = f"""
@@ -2259,10 +2519,7 @@ def has_purchase_content_data(account_id, date_start, date_end):
         LEFT JOIN ig_contents ig ON a.source_ig_media_id = ig.fb_ig_media_id
         WHERE a.account_id = {account_id}
           AND a.source_ig_media_id IS NOT NULL
-          AND (ig.ig_timestamp IS NULL OR (
-              (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
-              AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
-          ))
+          {_upload_date_filter(date_start, date_end, filter_scope, allow_null=True)}
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
           AND apd.purchase_count IS NOT NULL
@@ -2279,7 +2536,7 @@ def has_purchase_content_data(account_id, date_start, date_end):
 
 
 # 구매가 발생한 콘텐츠 전체 조회
-def get_purchase_contents_data(account_id, date_start, date_end):
+def get_purchase_contents_data(account_id, date_start, date_end, filter_scope=FILTER_SCOPE_ALL):
     engine = get_engine()
 
     query = f"""
@@ -2302,10 +2559,7 @@ def get_purchase_contents_data(account_id, date_start, date_end):
         LEFT JOIN ig_contents ig ON a.source_ig_media_id = ig.fb_ig_media_id
         WHERE a.account_id = {account_id}
           AND a.source_ig_media_id IS NOT NULL
-          AND (ig.ig_timestamp IS NULL OR (
-              (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date >= '{date_start}'::date
-              AND (ig.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date <= (DATE_TRUNC('week', '{date_end}'::date) - INTERVAL '1 day')::date
-          ))
+          {_upload_date_filter(date_start, date_end, filter_scope, allow_null=True)}
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
           AND ({account_id} IN (3, 2, 26)
@@ -2380,8 +2634,8 @@ def chunk_list(data, chunk_size=4):
 
 
 # 구매 발생 콘텐츠 페이지 구성
-def get_purchase_contents_pages_data(account_id, date_start, date_end):
-    if not has_purchase_content_data(account_id, date_start, date_end):
+def get_purchase_contents_pages_data(account_id, date_start, date_end, filter_scope=FILTER_SCOPE_ALL):
+    if not has_purchase_content_data(account_id, date_start, date_end, filter_scope):
         return {
             "title": "구매가 발생한 콘텐츠",
             "pages": [],
@@ -2389,7 +2643,7 @@ def get_purchase_contents_pages_data(account_id, date_start, date_end):
             "total_count": 0
         }
 
-    contents = get_purchase_contents_data(account_id, date_start, date_end)
+    contents = get_purchase_contents_data(account_id, date_start, date_end, filter_scope)
 
     if not contents:
         return {
@@ -2416,6 +2670,7 @@ def get_purchase_total_count(account_id, date_start, date_end):
         JOIN ad_sets ads ON a.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
         WHERE a.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "a")}
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.purchase_count IS NOT NULL
@@ -2443,6 +2698,7 @@ def get_purchase_summary_page_data(account_id, date_start, date_end):
         JOIN ad_sets ads ON a.ad_set_id = ads.id
         JOIN campaigns c ON ads.campaign_id = c.id
         WHERE a.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "a")}
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= '{date_end}'::date
           AND apd.purchase_count IS NOT NULL
@@ -2469,6 +2725,7 @@ def get_purchase_summary_page_data(account_id, date_start, date_end):
         JOIN campaigns c ON ads.campaign_id = c.id
         LEFT JOIN ig_contents ig ON a.source_ig_media_id = ig.fb_ig_media_id
         WHERE a.account_id = {account_id}
+            {_ad_post_period_filter(date_start, date_end, "a")}
           AND a.source_ig_media_id IS NOT NULL
           AND apd.as_of_date >= '{date_start}'::date
           AND apd.as_of_date <= '{date_end}'::date
@@ -2928,6 +3185,7 @@ def get_target_spend_distribution(account_id, date_start, date_end):
         JOIN campaigns c  ON ads.campaign_id = c.id
         LEFT JOIN ad_performance_daily apd ON ad.id = apd.ad_id
     WHERE ad.account_id = {account_id}
+        {_ad_post_period_filter(date_start, date_end, "ad")}
         AND apd.as_of_date >= '{date_start}'
         AND apd.as_of_date <= DATE_TRUNC('week', '{date_end}'::date)::date
         AND apd.gender  NOT IN ('unknown', 'Unknown')
@@ -2952,7 +3210,7 @@ def get_target_spend_distribution(account_id, date_start, date_end):
 # CTR × 팔로우 4사분면 스캐터 데이터
 # ─────────────────────────────────────────────────────────────
 
-def get_ctr_follows_scatter_data(account_id: int, date_start: str, date_end: str) -> list[dict]:
+def get_ctr_follows_scatter_data(account_id: int, date_start: str, date_end: str, filter_scope: str = FILTER_SCOPE_ALL) -> list[dict]:
     """
     콘텐츠별 CTR(광고 성과)과 팔로우 발생수(IG 콘텐츠 인사이트)를
     하나의 row로 결합하여 반환합니다.
@@ -2964,7 +3222,13 @@ def get_ctr_follows_scatter_data(account_id: int, date_start: str, date_end: str
     """
     engine = get_engine()
 
-    query = """
+    # filter_scope='all'이면 게시물 업로드일(KST)도 기간으로 제한
+    upload_filter = (
+        "AND (ic.ig_timestamp AT TIME ZONE 'Asia/Seoul')::date BETWEEN %(date_start)s AND %(date_end)s"
+        if normalize_filter_scope(filter_scope) == FILTER_SCOPE_ALL else ""
+    )
+
+    query = f"""
         SELECT
             ic.id                                          AS content_id,
             ic.fb_ig_media_id,
@@ -2992,6 +3256,7 @@ def get_ctr_follows_scatter_data(account_id: int, date_start: str, date_end: str
         WHERE aa.id = %(account_id)s
           AND apd.as_of_date BETWEEN %(date_start)s AND %(date_end)s
           AND ici.as_of_date BETWEEN %(date_start)s AND %(date_end)s
+          {upload_filter}
         GROUP BY
             ic.id, ic.fb_ig_media_id, ic.thumbnail_url,
             ic.media_url, ic.ig_permalink, ic.ig_media_type, ic.ig_timestamp
@@ -3013,7 +3278,7 @@ def get_ctr_follows_scatter_data(account_id: int, date_start: str, date_end: str
     return df.to_dict("records")
 
 
-def get_prev_quarter_ctr_follows_means(account_id: int, date_start: str) -> dict:
+def get_prev_quarter_ctr_follows_means(account_id: int, date_start: str, filter_scope: str = FILTER_SCOPE_ALL) -> dict:
     """
     사분면 십자선 기준값 산출.
     date_start 기준 3개월 전 기간(이전 분기)의 CTR 중앙값과 팔로우 평균값을 반환합니다.
@@ -3030,7 +3295,7 @@ def get_prev_quarter_ctr_follows_means(account_id: int, date_start: str) -> dict
     prev_start = start_dt.strftime("%Y-%m-%d")
     prev_end   = end_dt.strftime("%Y-%m-%d")
 
-    rows = get_ctr_follows_scatter_data(account_id, prev_start, prev_end)
+    rows = get_ctr_follows_scatter_data(account_id, prev_start, prev_end, filter_scope)
 
     if not rows:
         return {"ctr_mean": None, "follows_mean": None}

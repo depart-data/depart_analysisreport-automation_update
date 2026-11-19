@@ -145,6 +145,16 @@ def is_dark_color(hex_color: str) -> bool:
     return relative_luminance(hex_color) < 0.5
 
 
+def ensure_min_lightness(hex_color: str, min_lightness: float = 0.40) -> str:
+    """HSL 명도가 min_lightness 미만이면 색상/채도는 유지한 채 명도만 끌어올린다."""
+    r, g, b = _hex_to_rgb01(hex_color)
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    if l >= min_lightness:
+        return _normalize_hex(hex_color)
+    r, g, b = colorsys.hls_to_rgb(h, min_lightness, s)
+    return _rgb01_to_hex(r, g, b)
+
+
 def _fig_to_svg(fig) -> str:
     buf = io.StringIO()
     fig.savefig(buf, format="svg", bbox_inches="tight")
@@ -388,7 +398,7 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                     boxstyle="round,pad=0.15",
                     facecolor="white",
                     edgecolor="none",
-                    alpha=0.85
+                    alpha=0.7
                 ),
             )
 
@@ -531,18 +541,30 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                     period_text = "분석 기간 전체"
                 cur_label = f"{period_text} 평균"
 
-            # 2. 텍스트 라벨 (왼쪽 고정, 빨간 글씨)
-            ax.text(
-                x=0.02,
-                y=avg_val,
-                s=f"{cur_label}: {avg_val:,.1f}{unit}",
+            # 두 평균선이 가까우면 라벨이 겹치므로, 위쪽 선은 선 위로 / 아래쪽 선은 선 아래로 라벨을 벌린다
+            AVG_LABEL_GAP_PT = 5
+            AVG_LABEL_BBOX = dict(boxstyle="round,pad=0.2", facecolor="white", edgecolor="none", alpha=0.7)
+            has_prev = prev_avg_val is not None
+            close = has_prev and abs(avg_val - prev_avg_val) < (y_high - y_low) * 0.15
+
+            if close and prev_avg_val > avg_val:
+                cur_va, cur_offset = "top", -AVG_LABEL_GAP_PT
+            else:
+                cur_va, cur_offset = "bottom", AVG_LABEL_GAP_PT
+
+            # 2. 텍스트 라벨 (왼쪽 고정, 빨간 글씨) — 점선과 간격을 두고, 박스는 텍스트에 맞게 fit
+            ax.annotate(
+                f"{cur_label}: {avg_val:,.1f}{unit}",
+                xy=(0.02, avg_val),
+                xycoords=ax.get_yaxis_transform(),
+                textcoords="offset points",
+                xytext=(0, cur_offset),
                 color="#e53935",
-                fontsize=10,
+                fontsize=7.5,
                 fontweight="bold",
-                ha="left", va="bottom",
-                bbox=dict(facecolor="white", edgecolor="none", alpha=0.9, pad=3),
+                ha="left", va=cur_va,
+                bbox=AVG_LABEL_BBOX,
                 zorder=1000,
-                transform=ax.get_yaxis_transform()
             )
 
             # 3. 차트 하단 평균선 기준 설명
@@ -555,27 +577,33 @@ def render_line_chart(dataset: Dict[str, Any], color_map: Dict[str, Any], compac
                 color="#e53935",
                 clip_on=False,
             )
-            
+
             # 4. 이전 분기 평균선 (회색)
-            if prev_quarter_avg and prev_quarter_avg.get("avg") is not None:
+            if has_prev:
                 prev_year = prev_quarter_avg.get("year")
                 prev_quarter = prev_quarter_avg.get("quarter")
 
                 # 4-1. 점선 그리기
                 ax.axhline(y=prev_avg_val, color="#858585", linestyle="--", linewidth=1.5, zorder=998)
 
+                if close and prev_avg_val <= avg_val:
+                    prev_va, prev_offset = "top", -AVG_LABEL_GAP_PT
+                else:
+                    prev_va, prev_offset = "bottom", AVG_LABEL_GAP_PT
+
                 # 4-2. 텍스트 라벨
-                ax.text(
-                    x=0.02,
-                    y=prev_avg_val,
-                    s=f"{prev_year}년 {prev_quarter}분기 평균: {prev_avg_val:,.1f}{unit}",
+                ax.annotate(
+                    f"{prev_year}년 {prev_quarter}분기 평균: {prev_avg_val:,.1f}{unit}",
+                    xy=(0.02, prev_avg_val),
+                    xycoords=ax.get_yaxis_transform(),
+                    textcoords="offset points",
+                    xytext=(0, prev_offset),
                     color="#858585",
-                    fontsize=10,
+                    fontsize=7.5,
                     fontweight="bold",
-                    ha="left", va="bottom",
-                    bbox=dict(facecolor="white", edgecolor="none", alpha=0.9, pad=3),
+                    ha="left", va=prev_va,
+                    bbox=AVG_LABEL_BBOX,
                     zorder=997,
-                    transform=ax.get_yaxis_transform()
                 )
 
                 # 4-3. 차트 하단 설명 
@@ -1952,6 +1980,100 @@ def render_follower_age_gender_stacked_barh_chart(chart_data, color_map):
 
     fig.subplots_adjust(left=0.18, right=0.98, top=0.95, bottom=0.12)
     return fig_to_base64(fig)
+
+#--------------------------------
+# 전체 성과 요약: 팔로워 수 변화 (막대 2개 + 화살표)
+# 작은 값이 큰 값의 이 비율 이상이면 막대 아래쪽을 물결로 생략해 변화를 강조
+FOLLOWER_BREAK_RATIO = 0.5
+
+def render_follower_change_chart(start_value, end_value, start_date, end_date, color_map):
+    if start_value is None or end_value is None:
+        return ""
+
+    W, H = 1000, 400
+    baseline, top_limit = 340, 80           # 가장 큰 막대의 윗변 y (위쪽은 값 라벨 공간)
+    bar_w, radius = 170, 6
+    xs = (250, 750)
+    ink, muted = "#202947", "#666666"
+    base = color_map["base"]
+    badge_text = "#ffffff" if is_dark_color(base) else "#000000"
+
+    max_v = max(start_value, end_value, 1)
+    min_v = min(start_value, end_value)
+
+    # 두 값이 모두 커서 차이가 잘 안 보이면(작은 값이 큰 값의 절반 이상) 아래쪽을 물결로 생략
+    broken = min_v > 0 and min_v / max_v >= FOLLOWER_BREAK_RATIO and max_v != min_v
+    stub = 40                                # 물결 아래에 남겨 두는 막대 밑동 높이
+    band = 18                                # 물결 생략 구간 높이
+    if broken:
+        floor_v = max(0, min_v - (max_v - min_v) * 0.6)   # 작은 막대도 몸통이 보이도록 바닥값을 올림
+        scale_bottom = baseline - stub - band
+
+    def bar_top(v):
+        if broken:
+            return scale_bottom - (scale_bottom - top_limit) * (v - floor_v) / (max_v - floor_v)
+        h = (baseline - top_limit) * v / max_v
+        return baseline - max(h, 4)          # 값이 아주 작아도 막대가 보이도록 최소 높이
+
+    def bar_path(cx, top):
+        x0, x1 = cx - bar_w / 2, cx + bar_w / 2
+        r = min(radius, baseline - top)
+        return (f"M{x0},{baseline} L{x0},{top + r} Q{x0},{top} {x0 + r},{top} "
+                f"L{x1 - r},{top} Q{x1},{top} {x1},{top + r} L{x1},{baseline} Z")
+
+    tops = (bar_top(start_value), bar_top(end_value))
+    values = (start_value, end_value)
+    dates = (start_date or "", end_date or "")
+    # 첫 막대는 테마색을 옅게(투명도), 마지막 막대는 테마색 그대로
+    opacities = (0.3, 1)
+
+    parts = [
+        f'<svg class="follower-change-chart" viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
+        f'font-family="inherit" role="img" aria-label="팔로워 수 {start_value:,}명에서 {end_value:,}명으로 변화">',
+    ]
+    for cx, top, op, v, d in zip(xs, tops, opacities, values, dates):
+        parts.append(f'<path d="{bar_path(cx, top)}" fill="{base}" fill-opacity="{op}"/>')
+        parts.append(f'<text x="{cx}" y="{top - 18}" text-anchor="middle" font-size="44" font-weight="900" fill="{ink}">{v:,}명</text>')
+        parts.append(f'<text x="{cx}" y="{baseline + 44}" text-anchor="middle" font-size="26" fill="{muted}">{d}</text>')
+    parts.append(f'<line x1="80" y1="{baseline}" x2="920" y2="{baseline}" stroke="#c9c9c9" stroke-width="2"/>')
+
+    if broken:
+        # 막대를 가로지르는 물결: 흰 띠로 막대를 끊고, 띠 위아래에 회색 물결선
+        band_mid = baseline - stub - band / 2
+
+        def wave(x_from, x_to, y, amp=6, period=28):
+            d = f"M{x_from},{y}"
+            x, up = x_from, True
+            while x < x_to:
+                nx = min(x + period / 2, x_to)
+                d += f" Q{(x + nx) / 2},{y - amp if up else y + amp} {nx},{y}"
+                x, up = nx, not up
+            return d
+
+        for cx in xs:
+            wx0, wx1 = cx - bar_w / 2 - 12, cx + bar_w / 2 + 12
+            parts.append(f'<path d="{wave(wx0, wx1, band_mid)}" fill="none" stroke="#ffffff" stroke-width="{band}"/>')
+            for dy in (-band / 2, band / 2):
+                parts.append(f'<path d="{wave(wx0, wx1, band_mid + dy)}" fill="none" stroke="#9b9b9b" stroke-width="2"/>')
+
+    # 화살표: 두 막대 사이를 수평으로 연결 (값 차이와 무관하게 같은 위치)
+    ay = baseline - (baseline - top_limit) * 0.45
+    x1, x2 = xs[0] + bar_w / 2 + 28, xs[1] - bar_w / 2 - 28
+    head = 22
+    parts.append(f'<line x1="{x1}" y1="{ay}" x2="{x2 - head}" y2="{ay}" stroke="{base}" stroke-width="6" stroke-linecap="round"/>')
+    parts.append(f'<path d="M{x2},{ay} L{x2 - head - 4},{ay - 16} L{x2 - head - 4},{ay + 16} Z" fill="{base}"/>')
+
+    # 증감 배지: 화살표 바로 위 중앙
+    delta = end_value - start_value
+    delta_text = f"{delta:+,}명" if delta else "±0명"
+    badge_w = 40 + 22 * len(delta_text)
+    badge_y = ay - 30 - 56
+    parts.append(f'<rect x="{500 - badge_w / 2}" y="{badge_y}" width="{badge_w}" height="56" rx="28" fill="{base}"/>')
+    parts.append(f'<text x="500" y="{badge_y + 39}" text-anchor="middle" font-size="32" font-weight="900" fill="{badge_text}">{delta_text}</text>')
+
+    parts.append("</svg>")
+    return "".join(parts)
+
 
 #--------------------------------
 # 팔로워 성별 도넛 차트

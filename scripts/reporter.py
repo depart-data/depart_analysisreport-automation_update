@@ -1,18 +1,23 @@
 from jinja2 import Environment, FileSystemLoader
 import os
+import re
+
+def translate_gender(data):
+    if isinstance(data, dict):
+        return {k: translate_gender(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [translate_gender(i) for i in data]
+    elif isinstance(data, str):
+        # 차트 이미지(base64)·SVG 문자열은 건드리지 않음 (부분 치환 시 이미지가 깨짐)
+        stripped = data.lstrip()
+        if stripped.startswith("data:") or stripped.startswith("<svg"):
+            return data
+        res = re.sub(r"\b[Ff]emale\b", "여성", data)
+        res = re.sub(r"\b[Mm]ale\b", "남성", res)
+        return res
+    return data
 
 def generate_html(context):
-
-    def translate_gender(data):
-        if isinstance(data, dict):
-            return {k: translate_gender(v) for k, v in data.items()}
-        elif isinstance(data, list):
-            return [translate_gender(i) for i in data]
-        elif isinstance(data, str):
-            res = data.replace("female", "여성").replace("Female", "여성")
-            res = res.replace("male", "남성").replace("Male", "남성")
-            return res
-        return data
 
     # 렌더링 직전에 데이터 성별 번역 적용
     translated_context = translate_gender(context)
